@@ -1,0 +1,220 @@
+/* ======= SCREEN STYLES ======= */
+.print-container {
+  padding: 10px;
+  font-family: Arial, sans-serif;
+  background: white;
+  max-width: 105mm;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.store-header .store-title {
+  font-family: Arial, sans-serif;
+  font-size: 24px;
+  color: #000;
+  text-align: center;
+}
+
+.store-header .store-address {
+  font-family: Arial, san-serif;
+  font-size: 8px;
+  color: #000;
+  font-style: normal;
+  text-align: center;
+}
+
+.store-header {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+
+.invoice-box {
+  border: 1px solid #ccc;
+  padding: 8mm;
+  background: #fff;
+}
+
+.invoice-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10pt;
+  margin-bottom: 5mm;
+}
+
+.customer-info,
+.invoice-summary {
+  font-size: 8pt;
+  margin-top: 3mm;
+}
+
+.invoice-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.5mm;
+}
+
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 4mm;
+}
+
+.invoice-table th,
+.invoice-table td {
+  border: 0.2mm solid #999;
+  padding: 1mm 2mm;
+  text-align: left;
+  font-size: 9.5pt;
+}
+
+.print-container .print-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 5mm;
+  gap: 6mm;
+}
+
+.print-buttons button {
+  /* padding: 4mm 4mm; */
+  /* background-color: #007bff;
+  border: none;
+  color: white;
+  font-size: 9.5pt;
+  cursor: pointer; */
+  margin-bottom: 10px;
+  background-color: #0a69b9;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.thank-you-message {
+  margin-top: 12mm;
+  text-align: center;
+  font-size: 11pt;
+  font-weight: 500;
+  color: #333;
+  border-top: 1px dashed #ccc;
+  padding-top: 5mm;
+}
+
+.payment-breakup {
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.payment-breakup h4 {
+  margin-bottom: 10px;
+  color: #333;
+  font-size: 1.1em;
+}
+
+.payment-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 5px;
+}
+
+.payment-table th,
+.payment-table td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.payment-table th {
+  background-color: #f8f8f8;
+  font-weight: bold;
+}
+
+.payment-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ======= PRINT STYLES ======= */
+@media print {
+  @page {
+    size: A6 portrait;
+    margin: 8mm;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .print-container,
+  .print-container * {
+    visibility: visible;
+  }
+
+  /*   .print-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100mm;
+    margin: 0 auto;
+    background: white;
+  } */
+  .print-container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background: white;
+    max-width: 300mm;
+    margin-right: 70mm;
+    box-sizing: border-box;
+  }
+
+  /*   .invoice-box {
+    padding: 6mm;
+    border: none;
+  } */
+
+  .invoice-box {
+    border: 1px solid #ccc;
+    padding: 8mm;
+    background: #fff;
+  }
+
+  .print-buttons {
+    display: none;
+    visibility: hidden;
+  }
+
+  /*   .invoice-table th,
+  .invoice-table td {
+    font-size: 8.5pt;
+    padding: 1mm;
+  } */
+
+  .invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 4mm;
+  }
+
+  .invoice-table th,
+  .invoice-table td {
+    border: 0.2mm solid #999;
+    padding: 1mm 2mm;
+    text-align: left;
+    font-size: 9.5pt;
+  }
+
+  .invoice-summary {
+    font-size: 9pt;
+    margin-top: 6mm;
+  }
+
+  .invoice-summary p {
+    margin: 1mm 0;
+  }
+}

@@ -1,0 +1,24 @@
+.invoice-number-container {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  margin-top: 35px;
+  margin-right: 35px;
+  background-color: #f8f9fa;
+  padding: 8px 16px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.invoice-number-label {
+  font-weight: 500;
+  color: #666;
+}
+
+.invoice-number-value {
+  font-weight: 600;
+  color: #0a69b9;
+} 

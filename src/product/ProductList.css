@@ -1,0 +1,56 @@
+.barcode-preview {
+  padding: 1rem;
+  background: #ffffff;
+  border-radius: 10px;
+  max-width: 1000px;
+  margin: auto;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.filter-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .product-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .product-table th,
+  .product-table td {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+  }
+
+.product-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.export-button {
+  padding: 8px 16px;
+  background-color: #0a69b9;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.export-button:hover {
+  background-color: #054d8c;
+}
+
+.print-barcodes-button {
+  background-color: #0a69b9;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+}
+  

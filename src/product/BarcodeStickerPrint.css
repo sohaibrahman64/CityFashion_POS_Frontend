@@ -1,0 +1,94 @@
+/* ===== Screen (do not show stickers) ===== */
+@media screen {
+  .barcode-print-container {
+    display: grid;
+    grid-template-columns: repeat(3, 3fr);
+    gap: 20px;
+  }
+
+  .print-buttons {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    align-items: center;
+    gap: 10px;
+  }
+}
+
+/* ===== Print Styling ===== */
+@media print {
+  @page {
+    size: A4;
+    margin-top: 10mm;
+    margin-left: -100mm;
+    margin-right: -100mm;
+    margin-bottom: 10mm;
+  }
+
+
+  body {
+    margin-left: 0;
+    padding: 0;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .barcode-print-container,
+  .barcode-print-container * {
+    visibility: visible;
+  }
+
+  .barcode-print-container {
+    display: grid;
+    grid-template-columns: repeat(3, 0fr); /* 3 stickers per row */
+    gap: 5mm 5mm;
+    width: 100%; /* vertical and horizontal spacing */
+    padding: 0;
+    margin: 0;
+    background: white;
+    box-sizing: border-box;
+    justify-content: left; /* Horizontal centering */
+    align-content: end; /* Vertical centering */
+    /* height: 100%; */ /* Use full viewport height */
+  }
+
+  .barcode-sticker {
+    width: 60mm;
+    height: 30mm;
+    border: 1px dashed #666;
+    padding: 2mm;
+    font-size: 9pt;
+    text-align: center;
+    background: white;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    page-break-inside: avoid;
+  }
+
+  .product-name {
+    font-weight: bold;
+    font-size: 9pt;
+    margin: 0;
+  }
+
+  .product-size {
+    font-size: 8pt;
+    margin: 1mm 0;
+  }
+
+  svg {
+    width: 100%;
+    height: auto;
+    max-height: 14mm; /* Barcode height control */
+  }
+
+  .product-price {
+    font-size: 9pt;
+    margin: 1mm 0 0 0;
+  }
+}

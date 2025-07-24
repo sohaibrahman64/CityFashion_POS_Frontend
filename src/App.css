@@ -1,0 +1,100 @@
+/* General reset */
+h2 {
+  color: #0a69b9;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #ffffff;
+  color: #0D1B2A;
+}
+
+.app-layout {
+  display: flex;
+  height: 100vh;
+}
+
+/* Sidebar styling */
+.sidebar {
+  width: 260px;
+  /* background-color: #1A2640; */
+  background-color: #0a69b9;
+  /* color: #27D1FF; */
+  color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar h2 {
+  font-size: 22px;
+  font-weight: 700;
+  /* color: #27D1FF; */
+  color: white;
+  margin-bottom: 30px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Menu items */
+.menu-item {
+  margin-bottom: 12px;
+}
+
+.menu-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+    /* color: #27D1FF; */
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.menu-label:hover {
+  background-color: #223355;
+}
+
+.menu-label.active {
+  background-color: #223355;
+  color: white;
+}
+
+.icon {
+  font-size: 18px;
+}
+
+/* Submenu */
+.submenu {
+  margin-left: 20px;
+  margin-top: 5px;
+}
+
+.main-content {
+  flex: 1;
+  padding: 30px;
+  background-color: #f9f9f9;
+  overflow-y: auto;
+}
+
+/* Card (dashboard stats) styling */
+.dashboard-card {
+  background-color: #1A2640;
+  color: #27D1FF;
+  padding: 20px;
+  border-radius: 12px;
+  width: 220px;
+  margin-right: 20px;
+  display: inline-block;
+}
+
+.chart-container {
+  background-color: #1A2640;
+  border-radius: 20px;
+  padding: 25px;
+  margin-top: 30px;
+  color: #27D1FF;
+}

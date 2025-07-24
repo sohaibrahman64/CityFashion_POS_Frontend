@@ -1,0 +1,93 @@
+.add-customer-form-container {
+  max-width: 400px;
+  margin: 40px auto;
+  background: #fff;
+  padding: 32px 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.add-customer-form-container h2 {
+  text-align: center;
+  color: #0a69b9;
+  margin-bottom: 24px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.add-customer-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.add-customer-form input,
+.add-customer-form textarea {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 15px;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.add-customer-form input:focus,
+.add-customer-form textarea:focus {
+  outline: none;
+  border-color: #0a69b9;
+  box-shadow: 0 0 0 2px rgba(10, 105, 185, 0.08);
+}
+
+.add-customer-form textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.add-customer-form button[type="submit"] {
+  background-color: #0a69b9;
+  color: #fff;
+  border: none;
+  padding: 12px 0;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.add-customer-form button[type="submit"]:hover:not(:disabled) {
+  background-color: #095a9e;
+}
+
+.add-customer-form button[type="submit"]:disabled {
+  background: #b3c6e0;
+  cursor: not-allowed;
+}
+
+.success-message {
+  color: #1a7f37;
+  background: #e6f4ea;
+  border: 1px solid #b7e1cd;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.error-message {
+  color: #b91c1c;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.add-customer-form-container h2 {
+  text-align: center;
+  color: #222;
+  margin-bottom: 24px;
+  font-size: 24px;
+  font-weight: 700;
+}
