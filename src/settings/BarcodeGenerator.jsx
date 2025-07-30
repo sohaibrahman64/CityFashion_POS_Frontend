@@ -30,6 +30,8 @@ const BarcodeGenerator = () => {
   const [previewData, setPreviewData] = useState(null);
   const [tableData, setTableData] = useState([]);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [previewMode, setPreviewMode] = useState('preview'); // 'preview' or 'generate'
+  const [selectedRow, setSelectedRow] = useState(null);
 
   // Handlers
   const handleGenerateCode = () => {
@@ -37,14 +39,27 @@ const BarcodeGenerator = () => {
   };
 
   const handleAddForBarcode = () => {
-    setPreviewData({
-      productName: product?.label || '',
-      productCode,
-      numLabels,
-      header,
-      line1,
-      line2,
-    });
+    // Validation: require product and numLabels
+    if (!product || !numLabels) return;
+    setTableData([
+      ...tableData,
+      {
+        productName: product.name,
+        productCode: productCode,
+        numLabels,
+        header,
+        line1,
+        line2,
+        id: Date.now(),
+      },
+    ]);
+    setNumLabels('');
+    setHeader('');
+    setLine1('');
+    setLine2('');
+    setProductCode('');
+    setProduct(null);
+    setPreviewData(null);
   };
 
   const handleAddToTable = () => {
@@ -74,18 +89,33 @@ const BarcodeGenerator = () => {
     setTableData(tableData.filter(row => row.id !== id));
   };
 
+  const handleGenerate = (row) => {
+    setSelectedRow(row);
+    setPreviewMode('generate');
+    setShowPreviewModal(true);
+  };
+
+  const handlePreview = (row) => {
+    setSelectedRow(row);
+    setPreviewMode('preview');
+    setShowPreviewModal(true);
+  };
+
   // Modal content for previewing multiple labels
   const renderPreviewLabels = () => {
-    const count = parseInt(numLabels, 10);
+    if (!selectedRow) return <div style={{textAlign:'center', color:'#888'}}>No data to preview</div>;
+    
+    const count = parseInt(selectedRow.numLabels, 10);
     if (!count || count < 1) return <div style={{textAlign:'center', color:'#888'}}>No labels to preview</div>;
+    
     return Array.from({ length: count }).map((_, idx) => (
       <div className="barcode-preview-box" key={idx} style={{margin: '10px'}}>
-        <div className="barcode-preview-header">{header || 'Header'}</div>
+        <div className="barcode-preview-header">{selectedRow.header || 'Header'}</div>
         <div className="barcode-preview-barcode">
-          <Barcode value={productCode || 'Product Code'} height={15} width={1} />
+          <Barcode value={selectedRow.productCode || 'Product Code'} height={15} width={1} />
         </div>
-        <div className="barcode-preview-line1">{line1 || 'Line 1'}</div>
-        <div className="barcode-preview-line2">{line2 || 'Line 2'}</div>
+        <div className="barcode-preview-line1">{selectedRow.line1 || 'Line 1'}</div>
+        <div className="barcode-preview-line2">{selectedRow.line2 || 'Line 2'}</div>
       </div>
     ));
   };
@@ -116,7 +146,7 @@ const BarcodeGenerator = () => {
           <div className="barcode-input-group1">
             <div className="form-group-barcode">
               <label>Product Name</label>
-              <ProductSelect value={product} onChange={setProduct} />
+              <ProductSelect onProductSelect={setProduct} />
             </div>
             <div className="form-group-barcode">
               <label>Product Code</label>
@@ -169,17 +199,18 @@ const BarcodeGenerator = () => {
           <thead>
             <tr>
               <th>Product Name</th>
+              <th>Barcode</th>
               <th>No Of Labels</th>
               <th>Header</th>
               <th>Line 1</th>
               <th>Line 2</th>
-              <th>Delete</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {tableData.length === 0 ? (
               <tr>
-                <td colSpan={6} style={{ textAlign: 'center', padding: '24px 0' }}>
+                <td colSpan={7} style={{ textAlign: 'center', padding: '24px 0' }}>
                   <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'center' }}>
                     <Barcode value={'Product Code'} height={40} width={1.5} background="#fff" lineColor="#bbb" />
                   </div>
@@ -192,11 +223,36 @@ const BarcodeGenerator = () => {
               tableData.map(row => (
                 <tr key={row.id}>
                   <td>{row.productName}</td>
+                  <td>{row.productCode}</td>
                   <td>{row.numLabels}</td>
                   <td>{row.header}</td>
                   <td>{row.line1}</td>
                   <td>{row.line2}</td>
-                  <td><button onClick={() => handleDeleteRow(row.id)}>Delete</button></td>
+                  <td>
+                    <div className="action-buttons">
+                      <button 
+                        className="action-btn generate-btn" 
+                        onClick={() => handleGenerate(row)}
+                        title="Generate"
+                      >
+                        🏷️
+                      </button>
+                      <button 
+                        className="action-btn preview-btn" 
+                        onClick={() => handlePreview(row)}
+                        title="Preview"
+                      >
+                        👁️
+                      </button>
+                      <button 
+                        className="action-btn delete-btn" 
+                        onClick={() => handleDeleteRow(row.id)}
+                        title="Delete"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))
             )}
@@ -224,10 +280,12 @@ const BarcodeGenerator = () => {
               </div>
             </div>
             {/* Modal Footer */}
-            <div className="barcode-modal-footer">
-              <button className="barcode-modal-save-btn">Save and Close</button>
-              <button className="barcode-modal-print-btn">Print</button>
-            </div>
+            {previewMode === 'generate' && (
+              <div className="barcode-modal-footer">
+                <button className="barcode-modal-save-btn">Save and Close</button>
+                <button className="barcode-modal-print-btn">Print</button>
+              </div>
+            )}
           </div>
         </div>
       )}
