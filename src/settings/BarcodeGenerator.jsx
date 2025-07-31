@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import './BarcodeGenerator.css';
 import ProductSelect from '../product/ProductSelect';
 import Barcode from 'react-barcode';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const PRINTER_OPTIONS = [
   { label: 'Regular Printer', value: 'regular' },
@@ -32,6 +34,7 @@ const BarcodeGenerator = () => {
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewMode, setPreviewMode] = useState('preview'); // 'preview' or 'generate'
   const [selectedRow, setSelectedRow] = useState(null);
+  const pdfRef = useRef(null);
 
   // Handlers
   const handleGenerateCode = () => {
@@ -99,6 +102,46 @@ const BarcodeGenerator = () => {
     setSelectedRow(row);
     setPreviewMode('preview');
     setShowPreviewModal(true);
+  };
+
+  const handleSaveAndClose = async () => {
+    if (!pdfRef.current) return;
+    
+    try {
+      const canvas = await html2canvas(pdfRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 295; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+      
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+      
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+      
+      const fileName = `barcode_labels_${selectedRow?.productName || 'product'}_${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(fileName);
+      
+      setShowPreviewModal(false);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error generating PDF. Please try again.');
+    }
   };
 
   // Modal content for previewing multiple labels
@@ -275,14 +318,14 @@ const BarcodeGenerator = () => {
             </div>
             {/* Modal Main Preview */}
             <div className="barcode-modal-labels-area">
-              <div className="barcode-modal-labels">
+              <div className="barcode-modal-labels" ref={pdfRef}>
                 {renderPreviewLabels()}
               </div>
             </div>
             {/* Modal Footer */}
             {previewMode === 'generate' && (
               <div className="barcode-modal-footer">
-                <button className="barcode-modal-save-btn">Save and Close</button>
+                <button className="barcode-modal-save-btn" onClick={handleSaveAndClose}>Save and Close</button>
                 <button className="barcode-modal-print-btn">Print</button>
               </div>
             )}
