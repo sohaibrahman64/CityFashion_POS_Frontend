@@ -35,3 +35,7 @@ export const GET_PURCHASE_HISTORY = "api/purchases/getPurchaseHistory";
 export const ADD_PURCHASE = "api/purchases/addPurchase";
 export const DELETE_PURCHASE = "api/purchases/deletePurchase";
 export const UPDATE_PURCHASE = "api/purchases/updatePurchase";
+export const SAVE_BARCODES = "api/barcode/saveBarcodes";
+export const GET_ALL_BARCODES = "api/barcode/getAllBarcodes";
+export const DELETE_BARCODE = "api/barcode/deleteBarcode";
+export const UPDATE_BARCODE = "api/barcode/updateBarcode";

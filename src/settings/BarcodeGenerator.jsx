@@ -1,9 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './BarcodeGenerator.css';
 import ProductSelect from '../product/ProductSelect';
 import Barcode from 'react-barcode';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import {BASE_URL, SAVE_BARCODES, GET_ALL_BARCODES } from '../Constants';
+import axios from 'axios';
 
 const PRINTER_OPTIONS = [
   { label: 'Regular Printer', value: 'regular' },
@@ -35,8 +37,44 @@ const BarcodeGenerator = () => {
   const [previewMode, setPreviewMode] = useState('preview'); // 'preview' or 'generate'
   const [selectedRow, setSelectedRow] = useState(null);
   const pdfRef = useRef(null);
+  const [loading, setLoading] = useState(false);
 
+  // Load saved barcodes from backend on component mount
+  useEffect(() => {
+    loadSavedBarcodes();
+  }, []);
+  
   // Handlers
+  const loadSavedBarcodes = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${BASE_URL}/${GET_ALL_BARCODES}`);
+      
+      if (response.data && response.data.success) {
+        // Transform backend data to match frontend format
+        console.log(response.data);
+        const transformedData = response.data.savedBarcodes.map(barcode => ({
+          id: barcode.id,
+          productName: barcode.productName,
+          productCode: barcode.productCode,
+          numLabels: barcode.numLabels,
+          header: barcode.header,
+          line1: barcode.line1,
+          line2: barcode.line2
+        }));
+        setTableData(transformedData);
+      } else {
+        console.log('No barcodes found or error loading barcodes');
+        setTableData([]);
+      }
+    } catch (error) {
+      console.error('Error loading barcodes:', error);
+      setTableData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleGenerateCode = () => {
     setProductCode(getRandom11DigitCode());
   };
@@ -88,8 +126,22 @@ const BarcodeGenerator = () => {
     setPreviewData(null);
   };
 
-  const handleDeleteRow = (id) => {
-    setTableData(tableData.filter(row => row.id !== id));
+  const handleDeleteRow = async (id) => {
+    try {
+      // Remove from local state immediately for better UX
+      setTableData(prev => prev.filter(row => row.id !== id));
+      
+      // TODO: If you have a DELETE_BARCODE API endpoint, you can call it here
+      // const response = await axios.delete(`${BASE_URL}/${DELETE_BARCODE}/${id}`);
+      // if (!response.data.success) {
+      //   // If delete failed, reload the data
+      //   await loadSavedBarcodes();
+      // }
+    } catch (error) {
+      console.error('Error deleting barcode:', error);
+      // Reload data if delete failed
+      await loadSavedBarcodes();
+    }
   };
 
   const handleGenerate = (row) => {
@@ -141,6 +193,46 @@ const BarcodeGenerator = () => {
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Error generating PDF. Please try again.');
+    }
+  };
+
+  const handleSaveBarcodes = async () => {
+    try {
+      if (tableData.length === 0) {
+        alert('No barcodes to save. Please add some barcodes first.');
+        return;
+      }
+
+      setLoading(true);
+      const response = await axios.post(`${BASE_URL}/${SAVE_BARCODES}`, {
+        barcodes: tableData.map(row => ({
+          productName: row.productName,
+          productCode: row.productCode,
+          numLabels: parseInt(row.numLabels),
+          header: row.header,
+          line1: row.line1,
+          line2: row.line2
+        })),
+        printer: printer,
+        size: size
+      });
+      
+      if (response.data && response.data.success) {
+        alert(response.data.message || 'Barcodes saved successfully!');
+        // Reload the barcodes from backend to show updated data
+        await loadSavedBarcodes();
+      } else {
+        alert('Error: ' + (response.data?.message || 'Failed to save barcodes'));
+      }
+    } catch (error) {
+      console.error('Error saving barcodes:', error);
+      if (error.response) {
+        alert('Error: ' + error.response.data?.message || 'Failed to save barcodes');
+      } else {
+        alert('Error saving barcodes. Please check your connection and try again.');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -251,7 +343,15 @@ const BarcodeGenerator = () => {
             </tr>
           </thead>
           <tbody>
-            {tableData.length === 0 ? (
+            {loading ? (
+              <tr>
+                <td colSpan={7} style={{ textAlign: 'center', padding: '24px 0' }}>
+                  <div style={{ color: '#888', fontSize: '1rem' }}>
+                    Loading barcodes...
+                  </div>
+                </td>
+              </tr>
+            ) : tableData.length === 0 ? (
               <tr>
                 <td colSpan={7} style={{ textAlign: 'center', padding: '24px 0' }}>
                   <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'center' }}>
@@ -304,8 +404,9 @@ const BarcodeGenerator = () => {
       </div>
       {/* Footer Buttons */}
       <div className="barcode-footer-row">
-        <button className="footer-btn" onClick={() => setShowPreviewModal(true)}>Preview</button>
-        <button className="footer-btn">Generate</button>
+        <button className="footer-btn" onClick={handleSaveBarcodes} disabled={loading}>
+          {loading ? 'Saving...' : 'Save Barcodes'}
+        </button>
       </div>
       {/* Preview Modal */}
       {showPreviewModal && (
