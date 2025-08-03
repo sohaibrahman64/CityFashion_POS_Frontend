@@ -276,9 +276,9 @@
   background: #fff;
   padding: 0;
   border-radius: 8px;
-  min-width: 320px;
+  min-width: 350px;
   max-width: 90vw;
-  max-height: 80vh;
+  max-height: 70vh;
   overflow-y: auto;
   position: relative;
   box-shadow: 0 4px 24px rgba(0,0,0,0.18);
@@ -291,7 +291,7 @@
   align-items: center;
   justify-content: space-between;
   background: #fff;
-  padding: 18px 5px 10px 5px;
+  padding: 5px 5px 5px 5px;
   margin: 5px 5px 0 5px;
   border-radius: 8px 8px 0 0;
   border-bottom: 1px solid #f0f0f0;
@@ -345,7 +345,7 @@
   align-items: center;
   background: #fff;
   margin: 5px 5px 5px 5px;
-  padding: 16px 5px 16px 5px;
+  padding: 5px 5px 5px 5px;
   border-radius: 0 0 8px 8px;
   gap: 16px;
   border-top: 1px solid #f0f0f0;
@@ -381,6 +381,71 @@
 
 .barcode-modal-print-btn:hover {
   background: #084e87;
+}
+
+.barcode-modal-body {
+  background: #fff;
+  margin: 5px 5px 0 5px;
+  padding: 20px;
+  border-radius: 0;
+  min-height: 350px;
+  min-width: 650px;
+  max-height: 70vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.input-field {
+  width: 40%;
+  padding: 5px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #0a69b9;
+  box-shadow: 0 0 0 2px rgba(10, 105, 185, 0.1);
+}
+
+.input-field.readonly,
+.readonly {
+  background: #f5f5f5;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.barcode-modal-cancel-btn {
+  background: #6c757d;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 28px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.barcode-modal-cancel-btn:hover {
+  background: #5a6268;
 }
 
 .delete-btn {
@@ -435,6 +500,15 @@
 .preview-btn:hover {
   background: #fff3e0;
   color: #e65100;
+}
+
+.edit-btn {
+  color: #2196f3;
+}
+
+.edit-btn:hover {
+  background: #e3f2fd;
+  color: #1976d2;
 }
 
 .delete-btn {

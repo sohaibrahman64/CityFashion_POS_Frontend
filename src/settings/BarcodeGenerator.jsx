@@ -38,6 +38,14 @@ const BarcodeGenerator = () => {
   const [selectedRow, setSelectedRow] = useState(null);
   const pdfRef = useRef(null);
   const [loading, setLoading] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingRow, setEditingRow] = useState(null);
+  const [editForm, setEditForm] = useState({
+    numLabels: '',
+    header: '',
+    line1: '',
+    line2: ''
+  });
 
   // Load saved barcodes from backend on component mount
   useEffect(() => {
@@ -154,6 +162,49 @@ const BarcodeGenerator = () => {
     setSelectedRow(row);
     setPreviewMode('preview');
     setShowPreviewModal(true);
+  };
+
+  const handleEdit = (row) => {
+    setEditingRow(row);
+    setEditForm({
+      numLabels: row.numLabels,
+      header: row.header || '',
+      line1: row.line1 || '',
+      line2: row.line2 || ''
+    });
+    setShowEditModal(true);
+  };
+
+  const handleEditSave = async () => {
+    try {
+      // Update the local state immediately for better UX
+      setTableData(prev => prev.map(row => 
+        row.id === editingRow.id 
+          ? { ...row, ...editForm }
+          : row
+      ));
+      
+      // TODO: If you have an UPDATE_BARCODE API endpoint, you can call it here
+      // const response = await axios.put(`${BASE_URL}/${UPDATE_BARCODE}/${editingRow.id}`, editForm);
+      // if (!response.data.success) {
+      //   // If update failed, reload the data
+      //   await loadSavedBarcodes();
+      // }
+      
+      setShowEditModal(false);
+      setEditingRow(null);
+      setEditForm({ numLabels: '', header: '', line1: '', line2: '' });
+    } catch (error) {
+      console.error('Error updating barcode:', error);
+      // Reload data if update failed
+      await loadSavedBarcodes();
+    }
+  };
+
+  const handleEditCancel = () => {
+    setShowEditModal(false);
+    setEditingRow(null);
+    setEditForm({ numLabels: '', header: '', line1: '', line2: '' });
   };
 
   const handleSaveAndClose = async () => {
@@ -388,6 +439,13 @@ const BarcodeGenerator = () => {
                         👁️
                       </button>
                       <button 
+                        className="action-btn edit-btn" 
+                        onClick={() => handleEdit(row)}
+                        title="Edit"
+                      >
+                        ✏️
+                      </button>
+                      <button 
                         className="action-btn delete-btn" 
                         onClick={() => handleDeleteRow(row.id)}
                         title="Delete"
@@ -430,6 +488,77 @@ const BarcodeGenerator = () => {
                 <button className="barcode-modal-print-btn">Print</button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+      
+      {/* Edit Modal */}
+      {showEditModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>Edit Barcode</h3>
+            <form className="form-grid">
+              <label>
+                Product Name:
+                <input
+                  type="text"
+                  value={editingRow?.productName || ''}
+                  readOnly
+                  className="readonly"
+                />
+              </label>
+              <label>
+                Product Code:
+                <input
+                  type="text"
+                  value={editingRow?.productCode || ''}
+                  readOnly
+                  className="readonly"
+                />
+              </label>
+              <label>
+                No. Of Labels *:
+                <input
+                  type="number"
+                  value={editForm.numLabels}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, numLabels: e.target.value }))}
+                  min="1"
+                  required
+                />
+              </label>
+              <label>
+                Header:
+                <input
+                  type="text"
+                  value={editForm.header}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, header: e.target.value }))}
+                />
+              </label>
+              <label>
+                Line 1:
+                <input
+                  type="text"
+                  value={editForm.line1}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, line1: e.target.value }))}
+                />
+              </label>
+              <label>
+                Line 2:
+                <input
+                  type="text"
+                  value={editForm.line2}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, line2: e.target.value }))}
+                />
+              </label>
+              <div className="form-buttons">
+                <button type="button" className="btn btn-secondary" onClick={handleEditCancel}>
+                  Cancel
+                </button>
+                <button type="button" className="btn btn-primary" onClick={handleEditSave}>
+                  Save Changes
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
