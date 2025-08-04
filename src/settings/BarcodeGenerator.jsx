@@ -4,7 +4,7 @@ import ProductSelect from '../product/ProductSelect';
 import Barcode from 'react-barcode';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import {BASE_URL, SAVE_BARCODES, GET_ALL_BARCODES } from '../Constants';
+import {BASE_URL, SAVE_BARCODES, GET_ALL_BARCODES, UPDATE_BARCODE, DELETE_BARCODE } from '../Constants';
 import axios from 'axios';
 
 const PRINTER_OPTIONS = [
@@ -41,11 +41,15 @@ const BarcodeGenerator = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
   const [editForm, setEditForm] = useState({
+    productCode: '',
+    productName: '',
     numLabels: '',
     header: '',
     line1: '',
     line2: ''
   });
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [deleteRowId, setDeleteRowId] = useState(null);
 
   // Load saved barcodes from backend on component mount
   useEffect(() => {
@@ -134,22 +138,35 @@ const BarcodeGenerator = () => {
     setPreviewData(null);
   };
 
-  const handleDeleteRow = async (id) => {
+  const handleDeleteRow = (id) => {
+    setDeleteRowId(id);
+    setShowDeleteConfirmModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
     try {
       // Remove from local state immediately for better UX
-      setTableData(prev => prev.filter(row => row.id !== id));
+      setTableData(prev => prev.filter(row => row.id !== deleteRowId));
       
       // TODO: If you have a DELETE_BARCODE API endpoint, you can call it here
-      // const response = await axios.delete(`${BASE_URL}/${DELETE_BARCODE}/${id}`);
-      // if (!response.data.success) {
-      //   // If delete failed, reload the data
-      //   await loadSavedBarcodes();
-      // }
+      const response = await axios.delete(`${BASE_URL}/${DELETE_BARCODE}/${deleteRowId}`);
+      if (!response.data.success) {
+        // If delete failed, reload the data
+        await loadSavedBarcodes();
+      }
     } catch (error) {
       console.error('Error deleting barcode:', error);
       // Reload data if delete failed
       await loadSavedBarcodes();
+    } finally {
+      setShowDeleteConfirmModal(false);
+      setDeleteRowId(null);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirmModal(false);
+    setDeleteRowId(null);
   };
 
   const handleGenerate = (row) => {
@@ -167,6 +184,8 @@ const BarcodeGenerator = () => {
   const handleEdit = (row) => {
     setEditingRow(row);
     setEditForm({
+      productCode: row.productCode,
+      productName: row.productName,
       numLabels: row.numLabels,
       header: row.header || '',
       line1: row.line1 || '',
@@ -185,11 +204,11 @@ const BarcodeGenerator = () => {
       ));
       
       // TODO: If you have an UPDATE_BARCODE API endpoint, you can call it here
-      // const response = await axios.put(`${BASE_URL}/${UPDATE_BARCODE}/${editingRow.id}`, editForm);
-      // if (!response.data.success) {
-      //   // If update failed, reload the data
-      //   await loadSavedBarcodes();
-      // }
+      const response = await axios.put(`${BASE_URL}/${UPDATE_BARCODE}/${editingRow.id}`, editForm);
+      if (!response.data.success) {
+        // If update failed, reload the data
+        await loadSavedBarcodes();
+      }
       
       setShowEditModal(false);
       setEditingRow(null);
@@ -559,6 +578,24 @@ const BarcodeGenerator = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirmModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>Confirm Delete</h3>
+            <p>Are you sure you want to delete this barcode? This action cannot be undone.</p>
+            <div className="form-buttons">
+              <button type="button" className="btn btn-secondary" onClick={handleCancelDelete}>
+                Cancel
+              </button>
+              <button type="button" className="btn btn-danger" onClick={handleConfirmDelete}>
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}

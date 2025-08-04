@@ -46,7 +46,8 @@
   border-collapse: collapse;
   margin-top: 1rem;
   margin-bottom: 1rem;
-  font-family: "Segoe UI", sans-serif;
+  /* font-family: "Segoe UI", sans-serif; */
+  font-family: 'Poppins', 'Source Sans Pro', sans-serif;
   font-size: 0.95rem;
   background-color: #fff;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);

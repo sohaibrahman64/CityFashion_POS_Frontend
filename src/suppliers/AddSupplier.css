@@ -60,7 +60,8 @@
   font-size: 14px;
   min-height: 80px;
   resize: vertical;
-  font-family: inherit;
+  /* font-family: inherit; */
+  font-family: 'Poppins', 'Source Sans Pro', sans-serif;
 }
 
 .supplier-form textarea:focus {

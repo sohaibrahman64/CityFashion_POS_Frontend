@@ -5,7 +5,8 @@ h2 {
 
 body {
   margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
+  font-family: 'Poppins', 'Source Sans Pro', sans-serif;
   background-color: #ffffff;
   color: #0D1B2A;
 }
