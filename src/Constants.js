@@ -6,6 +6,7 @@ export const ADD_CATEGORY = "api/categories/addCategory";
 export const DELETE_CATEGORY = "api/categories/deleteCategory";
 export const GENERATE_BARCODE = "api/barcode/generateBarcode";
 export const SAVE_PRODUCT = "api/products/saveProduct";
+export const SAVE_PRODUCT_NEW = "api/products/saveProductNew";
 export const GET_ALL_PRODUCTS = "api/products/getAllProducts";
 export const UPDATE_PRODUCT = "api/products/updateProduct";
 export const DELETE_PRODUCT = "api/products/deleteProduct";

@@ -461,3 +461,285 @@
   background: #ccc;
   cursor: not-allowed;
 }
+
+/* HSN Modal Styles */
+.hsn-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.hsn-modal-content {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 800px;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.hsn-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 20px 15px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f8f9fa;
+}
+
+.hsn-header-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+}
+
+.hsn-modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.hsn-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  padding: 5px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  margin-left: 10px;
+}
+
+.hsn-modal-close:hover {
+  background: #e9ecef;
+  color: #333;
+}
+
+.hsn-search-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: 5px;
+  flex: 1;
+  max-width: 400px;
+}
+
+.hsn-search-input {
+  flex: 1;
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  background: #fff;
+}
+
+.hsn-search-input:focus {
+  outline: none;
+  border-color: #0a69b9;
+  box-shadow: 0 0 0 2px rgba(10, 105, 185, 0.1);
+}
+
+.hsn-clear-search-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #666;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.hsn-clear-search-btn:hover {
+  background: #e9ecef;
+  color: #333;
+}
+
+.hsn-table-container {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.hsn-table-header {
+  display: grid;
+  grid-template-columns: 1fr 2fr 100px;
+  gap: 15px;
+  padding: 15px 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+  font-weight: 600;
+  color: #333;
+}
+
+.hsn-table-body {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.hsn-table-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr 100px;
+  gap: 15px;
+  padding: 12px 20px;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+}
+
+.hsn-table-row:hover {
+  background: #f8f9fa;
+}
+
+.hsn-table-cell {
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.hsn-table-cell.header {
+  font-weight: 600;
+  color: #333;
+}
+
+.hsn-select-btn {
+  padding: 6px 12px;
+  background: #0a69b9;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.hsn-select-btn:hover {
+  background: #095a9e;
+}
+
+.hsn-loading,
+.hsn-no-results {
+  padding: 40px 20px;
+  text-align: center;
+  color: #666;
+  font-size: 1rem;
+}
+
+/* Responsive design for HSN modal */
+@media (max-width: 768px) {
+  .hsn-modal-content {
+    width: 95%;
+    max-height: 90vh;
+  }
+  
+  .hsn-table-header,
+  .hsn-table-row {
+    grid-template-columns: 1fr 1.5fr 80px;
+    gap: 10px;
+    padding: 10px 15px;
+  }
+  
+  .hsn-table-cell {
+    font-size: 0.9rem;
+  }
+}
+
+/* Purchase Price and Taxes Section */
+.purchase-taxes-section {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.purchase-price-div,
+.taxes-div {
+  flex: 1;
+  background: #fff;
+  padding: 15px 20px;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  margin-right: 5px;
+}
+
+.purchase-price-div h3,
+.taxes-div h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.purchase-price-row {
+  display: flex;
+  gap: 15px;
+  align-items: flex-end;
+}
+
+.purchase-input-group,
+.purchase-select-group,
+.taxes-select-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.purchase-input,
+.purchase-select,
+.taxes-select {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  background: #f7f7f7;
+  width: 100%;
+  height: 35px;
+  box-sizing: border-box;
+}
+
+.purchase-input:focus,
+.purchase-select:focus,
+.taxes-select:focus {
+  outline: none;
+  border-color: #0a69b9;
+  box-shadow: 0 0 0 2px rgba(10, 105, 185, 0.1);
+}
+
+.purchase-select,
+.taxes-select {
+  background: #fff;
+}
+
+/* Responsive design for purchase-taxes section */
+@media (max-width: 768px) {
+  .purchase-taxes-section {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .purchase-price-div,
+  .taxes-div {
+    margin-right: 0;
+  }
+  
+  .purchase-price-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

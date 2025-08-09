@@ -2,14 +2,17 @@ import React, { useState, useRef } from 'react';
 import './AddNewProductNew.css';
 import ProductSelect from './ProductSelect';
 import UnitSelect from './UnitSelect';
-import { GENERATE_BARCODE } from '../Constants';
+import ProductCategorySelect from './ProductCategorySelect';
+import { GENERATE_BARCODE, SAVE_PRODUCT_NEW, BASE_URL } from '../Constants';
 import axios from 'axios';
+import * as XLSX from 'xlsx';
 
 const AddNewProductNew = () => {
   // State for form fields
   const [productName, setProductName] = useState('');
   const [productHSN, setProductHSN] = useState('');
   const [productCategory, setProductCategory] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [productCode, setProductCode] = useState('');
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -30,8 +33,160 @@ const AddNewProductNew = () => {
   const [minStock, setMinStock] = useState('');
   const [location, setLocation] = useState('');
 
-  // File input ref for image selection
+  // Purchase and Tax state
+  const [purchasePrice, setPurchasePrice] = useState('');
+  const [purchasePriceType, setPurchasePriceType] = useState('without_tax');
+  const [selectedTax, setSelectedTax] = useState('none');
+
+  // HSN Modal state
+  const [showHSNModal, setShowHSNModal] = useState(false);
+  const [hsnCodes, setHsnCodes] = useState([]);
+  const [filteredHsnCodes, setFilteredHsnCodes] = useState([]);
+  const [hsnSearchTerm, setHsnSearchTerm] = useState('');
+  const [hsnLoading, setHsnLoading] = useState(false);
+
+  // File input ref
   const fileInputRef = useRef(null);
+
+  // Load HSN codes from Excel file
+  const loadHSNCodes = async () => {
+    setHsnLoading(true);
+    try {
+      const response = await fetch('/GST_HSN_CODES.xlsx');
+      const arrayBuffer = await response.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      
+      let allCodes = [];
+      
+      // Read all sheets except the first one (header)
+      workbook.SheetNames.forEach((sheetName, index) => {
+        if (index > 0) { // Skip first sheet (header)
+          const worksheet = workbook.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+          
+          // Skip header row and process data
+          jsonData.slice(1).forEach(row => {
+            // Check if we have at least 3 columns (SL NO, HS Code, Description)
+            if (row.length >= 3) {
+              // Ignore SL NO (index 0), read HS Code (index 1) and Description (index 2)
+              const hsCode = row[1];
+              const description = row[2];
+              
+              if (hsCode && description) { // Check if both HS Code and Description exist
+                allCodes.push({
+                  code: hsCode.toString(),
+                  description: description.toString()
+                });
+              }
+            }
+          });
+        }
+      });
+      
+      setHsnCodes(allCodes);
+      setFilteredHsnCodes(allCodes);
+      return allCodes; // Return the codes for chaining
+    } catch (error) {
+      console.error('Error loading HSN codes:', error);
+      alert('Error loading HSN codes. Please check if the file exists.');
+      return []; // Return empty array on error
+    } finally {
+      setHsnLoading(false);
+    }
+  };
+
+  // Handle HSN search
+  const handleSearchHSN = () => {
+    setShowHSNModal(true);
+    
+    // Pre-populate search with Product Name if it exists
+    if (productName.trim()) {
+      setHsnSearchTerm(productName.trim());
+      // Load codes and filter immediately
+      if (hsnCodes.length === 0) {
+        loadHSNCodes().then(() => {
+          // Filter after codes are loaded
+          filterHSNCodes(productName.trim());
+        });
+      } else {
+        // Filter immediately if codes are already loaded
+        filterHSNCodes(productName.trim());
+      }
+    } else {
+      // Clear search term if no product name
+      setHsnSearchTerm('');
+      if (hsnCodes.length === 0) {
+        loadHSNCodes();
+      } else {
+        setFilteredHsnCodes(hsnCodes);
+      }
+    }
+  };
+
+  // Filter HSN codes based on search term
+  const filterHSNCodes = (searchTerm) => {
+    setHsnSearchTerm(searchTerm);
+    if (!searchTerm.trim()) {
+      setFilteredHsnCodes(hsnCodes);
+    } else {
+      // Extract meaningful keywords from the search term
+      const keywords = extractKeywords(searchTerm);
+      
+      const filtered = hsnCodes.filter(code => {
+        const codeText = code.code.toLowerCase();
+        const descriptionText = code.description.toLowerCase();
+        
+        // Check if any keyword matches in code or description
+        return keywords.some(keyword => 
+          codeText.includes(keyword.toLowerCase()) ||
+          descriptionText.includes(keyword.toLowerCase())
+        );
+      });
+      
+      setFilteredHsnCodes(filtered);
+    }
+  };
+
+  // Extract meaningful keywords from product name
+  const extractKeywords = (productName) => {
+    // Remove common words and numbers, keep meaningful product terms
+    const commonWords = ['red', 'blue', 'green', 'black', 'white', 'yellow', 'pink', 'purple', 'orange', 'brown', 'gray', 'grey'];
+    const sizeWords = ['small', 'medium', 'large', 'xl', 'xxl', 'xs', 's', 'm', 'l'];
+    const numberPattern = /\d+/g;
+    
+    let keywords = productName.toLowerCase()
+      .split(/\s+/)
+      .filter(word => {
+        // Remove common color words
+        if (commonWords.includes(word)) return false;
+        // Remove size words
+        if (sizeWords.includes(word)) return false;
+        // Remove pure numbers
+        if (numberPattern.test(word) && word.length <= 3) return false;
+        // Keep words with at least 2 characters
+        return word.length >= 2;
+      });
+    
+    // If no meaningful keywords found, use the original search term
+    if (keywords.length === 0) {
+      keywords = [productName.toLowerCase()];
+    }
+    
+    return keywords;
+  };
+
+  // Select HSN code
+  const selectHSNCode = (code) => {
+    setProductHSN(code.code);
+    setShowHSNModal(false);
+    setHsnSearchTerm('');
+  };
+
+  // Close HSN modal
+  const closeHSNModal = () => {
+    setShowHSNModal(false);
+    setHsnSearchTerm('');
+  };
 
   // Generate 11-digit product code
   const handleGenerateCode = () => {
@@ -42,6 +197,12 @@ const AddNewProductNew = () => {
   // Handle unit selection
   const handleUnitSelect = (unit) => {
     setSelectedUnit(unit);
+  };
+
+  // Handle category selection
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category);
+    setProductCategory(category.name);
   };
 
   // Handle image selection
@@ -68,67 +229,120 @@ const AddNewProductNew = () => {
     }
   };
 
-  // Handle search HSN
-  const handleSearchHSN = () => {
-    // TODO: Implement HSN search functionality
-    console.log('Searching for HSN code...');
-    alert('HSN search functionality will be implemented here');
-  };
-
   // Handle save product
   const handleSaveProduct = async () => {
     try {
+      setLoading(true);
+      
       // Validation
       if (!productName.trim()) {
         alert('Please enter product name');
         return;
       }
+      if (!productHSN.trim()) {
+        alert('Please enter product HSN code');
+        return;
+      }
+      if (!selectedCategory) {
+        alert('Please select a product category');
+        return;
+      }
       if (!productCode.trim()) {
-        alert('Please generate product code');
+        alert('Please generate a product code');
+        return;
+      }
+      if (!selectedUnit) {
+        alert('Please select a unit');
         return;
       }
 
-      setLoading(true);
-      
       // Prepare product data
       const productData = {
-        name: productName,
-        hsn: productHSN,
-        category: productCategory,
-        code: productCode,
+        name: productName.trim(),
+        hsn: productHSN.trim(),
+        category: selectedCategory,
+        code: productCode.trim(),
         unit: selectedUnit,
-        image: selectedImage,
+        imageData: selectedImage,
+        
+        // Pricing information
         pricing: {
-          salePrice: parseFloat(salePrice) || 0,
-          salePriceType,
-          discountAmount: parseFloat(discountAmount) || 0,
-          discountType
+            salePrice: parseFloat(salePrice) || 0,
+            salePriceType: salePriceType,
+            discountAmount: parseFloat(discountAmount) || 0,
+            discountType: discountType,
         },
+        
+        // Stock information
         stock: {
-          openingQuantity: parseInt(openingQuantity) || 0,
-          atPrice: parseFloat(atPrice) || 0,
-          asOfDate,
-          minStock: parseInt(minStock) || 0
-        }
+            openingQuantity: parseInt(openingQuantity) || 0,
+            atPrice: parseFloat(atPrice) || 0,
+            asOfDate: asOfDate,
+            minStockToMaintain: parseInt(minStock) || 0,
+            location: location.trim(),
+        },
+        
+        // Purchase and tax information
+        purchasePriceTaxes: {
+            purchasePrice: parseFloat(purchasePrice) || 0,
+            purchasePriceType: purchasePriceType,
+            taxType: selectedTax,
+        },
       };
 
-      // TODO: Add API call to save product
-      console.log('Product data to save:', productData);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      alert('Product saved successfully!');
-      
-      // Reset form if needed
-      // resetForm();
-      
+      // Call backend API
+      const response = await axios.post(`${BASE_URL}/${SAVE_PRODUCT_NEW}`, productData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.data) {
+        alert('Product saved successfully!');
+        // Reset form
+        resetForm();
+      } else {
+        alert('Failed to save product. Please try again.');
+      }
     } catch (error) {
       console.error('Error saving product:', error);
-      alert('Error saving product. Please try again.');
+      alert('Error saving product. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
+  };
+
+  // Reset form function
+  const resetForm = () => {
+    setProductName('');
+    setProductHSN('');
+    setProductCategory('');
+    setSelectedCategory(null);
+    setProductCode('');
+    setSelectedUnit(null);
+    setSelectedImage(null);
+    setImagePreview(null);
+    
+    // Reset pricing
+    setSalePrice('');
+    setSalePriceType('without_tax');
+    setDiscountAmount('');
+    setDiscountType('percentage');
+    
+    // Reset stock
+    setOpeningQuantity('');
+    setAtPrice('');
+    setAsOfDate('');
+    setMinStock('');
+    setLocation('');
+    
+    // Reset purchase and tax
+    setPurchasePrice('');
+    setPurchasePriceType('without_tax');
+    setSelectedTax('none');
+    
+    // Reset active tab
+    setActiveTab('pricing');
   };
 
   return (
@@ -169,13 +383,7 @@ const AddNewProductNew = () => {
 
           <div className="form-group-product">
             <label>Product Category</label>
-            <input 
-              type="text" 
-              value={productCategory} 
-              onChange={(e) => setProductCategory(e.target.value)}
-              className="input-product"
-              placeholder="Enter category"
-            />
+            <ProductCategorySelect onCategorySelect={handleCategorySelect} />
           </div>
 
           <div className="form-group-product">
@@ -404,12 +612,132 @@ const AddNewProductNew = () => {
         </div>
       </div>
 
+      {/* Purchase Price and Taxes Section */}
+      <div className="purchase-taxes-section">
+        {/* Purchase Price Div */}
+        <div className="purchase-price-div">
+          <h3>Purchase Price</h3>
+          <div className="purchase-price-row">
+            <div className="purchase-input-group">
+              <input 
+                type="number" 
+                value={purchasePrice} 
+                onChange={(e) => setPurchasePrice(e.target.value)}
+                className="purchase-input"
+                placeholder="Enter purchase price"
+                min="0"
+                step="0.01"
+              />
+            </div>
+            <div className="purchase-select-group">
+              <select 
+                value={purchasePriceType} 
+                onChange={(e) => setPurchasePriceType(e.target.value)}
+                className="purchase-select"
+              >
+                <option value="without_tax">Without Tax</option>
+                <option value="with_tax">With Tax</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Taxes Div */}
+        <div className="taxes-div">
+          <h3>Taxes</h3>
+          <div className="taxes-select-group">
+            <select 
+              value={selectedTax} 
+              onChange={(e) => setSelectedTax(e.target.value)}
+              className="taxes-select"
+            >
+              <option value="none">None</option>
+              <option value="igst_0">IGST@0%</option>
+              <option value="gst_0">GST@0%</option>
+              <option value="igst_025">IGST@0.25%</option>
+              <option value="gst_025">GST@0.25%</option>
+              <option value="igst_3">IGST@3%</option>
+              <option value="gst_3">GST@3%</option>
+              <option value="igst_5">IGST@5%</option>
+              <option value="gst_5">GST@5%</option>
+              <option value="igst_12">IGST@12%</option>
+              <option value="gst_12">GST@12%</option>
+              <option value="igst_18">IGST@18%</option>
+              <option value="gst_18">GST@18%</option>
+              <option value="igst_28">IGST@28%</option>
+              <option value="gst_28">GST@28%</option>
+              <option value="exempt">Exempt</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       {/* Footer Save Button */}
       <div className="product-footer-row">
         <button className="footer-btn" onClick={handleSaveProduct} disabled={loading}>
           {loading ? 'Saving...' : 'Save'}
         </button>
       </div>
+
+      {/* HSN Search Modal */}
+      {showHSNModal && (
+        <div className="hsn-modal-overlay" onClick={closeHSNModal}>
+          <div className="hsn-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="hsn-modal-header">
+              <div className="hsn-header-content">
+                <h2>Select HSN</h2>
+                <div className="hsn-search-container">
+                  <input
+                    type="text"
+                    value={hsnSearchTerm}
+                    onChange={(e) => filterHSNCodes(e.target.value)}
+                    placeholder="Search HSN codes or descriptions..."
+                    className="hsn-search-input"
+                  />
+                  <button 
+                    onClick={() => filterHSNCodes('')} 
+                    className="hsn-clear-search-btn"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+              <button className="hsn-modal-close" onClick={closeHSNModal}>✕</button>
+            </div>
+
+            <div className="hsn-table-container">
+              <div className="hsn-table-header">
+                <div className="hsn-table-cell header">Code</div>
+                <div className="hsn-table-cell header">Description</div>
+                <div className="hsn-table-cell header">Action</div>
+              </div>
+              
+              {hsnLoading ? (
+                <div className="hsn-loading">Loading HSN codes...</div>
+              ) : filteredHsnCodes.length === 0 ? (
+                <div className="hsn-no-results">No HSN codes found for "{hsnSearchTerm}".</div>
+              ) : (
+                <div className="hsn-table-body">
+                  {filteredHsnCodes.map((code, index) => (
+                    <div key={index} className="hsn-table-row">
+                      <div className="hsn-table-cell">{code.code}</div>
+                      <div className="hsn-table-cell">{code.description}</div>
+                      <div className="hsn-table-cell">
+                        <button 
+                          className="hsn-select-btn"
+                          onClick={() => selectHSNCode(code)}
+                        >
+                          Select
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
