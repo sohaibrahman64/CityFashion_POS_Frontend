@@ -230,12 +230,94 @@ const AddNewProductNew = () => {
   };
 
   // Handle save product
-  const handleSaveProduct = async () => {
+//   const handleSaveProduct = async () => {
+//     try {
+//       setLoading(true);
+      
+//       // Validation
+//       if (!productName.trim()) {
+//         alert('Please enter product name');
+//         return;
+//       }
+//       if (!productHSN.trim()) {
+//         alert('Please enter product HSN code');
+//         return;
+//       }
+//       if (!selectedCategory) {
+//         alert('Please select a product category');
+//         return;
+//       }
+//       if (!productCode.trim()) {
+//         alert('Please generate a product code');
+//         return;
+//       }
+//       if (!selectedUnit) {
+//         alert('Please select a unit');
+//         return;
+//       }
+
+//       // Prepare product data
+//       const productData = {
+//         name: productName.trim(),
+//         hsn: productHSN.trim(),
+//         category: selectedCategory,
+//         code: productCode.trim(),
+//         unit: selectedUnit,
+//         imageData: selectedImage,
+        
+//         // Pricing information
+//         pricing: {
+//             salePrice: parseFloat(salePrice) || 0,
+//             salePriceType: salePriceType,
+//             discountAmount: parseFloat(discountAmount) || 0,
+//             discountType: discountType,
+//         },
+        
+//         // Stock information
+//         stock: {
+//             openingQuantity: parseInt(openingQuantity) || 0,
+//             atPrice: parseFloat(atPrice) || 0,
+//             asOfDate: asOfDate,
+//             minStockToMaintain: parseInt(minStock) || 0,
+//             location: location.trim(),
+//         },
+        
+//         // Purchase and tax information
+//         purchasePriceTaxes: {
+//             purchasePrice: parseFloat(purchasePrice) || 0,
+//             purchasePriceType: purchasePriceType,
+//             taxType: selectedTax,
+//         },
+//       };
+
+//       // Call backend API
+//       const response = await axios.post(`${BASE_URL}/${SAVE_PRODUCT_NEW}`, productData, {
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//       });
+
+//       if (response.data) {
+//         alert('Product saved successfully!');
+//         // Reset form
+//         resetForm();
+//       } else {
+//         alert('Failed to save product. Please try again.');
+//       }
+//     } catch (error) {
+//       console.error('Error saving product:', error);
+//       alert('Error saving product. Please check your connection and try again.');
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+const handleSaveProduct = async () => {
     try {
       setLoading(true);
-      
+  
       // Validation
-      if (!productName.trim()) {
+     if (!productName.trim()) {
         alert('Please enter product name');
         return;
       }
@@ -255,58 +337,54 @@ const AddNewProductNew = () => {
         alert('Please select a unit');
         return;
       }
-
-      // Prepare product data
+      // Prepare product JSON
       const productData = {
         name: productName.trim(),
         hsn: productHSN.trim(),
         category: selectedCategory,
         code: productCode.trim(),
         unit: selectedUnit,
-        imageData: selectedImage,
-        
-        // Pricing information
         pricing: {
-            salePrice: parseFloat(salePrice) || 0,
-            salePriceType: salePriceType,
-            discountAmount: parseFloat(discountAmount) || 0,
-            discountType: discountType,
+          salePrice: parseFloat(salePrice) || 0,
+          salePriceType,
+          discountAmount: parseFloat(discountAmount) || 0,
+          discountType,
         },
-        
-        // Stock information
         stock: {
-            openingQuantity: parseInt(openingQuantity) || 0,
-            atPrice: parseFloat(atPrice) || 0,
-            asOfDate: asOfDate,
-            minStockToMaintain: parseInt(minStock) || 0,
-            location: location.trim(),
+          openingQuantity: parseInt(openingQuantity) || 0,
+          atPrice: parseFloat(atPrice) || 0,
+          asOfDate,
+          minStockToMaintain: parseInt(minStock) || 0,
+          location: location.trim(),
         },
-        
-        // Purchase and tax information
         purchasePriceTaxes: {
-            purchasePrice: parseFloat(purchasePrice) || 0,
-            purchasePriceType: purchasePriceType,
-            taxType: selectedTax,
+          purchasePrice: parseFloat(purchasePrice) || 0,
+          purchasePriceType,
+          taxType: selectedTax,
         },
       };
-
-      // Call backend API
-      const response = await axios.post(`${BASE_URL}/${SAVE_PRODUCT_NEW}`, productData, {
+  
+      // Prepare FormData
+      const formData = new FormData();
+      formData.append("imageFile", selectedImage); 
+      formData.append("product", new Blob([JSON.stringify(productData)], { type: "application/json" }));
+  
+      // Send request
+      const response = await axios.post(`${BASE_URL}/${SAVE_PRODUCT_NEW}`, formData, {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "multipart/form-data",
         },
       });
-
-      if (response.data) {
-        alert('Product saved successfully!');
-        // Reset form
+  
+      if (response.data?.success) {
+        alert("Product saved successfully!");
         resetForm();
       } else {
-        alert('Failed to save product. Please try again.');
+        alert("Failed to save product. Please try again.");
       }
     } catch (error) {
-      console.error('Error saving product:', error);
-      alert('Error saving product. Please check your connection and try again.');
+      console.error("Error saving product:", error);
+      alert("Error saving product. Please check your connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -416,30 +494,16 @@ const AddNewProductNew = () => {
         {/* Image Selection Group */}
         <div className="product-image-group">
           <div className="image-upload-section">
-            <div className="image-upload-button" onClick={handleImageSelect}>
-              <span className="camera-icon">📷</span>
-              <span className="upload-text">Add Item Image</span>
-            </div>
-            
-            {/* Hidden file input */}
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleImageChange}
-              accept="image/jpeg,image/jpg,image/png"
-              style={{ display: 'none' }}
-            />
-
-            {/* Image Preview */}
-            {imagePreview && (
+            {!imagePreview ? (
+              <div className="image-upload-button" onClick={handleImageSelect}>
+                <span className="camera-icon">📷</span>
+                <span className="upload-text">Add Item Image</span>
+              </div>
+            ) : (
               <div className="image-preview-container">
-                <img 
-                  src={imagePreview} 
-                  alt="Product preview" 
-                  className="image-preview"
-                />
+                <img src={imagePreview} alt="Product preview" className="image-preview" />
                 <button 
-                  className="remove-image-btn"
+                  className="remove-image-btn" 
                   onClick={() => {
                     setSelectedImage(null);
                     setImagePreview(null);
@@ -452,6 +516,13 @@ const AddNewProductNew = () => {
                 </button>
               </div>
             )}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImageChange}
+              accept="image/jpeg,image/jpg,image/png"
+              style={{ display: 'none' }}
+            />
           </div>
         </div>
       </div>
