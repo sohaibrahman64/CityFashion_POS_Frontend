@@ -1,0 +1,500 @@
+.product-transactions-container {
+    padding: 20px;
+    height: 100vh;
+    box-sizing: border-box;
+}
+
+.product-transactions-container h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.transactions-layout {
+    display: flex;
+    height: calc(100vh - 100px); /* Full height minus header and padding */
+    gap: 5px; /* 5px gap between all divs */
+}
+
+/* First div - Left side, 20% width, full height */
+.left-panel {
+    flex: 0 0 30%; /* Fixed 20% width */
+    height: 100%;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-left: 0px; /* Reduced from 5px to 0px */
+    margin-bottom: 5px;
+    box-sizing: border-box;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Left panel controls section */
+.left-panel-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+/* Search icon container */
+.search-icon-container {
+    cursor: pointer;
+    padding: 1px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 34px;
+}
+
+.search-icon-container:hover {
+    background-color: #f5f5f5;
+}
+
+.search-icon-btn {
+    font-size: 18px;
+    color: #666;
+    line-height: 1;
+    display: block;
+}
+
+/* Add Item button */
+.add-item-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 4px 0 0 4px; /* Rounded left corners only */
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    border-right: 1px solid #0056b3; /* Border between buttons */
+}
+
+.add-item-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Add Item container */
+.add-item-container {
+    display: flex;
+    align-items: center;
+}
+
+/* Dropdown arrow button */
+.dropdown-arrow-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 8px;
+    border-radius: 0 4px 4px 0; /* Rounded right corners only */
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+}
+
+.dropdown-arrow-btn:hover {
+    background-color: #0056b3;
+}
+
+.dropdown-arrow {
+    font-size: 12px;
+    color: white;
+    line-height: 1;
+}
+
+/* Three dots menu */
+.three-dots-menu {
+    position: relative;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.three-dots-menu:hover {
+    background-color: #f5f5f5;
+}
+
+.three-dots {
+    font-size: 20px;
+    color: #666;
+    font-weight: bold;
+}
+
+/* Dropdown menu */
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    min-width: 150px;
+}
+
+.dropdown-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s;
+    color: #0a69b9;
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Import dropdown menu */
+.import-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    min-width: 180px;
+    margin-top: 2px;
+}
+
+/* Container for middle and right panels - takes remaining width */
+.middle-right-container {
+    flex: 1; /* Takes remaining 80% width */
+    display: flex;
+    flex-direction: column; /* Stack middle and right panels vertically */
+    gap: 5px;
+}
+
+/* Second div - Middle, full width of container, 30% height */
+.middle-panel {
+    width: 100%;
+    height: 30%;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 5px;
+    box-sizing: border-box;
+}
+
+/* Third div - Right side, full width of container, 70% height */
+.right-panel {
+    width: 100%;
+    height: 70%;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 5px;
+    box-sizing: border-box;
+}
+
+/* Search bar container */
+.search-bar-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    position: relative;
+}
+
+/* Search input */
+.search-input {
+    width: 100%;
+    padding: 10px 40px 10px 12px;
+    border: 2px solid #007bff;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.search-input:focus {
+    border-color: #0056b3;
+}
+
+/* Close search button */
+.close-search-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #666;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+}
+
+.close-search-btn:hover {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .transactions-layout {
+        flex-direction: column;
+        height: auto;
+    }
+    
+    .left-panel,
+    .middle-panel,
+    .right-panel {
+        width: 100%;
+        height: auto;
+        min-height: 200px;
+    }
+    
+    .left-panel-controls {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .dropdown-menu {
+        right: auto;
+        left: 0;
+    }
+}
+
+/* Table header with filter */
+.table-header-filter {
+    height: 10px;
+    background-color: #FAFAFB;
+    padding: 15px 12px;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.header-labels {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+}
+
+.header-label {
+    flex: 1;
+    text-align: center;
+}
+
+.filter-section {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+
+.filter-icon-container {
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.filter-icon-container:hover {
+    background-color: #f0f0f0;
+}
+
+.filter-icon {
+    font-size: 16px;
+    color: #666;
+}
+
+/* Filter dropdown menu */
+.filter-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    min-width: 200px;
+    margin-top: 8px;
+    padding: 12px;
+}
+
+.filter-option {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 8px;
+}
+
+.filter-option input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #007bff;
+}
+
+.filter-option label {
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    user-select: none;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.filter-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.clear-btn {
+    background-color: #f8f9fa;
+    color: #666;
+    border: 1px solid #ddd;
+}
+
+.clear-btn:hover {
+    background-color: #e9ecef;
+}
+
+.apply-btn {
+    background-color: #007bff;
+    color: white;
+}
+
+.apply-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Product list container */
+.product-list-container {
+    flex: 1;
+    overflow-y: auto;
+    margin: 0 5px;
+}
+
+/* Product row */
+.product-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 5px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-radius: 4px;
+    margin-bottom: 4px;
+}
+
+.product-row:hover {
+    background-color: #f8f9fa;
+}
+
+.product-row.selected {
+    background-color: #CEE6F3;
+}
+
+/* Product name - left aligned */
+.product-name {
+    flex: 1;
+    text-align: left;
+    font-weight: 500;
+    color: #333;
+    font-size: 14px;
+}
+
+/* Product quantity and actions container - right aligned */
+.product-quantity {
+    text-align: right;
+    color: #666;
+    font-size: 14px;
+    margin-right: 3px;
+    min-width: 60px;
+}
+
+/* Stock level color coding */
+.product-quantity.stock-adequate {
+    color: #28a745; /* Green color for adequate stock */
+    font-weight: 600;
+}
+
+.product-quantity.stock-low {
+    color: #dc3545; /* Red color for low stock */
+    font-weight: 600;
+}
+
+.product-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+}
+
+/* Product three dots */
+.product-three-dots {
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 18px;
+    color: #666;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.product-three-dots:hover {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+/* Loading and empty states */
+.loading-message,
+.no-products-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+    font-style: italic;
+    font-size: 14px;
+}

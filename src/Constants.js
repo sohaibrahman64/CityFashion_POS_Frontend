@@ -8,6 +8,7 @@ export const GENERATE_BARCODE = "api/barcode/generateBarcode";
 export const SAVE_PRODUCT = "api/products/saveProduct";
 export const SAVE_PRODUCT_NEW = "api/products/saveProductNew";
 export const GET_ALL_PRODUCTS = "api/products/getAllProducts";
+export const GET_ALL_PRODUCTS_NEW = "api/products/getAllProductsNew";
 export const UPDATE_PRODUCT = "api/products/updateProduct";
 export const DELETE_PRODUCT = "api/products/deleteProduct";
 export const GET_ALL_PAYMENT_MODES = "api/payment-modes/getAllPaymentModes";

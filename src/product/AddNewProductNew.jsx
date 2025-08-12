@@ -354,7 +354,7 @@ const handleSaveProduct = async () => {
           openingQuantity: parseInt(openingQuantity) || 0,
           atPrice: parseFloat(atPrice) || 0,
           asOfDate,
-          minStockToMaintain: parseInt(minStock) || 0,
+          minStock: parseInt(minStock) || 0,
           location: location.trim(),
         },
         purchasePriceTaxes: {
@@ -366,8 +366,15 @@ const handleSaveProduct = async () => {
   
       // Prepare FormData
       const formData = new FormData();
-      formData.append("imageFile", selectedImage); 
+      
+      // Only append image if it exists
+      if (selectedImage) {
+        formData.append("imageFile", selectedImage); 
+      }
+      
       formData.append("product", new Blob([JSON.stringify(productData)], { type: "application/json" }));
+
+      console.log(formData);
   
       // Send request
       const response = await axios.post(`${BASE_URL}/${SAVE_PRODUCT_NEW}`, formData, {

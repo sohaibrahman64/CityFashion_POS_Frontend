@@ -32,13 +32,14 @@ import LowInventoryAlerts from "../inventory/LowInventoryAlerts";
 import AddSupplier from "../suppliers/AddSupplier";
 import SuppliersList from "../suppliers/SuppliersList";
 import BarcodeGenerator from "../settings/BarcodeGenerator";
+import ProductTransactions from "../product/ProductTransactions";
 
 const routeComponentMap = {
   "/dashboard": <Dashboard />,
   "/sales/new": <NewSales />,
   "/sales/history": <PastSales />,
   "/products/add": <AddNewProductNew />,
-  "/products/list": <ProductList />,
+  "/products/transactions": <ProductTransactions />,
   "/products/import": <BulkImportProducts />,
   "/invoices/all": <AllInvoices />,
   "/invoices/share": <ShareViaWhatsApp />,
