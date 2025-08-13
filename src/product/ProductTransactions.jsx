@@ -1,6 +1,6 @@
 import "./ProductTransactions.css";
 import { useState, useEffect, useRef } from "react";
-import { BASE_URL, GET_ALL_PRODUCTS_NEW } from "../Constants";
+import { BASE_URL, GET_ALL_PRODUCTS_NEW, STOCK_ADJUSTMENT } from "../Constants";
 import axios from "axios";
 
 const ProductTransactions = () => {
@@ -18,6 +18,9 @@ const ProductTransactions = () => {
   const [showAdjustModal, setShowAdjustModal] = useState(false);
   const [stockMode, setStockMode] = useState('add');
   const [adjustmentDate, setAdjustmentDate] = useState(new Date().toISOString().split('T')[0]);
+  const [totalQuantity, setTotalQuantity] = useState('');
+  const [atPrice, setAtPrice] = useState('');
+  const [description, setDescription] = useState('');
   const dropdownRef = useRef(null);
   const importDropdownRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -132,6 +135,59 @@ const ProductTransactions = () => {
     });
     setShowFilterDropdown(false);
     // Add your filter application logic here
+  };
+
+  const handleSaveAdjustment = async () => {
+    try {
+      // Validate required fields
+      if (!selectedProductId || !totalQuantity || !atPrice) {
+        alert("Please fill in all required fields (Product, Quantity, and Price)");
+        return;
+      }
+
+      // Prepare the stock adjustment data
+      const adjustmentData = {
+        productId: selectedProductId,
+        quantity: parseFloat(totalQuantity),
+        atPrice: parseFloat(atPrice),
+        description: description || "",
+        adjustmentDate: adjustmentDate,
+        stockMode: stockMode, // 'add' or 'reduce'
+        adjustmentType: stockMode === 'add' ? 'ADD_STOCK' : 'REDUCE_STOCK'
+      };
+
+      console.log("Saving adjustment:", adjustmentData);
+
+      // Make API call to backend
+      const response = await axios.post(`${BASE_URL}/${STOCK_ADJUSTMENT}`, adjustmentData);
+      
+      if (response.status === 200 || response.status === 201) {
+        console.log("Stock adjustment saved successfully:", response.data);
+        
+        // Show success message
+        alert("Stock adjustment saved successfully!");
+        
+        // Close modal and reset form
+        setShowAdjustModal(false);
+        setTotalQuantity('');
+        setAtPrice('');
+        setDescription('');
+        
+        // Reload products to reflect the changes
+        await loadProducts();
+      }
+    } catch (error) {
+      console.error("Error saving stock adjustment:", error);
+      
+      // Show error message to user
+      if (error.response) {
+        alert(`Error: ${error.response.data.message || 'Failed to save stock adjustment'}`);
+      } else if (error.request) {
+        alert("Error: No response from server. Please check your connection.");
+      } else {
+        alert(`Error: ${error.message}`);
+      }
+    }
   };
 
     return (
@@ -542,8 +598,53 @@ const ProductTransactions = () => {
               </div>
             </div>
             <div className="modal-content">
-              {/* Modal content will go here */}
-              <p>Adjust Item functionality coming soon...</p>
+              <div className="input-row">
+                <div className="total-qty-section">
+                  <label className="total-qty-label">Total Qty</label>
+                  <input 
+                    type="number" 
+                    className="total-qty-input"
+                    placeholder="Enter quantity"
+                    value={totalQuantity}
+                    onChange={(e) => setTotalQuantity(e.target.value)}
+                  />
+                </div>
+                <div className="unit-section">
+                  <label className="unit-label">Unit</label>
+                  <div className="unit-value">
+                    {selectedProductId ? 
+                      filteredProducts.find(p => p.id === selectedProductId)?.unit?.label || 'N/A'
+                      : 'N/A'
+                    }
+                  </div>
+                </div>
+                <div className="at-price-section">
+                  <label className="at-price-label">At Price</label>
+                  <input 
+                    type="number" 
+                    className="at-price-input"
+                    placeholder="Enter price"
+                    value={atPrice}
+                    onChange={(e) => setAtPrice(e.target.value)}
+                    step="0.01"
+                  />
+                </div>
+                <div className="description-section">
+                  <label className="description-label">Description</label>
+                  <input 
+                    type="text" 
+                    className="description-input"
+                    placeholder="Enter description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="save-button-container">
+                <button className="save-button" onClick={handleSaveAdjustment}>
+                  Save
+                </button>
+              </div>
             </div>
           </div>
         </div>

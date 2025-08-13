@@ -401,6 +401,155 @@
     overflow-y: auto;
 }
 
+/* Total Qty Section */
+.total-qty-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-left: 5px;
+}
+
+.total-qty-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+}
+
+.total-qty-input {
+    width: 120px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #333;
+    background-color: white;
+}
+
+.total-qty-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Input Row Layout */
+.input-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+/* Unit Section */
+.unit-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.unit-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+}
+
+.unit-value {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #333;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    width: 120px;
+}
+
+/* At Price Section */
+.at-price-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.at-price-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+}
+
+.at-price-input {
+    width: 120px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #333;
+    background-color: white;
+}
+
+.at-price-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Description Section */
+.description-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-right: 5px;
+}
+
+.description-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+}
+
+.description-input {
+    width: 400px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #333;
+    background-color: white;
+}
+
+.description-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Save Button Container */
+.save-button-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    padding-right: 20px;
+}
+
+.save-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.save-button:hover {
+    background-color: #0056b3;
+}
+
+.save-button:active {
+    background-color: #004085;
+}
+
 /* Item Info Section */
 .item-info-section {
     display: flex;

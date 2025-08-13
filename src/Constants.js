@@ -42,3 +42,4 @@ export const GET_ALL_BARCODES = "api/barcode/getAllBarcodes";
 export const DELETE_BARCODE = "api/barcode/deleteBarcode";
 export const UPDATE_BARCODE = "api/barcode/updateBarcode";
 export const GENERATE_PRODUCT_CODE = "api/products/generateProductCode";
+export const STOCK_ADJUSTMENT = "api/stock-adjustments";
