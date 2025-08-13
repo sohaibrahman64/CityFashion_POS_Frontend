@@ -99,7 +99,7 @@ const Sidebar = ({ roleId, onMenuItemClick }) => {
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-header">City Fashion_Kid's World</div>
+      <div className="sidebar-header">RetailStack</div>
       {error ? (
         <div className="error-message">{error}</div>
       ) : (

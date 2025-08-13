@@ -185,7 +185,7 @@
     gap: 5px;
 }
 
-/* Second div - Middle, full width of container, 30% height */
+/* Middle panel */
 .middle-panel {
     width: 100%;
     height: 30%;
@@ -194,6 +194,290 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin-bottom: 5px;
     box-sizing: border-box;
+    padding: 0;
+    position: relative;
+}
+
+/* Product info container */
+.product-info-container {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Selected product title */
+.selected-product-title {
+    font-size: 15px;
+    font-weight: bold;
+    color: #333;
+    text-align: left;
+    word-wrap: break-word;
+    max-width: 100%;
+    margin: 0;
+}
+
+/* Sale price info */
+.sale-price-info {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+    margin: 0;
+}
+
+/* Purchase price info */
+.purchase-price-info {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+    margin: 0;
+}
+
+/* Stock quantity info */
+.stock-quantity-info {
+    position: absolute;
+    top: 50px;
+    right: 15px;
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+    margin: 0;
+    text-align: right;
+}
+
+/* Stock value info */
+.stock-value-info {
+    position: absolute;
+    top: 90px;
+    right: 15px;
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+    margin: 0;
+    text-align: right;
+}
+
+/* Value styling */
+.value-positive {
+    color: #28a745; /* Green color for positive values */
+    font-weight: 600;
+}
+
+.value-zero {
+    color: #dc3545; /* Red color for zero values */
+    font-weight: 600;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    z-index: 1000;
+    padding-top: 10%;
+}
+
+/* Adjust Modal */
+.adjust-modal {
+    width: 1000px;
+    height: 300px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Modal Header */
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 24px;
+    border-bottom: 1px solid #e9ecef;
+    background-color: #f8f9fa;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Stock Toggle Container */
+.stock-toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.toggle-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    position: relative;
+    width: 60px;
+    height: 30px;
+}
+
+.toggle-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-label-element {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #007bff;
+    transition: 0.4s;
+    border-radius: 30px;
+}
+
+.toggle-label-element:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+.toggle-input:checked + .toggle-label-element {
+    background-color: #007bff;
+}
+
+.toggle-input:checked + .toggle-label-element:before {
+    transform: translateX(30px);
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #666;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.modal-close-btn:hover {
+    background-color: #e9ecef;
+    color: #333;
+}
+
+/* Modal Content */
+.modal-content {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+/* Item Info Section */
+.item-info-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 24px;
+    border-bottom: 1px solid #e9ecef;
+    background-color: white;
+}
+
+/* Item Name Section */
+.item-name-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.item-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #666;
+}
+
+.item-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Adjustment Date Section */
+.adjustment-date-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-end;
+}
+
+.date-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #666;
+}
+
+.date-picker {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #333;
+    background-color: white;
+    cursor: pointer;
+}
+
+.date-picker:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Adjust Item button */
+.adjust-item-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.adjust-item-btn:hover {
+    background-color: #0056b3;
 }
 
 /* Third div - Right side, full width of container, 70% height */
