@@ -17,7 +17,7 @@
 
 /* First div - Left side, 20% width, full height */
 .left-panel {
-    flex: 0 0 30%; /* Fixed 20% width */
+    flex: 0 0 30%; /* Default width when sidebar is expanded */
     height: 100%;
     background-color: white;
     border-radius: 8px;
@@ -28,6 +28,17 @@
     padding: 15px;
     display: flex;
     flex-direction: column;
+    transition: flex-basis 0.3s ease;
+}
+
+/* Adjust left-panel width when sidebar is collapsed */
+.sidebar.collapsed ~ .main-content .left-panel {
+    flex: 0 0 25%;
+}
+
+/* Keep left-panel width when sidebar is expanded */
+.sidebar.expanded ~ .main-content .left-panel {
+    flex: 0 0 30%;
 }
 
 /* Left panel controls section */
@@ -745,48 +756,48 @@
 }
 
 .transactions-table th:first-child {
-    min-width: 40px;
-    width: 40px;
+    min-width: 5px;
+    width: 5px;
 }
 
 .transactions-table th:nth-child(2) {
-    min-width: 80px;
-    width: 80px;
+    min-width: 30px;
+    width: 30px;
 }
 
 .transactions-table th:nth-child(3) {
-    min-width: 70px;
-    width: 70px;
+    min-width: 30px;
+    width: 30px;
 }
 
 .transactions-table th:nth-child(4) {
-    min-width: 120px;
-    width: 120px;
+    min-width: 30px;
+    width: 30px;
 }
 
 .transactions-table th:nth-child(5) {
-    min-width: 80px;
-    width: 80px;
+    min-width: 30px;
+    width: 30px;
 }
 
 .transactions-table th:nth-child(6) {
-    min-width: 70px;
-    width: 70px;
+    min-width: 30px;
+    width: 30px;
 }
 
 .transactions-table th:nth-child(7) {
-    min-width: 70px;
-    width: 70px;
+    min-width: 30px;
+    width: 30px;
 }
 
 .transactions-table th:nth-child(8) {
-    min-width: 80px;
-    width: 80px;
+    min-width: 30px;
+    width: 30px;
 }
 
 .transactions-table th:last-child {
-    min-width: 40px;
-    width: 40px;
+    min-width: 5px;
+    width: 5px;
 }
 
 .transactions-table td {
@@ -810,7 +821,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 100%;
+    width: 80%;
 }
 
 .column-header-content span {
@@ -827,7 +838,20 @@
     align-items: center;
     justify-content: center;
     margin-left: 4px;
+    margin-top: 0px;
     opacity: 0.6;
+}
+
+/* Hide filter icons for 1st and 9th columns */
+.transactions-table th:first-child .filter-icon-container,
+.transactions-table th:last-child .filter-icon-container {
+    display: none;
+}
+
+/* Reduce width of column-header-content for 1st and 9th columns */
+.transactions-table th:first-child .column-header-content,
+.transactions-table th:last-child .column-header-content {
+    width:60%;
 }
 
 .transactions-table .filter-icon-container:hover {
@@ -842,7 +866,7 @@
 
 /* Status dot header - no content */
 .status-dot-header {
-    width: 40px;
+    width: 10px;
 }
 
 /* Status dots */
@@ -868,7 +892,7 @@
 /* Action dots */
 .action-dots {
     cursor: pointer;
-    padding: 2px 6px;
+    padding: 2px 2px;
     border-radius: 4px;
     font-size: 16px;
     color: #666;
