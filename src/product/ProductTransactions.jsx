@@ -905,6 +905,81 @@ const ProductTransactions = () => {
                       <div className="action-dots">⋮</div>
                     </td>
                   </tr>
+                  <tr>
+                    <td>
+                      <div className="status-dot positive"></div>
+                    </td>
+                    <td>PURCHASE</td>
+                    <td>PO-001</td>
+                    <td>Supplier restock</td>
+                    <td>2024-01-13</td>
+                    <td>+100</td>
+                    <td>₹22.50</td>
+                    <td>Completed</td>
+                    <td>
+                      <div className="action-dots">⋮</div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div className="status-dot positive"></div>
+                    </td>
+                    <td>SALE</td>
+                    <td>INV-002</td>
+                    <td>Bulk order</td>
+                    <td>2024-01-12</td>
+                    <td>-15</td>
+                    <td>₹28.00</td>
+                    <td>Completed</td>
+                    <td>
+                      <div className="action-dots">⋮</div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div className="status-dot neutral"></div>
+                    </td>
+                    <td>Stock Transfer</td>
+                    <td>TR-001</td>
+                    <td>Warehouse transfer</td>
+                    <td>2024-01-11</td>
+                    <td>+25</td>
+                    <td>₹0.00</td>
+                    <td>Completed</td>
+                    <td>
+                      <div className="action-dots">⋮</div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div className="status-dot negative"></div>
+                    </td>
+                    <td>Stock Reduction</td>
+                    <td>-</td>
+                    <td>Expired items</td>
+                    <td>2024-01-10</td>
+                    <td>-8</td>
+                    <td>₹25.00</td>
+                    <td>Completed</td>
+                    <td>
+                      <div className="action-dots">⋮</div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div className="status-dot positive"></div>
+                    </td>
+                    <td>SALE</td>
+                    <td>INV-003</td>
+                    <td>Retail customer</td>
+                    <td>2024-01-09</td>
+                    <td>-3</td>
+                    <td>₹32.00</td>
+                    <td>Completed</td>
+                    <td>
+                      <div className="action-dots">⋮</div>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
