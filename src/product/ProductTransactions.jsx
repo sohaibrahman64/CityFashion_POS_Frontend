@@ -16,11 +16,16 @@ const ProductTransactions = () => {
   const [loading, setLoading] = useState(true);
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [showAdjustModal, setShowAdjustModal] = useState(false);
-  const [stockMode, setStockMode] = useState('add');
-  const [adjustmentDate, setAdjustmentDate] = useState(new Date().toISOString().split('T')[0]);
-  const [totalQuantity, setTotalQuantity] = useState('');
-  const [atPrice, setAtPrice] = useState('');
-  const [description, setDescription] = useState('');
+  const [stockMode, setStockMode] = useState("add");
+  const [adjustmentDate, setAdjustmentDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
+  const [totalQuantity, setTotalQuantity] = useState("");
+  const [atPrice, setAtPrice] = useState("");
+  const [description, setDescription] = useState("");
+  const [transactionsSearchTerm, setTransactionsSearchTerm] = useState("");
+  const [isResizing, setIsResizing] = useState(false);
+  const [currentResizeColumn, setCurrentResizeColumn] = useState(null);
   const dropdownRef = useRef(null);
   const importDropdownRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -108,6 +113,14 @@ const ProductTransactions = () => {
     }
   }, [showSearch]);
 
+  // Cleanup resizing state when component unmounts
+  useEffect(() => {
+    return () => {
+      setIsResizing(false);
+      setCurrentResizeColumn(null);
+    };
+  }, []);
+
   // Handle bulk actions
   const handleBulkAction = (action) => {
     console.log(`Bulk ${action} action triggered`);
@@ -137,11 +150,52 @@ const ProductTransactions = () => {
     // Add your filter application logic here
   };
 
+  // Column resizing functions
+  const handleMouseDown = (e, columnIndex) => {
+    e.preventDefault();
+    setIsResizing(true);
+    setCurrentResizeColumn(columnIndex);
+    
+    const startX = e.clientX;
+    const startWidth = e.target.closest('th').offsetWidth;
+    
+    const handleMouseMove = (moveEvent) => {
+      if (isResizing) {
+        const currentX = moveEvent.clientX;
+        const diff = currentX - startX;
+        const newWidth = Math.max(50, startWidth + diff); // Minimum width of 50px
+        
+        const table = e.target.closest('table');
+        const th = table.querySelector(`th:nth-child(${columnIndex + 1})`);
+        if (th) {
+          th.style.width = `${newWidth}px`;
+        }
+      }
+    };
+    
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      setCurrentResizeColumn(null);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
+  const handleFilterClick = (columnName) => {
+    console.log(`Filter clicked for column: ${columnName}`);
+    // TODO: Implement filter functionality for each column
+  };
+
   const handleSaveAdjustment = async () => {
     try {
       // Validate required fields
       if (!selectedProductId || !totalQuantity || !atPrice) {
-        alert("Please fill in all required fields (Product, Quantity, and Price)");
+        alert(
+          "Please fill in all required fields (Product, Quantity, and Price)"
+        );
         return;
       }
 
@@ -153,13 +207,16 @@ const ProductTransactions = () => {
         description: description || "",
         adjustmentDate: adjustmentDate,
         stockMode: stockMode, // 'add' or 'reduce'
-        adjustmentType: stockMode === 'add' ? 'ADD_STOCK' : 'REDUCE_STOCK'
+        adjustmentType: stockMode === "add" ? "ADD_STOCK" : "REDUCE_STOCK",
       };
 
       console.log("Saving adjustment:", adjustmentData);
 
       // Make API call to backend
-      const response = await axios.post(`${BASE_URL}/${STOCK_ADJUSTMENT}`, adjustmentData);
+      const response = await axios.post(
+        `${BASE_URL}/${STOCK_ADJUSTMENT}`,
+        adjustmentData
+      );
       
       if (response.status === 200 || response.status === 201) {
         console.log("Stock adjustment saved successfully:", response.data);
@@ -169,11 +226,97 @@ const ProductTransactions = () => {
         
         // Close modal and reset form
         setShowAdjustModal(false);
-        setTotalQuantity('');
-        setAtPrice('');
-        setDescription('');
-        
-        // Reload products to reflect the changes
+        setTotalQuantity("");
+        setAtPrice("");
+        setDescription("");
+
+        // Update the local product state immediately to reflect changes
+        setProducts((prevProducts) => {
+          return prevProducts.map((product) => {
+            if (product.id === selectedProductId) {
+              // Create a new product object with updated values
+              const updatedProduct = { ...product };
+
+              // Update stock quantity based on mode
+              if (stockMode === "add") {
+                updatedProduct.stock = {
+                  ...updatedProduct.stock,
+                  openingQuantity:
+                    (updatedProduct.stock.openingQuantity || 0) +
+                    parseFloat(totalQuantity),
+                };
+              } else {
+                updatedProduct.stock = {
+                  ...updatedProduct.stock,
+                  openingQuantity: Math.max(
+                    0,
+                    (updatedProduct.stock.openingQuantity || 0) -
+                      parseFloat(totalQuantity)
+                  ),
+                };
+              }
+
+              // Update purchase price if it's different from current price
+              if (
+                parseFloat(atPrice) !==
+                (updatedProduct.purchasePriceTaxes?.purchasePrice || 0)
+              ) {
+                updatedProduct.purchasePriceTaxes = {
+                  ...updatedProduct.purchasePriceTaxes,
+                  purchasePrice: parseFloat(atPrice),
+                };
+              }
+
+              return updatedProduct;
+            }
+            return product;
+          });
+        });
+
+        // Also update filtered products to maintain consistency
+        setFilteredProducts((prevFilteredProducts) => {
+          return prevFilteredProducts.map((product) => {
+            if (product.id === selectedProductId) {
+              // Create a new product object with updated values
+              const updatedProduct = { ...product };
+
+              // Update stock quantity based on mode
+              if (stockMode === "add") {
+                updatedProduct.stock = {
+                  ...updatedProduct.stock,
+                  openingQuantity:
+                    (updatedProduct.stock.openingQuantity || 0) +
+                    parseFloat(totalQuantity),
+                };
+              } else {
+                updatedProduct.stock = {
+                  ...updatedProduct.stock,
+                  openingQuantity: Math.max(
+                    0,
+                    (updatedProduct.stock.openingQuantity || 0) -
+                      parseFloat(totalQuantity)
+                  ),
+                };
+              }
+
+              // Update purchase price if it's different from current price
+              if (
+                parseFloat(atPrice) !==
+                (updatedProduct.purchasePriceTaxes?.purchasePrice || 0)
+              ) {
+                updatedProduct.purchasePriceTaxes = {
+                  ...updatedProduct.purchasePriceTaxes,
+                  purchasePrice: parseFloat(atPrice),
+                };
+              }
+
+              return updatedProduct;
+            }
+            return product;
+          });
+        });
+
+        // Reload products from backend to ensure data consistency
         await loadProducts();
       }
     } catch (error) {
@@ -181,7 +324,11 @@ const ProductTransactions = () => {
       
       // Show error message to user
       if (error.response) {
-        alert(`Error: ${error.response.data.message || 'Failed to save stock adjustment'}`);
+        alert(
+          `Error: ${
+            error.response.data.message || "Failed to save stock adjustment"
+          }`
+        );
       } else if (error.request) {
         alert("Error: No response from server. Please check your connection.");
       } else {
@@ -539,19 +686,238 @@ const ProductTransactions = () => {
                   : "0.00"}
               </span>
             </div>
-            <button className="adjust-item-btn" onClick={() => setShowAdjustModal(true)}>
+            <button
+              className="adjust-item-btn"
+              onClick={() => setShowAdjustModal(true)}
+            >
               Adjust Item
             </button>
           </div>
 
           {/* Third div - Right side, remaining width, 70% height */}
-          <div className="right-panel">{/* Content for right panel */}</div>
+          <div className="right-panel">
+            <div className="right-panel-header">
+              <h3 className="transactions-title">Transactions</h3>
+              <div className="transactions-search-container">
+                <input
+                  type="text"
+                  className="transactions-search-input"
+                  placeholder="Search transactions..."
+                  value={transactionsSearchTerm}
+                  onChange={(e) => setTransactionsSearchTerm(e.target.value)}
+                />
+                <button
+                  className="transactions-close-btn"
+                  onClick={() => setTransactionsSearchTerm("")}
+                  style={{ display: transactionsSearchTerm ? "flex" : "none" }}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+            
+            {/* Transactions Table */}
+            <div className="transactions-table-container">
+              <table className="transactions-table">
+                <thead>
+                  <tr>
+                    <th 
+                      className={`status-dot-header ${currentResizeColumn === 0 ? 'resizing' : ''}`} 
+                      data-column="status"
+                      onMouseDown={(e) => handleMouseDown(e, 0)}
+                    >
+                      <div className="column-header-content">
+                        <span></span>
+                        <div 
+                          className="filter-icon-container"
+                          onClick={() => handleFilterClick('status')}
+                        >
+                          <span className="filter-icon">🔽</span>
+                        </div>
+                      </div>
+                    </th>
+                    <th 
+                      className={currentResizeColumn === 1 ? 'resizing' : ''}
+                      data-column="type"
+                      onMouseDown={(e) => handleMouseDown(e, 1)}
+                    >
+                      <div className="column-header-content">
+                        <span>TYPE</span>
+                        <div 
+                          className="filter-icon-container"
+                          onClick={() => handleFilterClick('type')}
+                        >
+                          <span className="filter-icon">🔽</span>
+                        </div>
+                      </div>
+                    </th>
+                    <th 
+                      className={currentResizeColumn === 2 ? 'resizing' : ''}
+                      data-column="invoice"
+                      onMouseDown={(e) => handleMouseDown(e, 2)}
+                    >
+                      <div className="column-header-content">
+                        <span>INVOICE</span>
+                        <div 
+                          className="filter-icon-container"
+                          onClick={() => handleFilterClick('invoice')}
+                        >
+                          <span className="filter-icon">🔽</span>
+                        </div>
+                      </div>
+                    </th>
+                    <th 
+                      className={currentResizeColumn === 3 ? 'resizing' : ''}
+                      data-column="name"
+                      onMouseDown={(e) => handleMouseDown(e, 3)}
+                    >
+                      <div className="column-header-content">
+                        <span>NAME</span>
+                        <div 
+                          className="filter-icon-container"
+                          onClick={() => handleFilterClick('name')}
+                        >
+                          <span className="filter-icon">🔽</span>
+                        </div>
+                      </div>
+                    </th>
+                    <th 
+                      className={currentResizeColumn === 4 ? 'resizing' : ''}
+                      data-column="date"
+                      onMouseDown={(e) => handleMouseDown(e, 4)}
+                    >
+                      <div className="column-header-content">
+                        <span>DATE</span>
+                        <div 
+                          className="filter-icon-container"
+                          onClick={() => handleFilterClick('date')}
+                        >
+                          <span className="filter-icon">🔽</span>
+                        </div>
+                      </div>
+                    </th>
+                    <th 
+                      className={currentResizeColumn === 5 ? 'resizing' : ''}
+                      data-column="quantity"
+                      onMouseDown={(e) => handleMouseDown(e, 5)}
+                    >
+                      <div className="column-header-content">
+                        <span>QUANTITY</span>
+                        <div 
+                          className="filter-icon-container"
+                          onClick={() => handleFilterClick('quantity')}
+                        >
+                          <span className="filter-icon">🔽</span>
+                        </div>
+                      </div>
+                    </th>
+                    <th 
+                      className={currentResizeColumn === 6 ? 'resizing' : ''}
+                      data-column="price"
+                      onMouseDown={(e) => handleMouseDown(e, 6)}
+                    >
+                      <div className="column-header-content">
+                        <span>PRICE</span>
+                        <div 
+                          className="filter-icon-container"
+                          onClick={() => handleFilterClick('price')}
+                        >
+                          <span className="filter-icon">🔽</span>
+                        </div>
+                      </div>
+                    </th>
+                    <th 
+                      className={currentResizeColumn === 7 ? 'resizing' : ''}
+                      data-column="status"
+                      onMouseDown={(e) => handleMouseDown(e, 7)}
+                    >
+                      <div className="column-header-content">
+                        <span>STATUS</span>
+                        <div 
+                          className="filter-icon-container"
+                          onClick={() => handleFilterClick('status')}
+                        >
+                          <span className="filter-icon">🔽</span>
+                        </div>
+                      </div>
+                    </th>
+                    <th 
+                      className={currentResizeColumn === 8 ? 'resizing' : ''}
+                      data-column="actions"
+                      onMouseDown={(e) => handleMouseDown(e, 8)}
+                    >
+                      <div className="column-header-content">
+                        <span></span>
+                        <div 
+                          className="filter-icon-container"
+                          onClick={() => handleFilterClick('actions')}
+                        >
+                          <span className="filter-icon">🔽</span>
+                        </div>
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {/* Sample transaction data - replace with actual data */}
+                  <tr>
+                    <td>
+                      <div className="status-dot neutral"></div>
+                    </td>
+                    <td>Stock Adjustment</td>
+                    <td>-</td>
+                    <td>Opening stock added</td>
+                    <td>2024-01-15</td>
+                    <td>+50</td>
+                    <td>₹25.00</td>
+                    <td>Completed</td>
+                    <td>
+                      <div className="action-dots">⋮</div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div className="status-dot positive"></div>
+                    </td>
+                    <td>SALE</td>
+                    <td>INV-001</td>
+                    <td>Customer purchase</td>
+                    <td>2024-01-15</td>
+                    <td>-2</td>
+                    <td>₹30.00</td>
+                    <td>Completed</td>
+                    <td>
+                      <div className="action-dots">⋮</div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div className="status-dot negative"></div>
+                    </td>
+                    <td>Stock Reduction</td>
+                    <td>-</td>
+                    <td>Damaged items removed</td>
+                    <td>2024-01-14</td>
+                    <td>-5</td>
+                    <td>₹25.00</td>
+                    <td>Completed</td>
+                    <td>
+                      <div className="action-dots">⋮</div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Adjust Item Modal */}
       {showAdjustModal && (
-        <div className="modal-overlay" onClick={() => setShowAdjustModal(false)}>
+        <div
+          className="modal-overlay"
+          onClick={() => setShowAdjustModal(false)}
+        >
           <div className="adjust-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="header-left">
@@ -562,8 +928,10 @@ const ProductTransactions = () => {
                     <input 
                       type="checkbox" 
                       className="toggle-input"
-                      checked={stockMode === 'reduce'}
-                      onChange={(e) => setStockMode(e.target.checked ? 'reduce' : 'add')}
+                      checked={stockMode === "reduce"}
+                      onChange={(e) =>
+                        setStockMode(e.target.checked ? "reduce" : "add")
+                      }
                     />
                     <span className="toggle-label-element"></span>
                   </label>
@@ -581,10 +949,10 @@ const ProductTransactions = () => {
               <div className="item-name-section">
                 <div className="item-label">Item Name</div>
                 <div className="item-value">
-                  {selectedProductId ? 
-                    filteredProducts.find(p => p.id === selectedProductId)?.name || 'No Product Selected'
-                    : 'No Product Selected'
-                  }
+                  {selectedProductId
+                    ? filteredProducts.find((p) => p.id === selectedProductId)
+                        ?.name || "No Product Selected"
+                    : "No Product Selected"}
                 </div>
               </div>
               <div className="adjustment-date-section">
@@ -612,10 +980,10 @@ const ProductTransactions = () => {
                 <div className="unit-section">
                   <label className="unit-label">Unit</label>
                   <div className="unit-value">
-                    {selectedProductId ? 
-                      filteredProducts.find(p => p.id === selectedProductId)?.unit?.label || 'N/A'
-                      : 'N/A'
-                    }
+                    {selectedProductId
+                      ? filteredProducts.find((p) => p.id === selectedProductId)
+                          ?.unit?.label || "N/A"
+                      : "N/A"}
                   </div>
                 </div>
                 <div className="at-price-section">

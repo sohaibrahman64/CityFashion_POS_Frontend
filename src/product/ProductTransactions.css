@@ -638,6 +638,304 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin-bottom: 5px;
     box-sizing: border-box;
+    padding: 15px;
+}
+
+/* Right panel header */
+.right-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+/* Transactions title */
+.transactions-title {
+    margin: 10px 0 0 5px;
+    color: #333;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* Transactions search container */
+.transactions-search-container {
+    margin: 10px 5px 0 0;
+    position: relative;
+}
+
+/* Transactions search input */
+.transactions-search-input {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 200px;
+}
+
+.transactions-search-input:focus {
+    border-color: #007bff;
+}
+
+/* Transactions close button */
+.transactions-close-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: #666;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+}
+
+.transactions-close-btn:hover {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+/* Transactions Table */
+.transactions-table-container {
+    overflow-x: auto;
+    overflow-y: auto;
+    margin-top: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 100%;
+}
+
+.transactions-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    min-width: 800px;
+    table-layout: fixed;
+}
+
+.transactions-table thead {
+    background-color: #f8f9fa;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.transactions-table th {
+    padding: 12px 8px;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+    font-size: 13px;
+    border-bottom: 2px solid #e9ecef;
+    position: relative;
+    min-width: 60px;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.transactions-table th:first-child {
+    min-width: 40px;
+    width: 40px;
+}
+
+.transactions-table th:nth-child(2) {
+    min-width: 80px;
+    width: 80px;
+}
+
+.transactions-table th:nth-child(3) {
+    min-width: 70px;
+    width: 70px;
+}
+
+.transactions-table th:nth-child(4) {
+    min-width: 120px;
+    width: 120px;
+}
+
+.transactions-table th:nth-child(5) {
+    min-width: 80px;
+    width: 80px;
+}
+
+.transactions-table th:nth-child(6) {
+    min-width: 70px;
+    width: 70px;
+}
+
+.transactions-table th:nth-child(7) {
+    min-width: 70px;
+    width: 70px;
+}
+
+.transactions-table th:nth-child(8) {
+    min-width: 80px;
+    width: 80px;
+}
+
+.transactions-table th:last-child {
+    min-width: 40px;
+    width: 40px;
+}
+
+.transactions-table td {
+    padding: 10px 8px;
+    text-align: left;
+    font-size: 13px;
+    color: #333;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.transactions-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Column header content with filter icon */
+.column-header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.column-header-content span {
+    flex: 1;
+}
+
+/* Filter icon container in table headers */
+.transactions-table .filter-icon-container {
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
+    opacity: 0.6;
+}
+
+.transactions-table .filter-icon-container:hover {
+    background-color: #e9ecef;
+    opacity: 1;
+}
+
+.transactions-table .filter-icon {
+    font-size: 10px;
+    color: #666;
+}
+
+/* Status dot header - no content */
+.status-dot-header {
+    width: 40px;
+}
+
+/* Status dots */
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-dot.neutral {
+    background-color: #6c757d; /* Gray for neutral transactions */
+}
+
+.status-dot.positive {
+    background-color: #28a745; /* Green for sales */
+}
+
+.status-dot.negative {
+    background-color: #dc3545; /* Red for negative transactions */
+}
+
+/* Action dots */
+.action-dots {
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 16px;
+    color: #666;
+    transition: background-color 0.2s;
+}
+
+.action-dots:hover {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+/* Column resizing */
+.transactions-table th {
+    position: relative;
+}
+
+.transactions-table th::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    cursor: col-resize;
+    background-color: transparent;
+    transition: background-color 0.2s;
+}
+
+.transactions-table th:hover::after {
+    background-color: #007bff;
+}
+
+.transactions-table th.resizing::after {
+    background-color: #0056b3;
+}
+
+.transactions-table th.resizing {
+    background-color: #e3f2fd;
+    transition: background-color 0.2s;
+}
+
+/* Prevent text selection during resize */
+.transactions-table th.resizing * {
+    user-select: none;
+}
+
+/* Responsive table adjustments */
+@media (max-width: 1200px) {
+    .transactions-table-container {
+        overflow-x: auto;
+    }
+    
+    .transactions-table {
+        min-width: 800px;
+    }
+}
+
+@media (max-width: 768px) {
+    .transactions-table th,
+    .transactions-table td {
+        padding: 6px 6px;
+        font-size: 12px;
+    }
+    
+    .transactions-table .filter-icon {
+        font-size: 9px;
+    }
 }
 
 /* Search bar container */

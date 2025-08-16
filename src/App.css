@@ -18,41 +18,64 @@ body {
 
 /* Sidebar styling */
 .sidebar {
-  width: 260px;
+  width: 80px;
   /* background-color: #1A2640; */
   background-color: #0a69b9;
   /* color: #27D1FF; */
   color: white;
-  padding: 20px;
+  padding: 15px 10px;
   display: flex;
   flex-direction: column;
+  transition: width 0.3s ease, padding 0.3s ease;
+}
+
+.sidebar.expanded {
+  width: 200px;
+  padding: 20px 15px;
+}
+
+.sidebar.collapsed {
+  width: 80px;
+  padding: 15px 10px;
 }
 
 .sidebar h2 {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
   /* color: #27D1FF; */
   color: white;
   margin-bottom: 30px;
   text-transform: uppercase;
   letter-spacing: 1px;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar.collapsed h2 {
+  opacity: 0;
 }
 
 /* Menu items */
 .menu-item {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .menu-label {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
+  gap: 8px;
+  padding: 8px 10px;
     /* color: #27D1FF; */
   color: white;
   text-decoration: none;
   border-radius: 6px;
-  transition: background-color 0.2s ease;
+  transition: all 0.3s ease;
+  font-size: 13px;
+}
+
+.sidebar.expanded .menu-label {
+  gap: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
 }
 
 .menu-label:hover {

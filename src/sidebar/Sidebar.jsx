@@ -28,6 +28,7 @@ const Sidebar = ({ roleId }) => {
   const [menuItems, setMenuItems] = useState([]);
   const [expandedItems, setExpandedItems] = useState(new Set());
   const [error, setError] = useState(null);
+  const [isExpanded, setIsExpanded] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -70,6 +71,10 @@ const Sidebar = ({ roleId }) => {
     }
   };
 
+  const toggleSidebar = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   const renderMenu = (items) =>
     items.map((item) => (
       <div key={item.id} className="menu-item">
@@ -93,8 +98,13 @@ const Sidebar = ({ roleId }) => {
     ));
 
   return (
-    <aside className="sidebar">
-      <div className="sidebar-header">RetailStack</div>
+    <aside className={`sidebar ${isExpanded ? 'expanded' : 'collapsed'}`}>
+      <div className="sidebar-header">
+        <span className="sidebar-title">{isExpanded ? 'RetailStack' : 'RS'}</span>
+        <button className="sidebar-toggle-btn" onClick={toggleSidebar}>
+          {isExpanded ? <FaMinus /> : <FaPlus />}
+        </button>
+      </div>
       {error ? (
         <div className="error-message">{error}</div>
       ) : (
