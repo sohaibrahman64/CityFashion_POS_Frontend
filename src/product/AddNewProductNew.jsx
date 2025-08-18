@@ -1,9 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './AddNewProductNew.css';
 import ProductSelect from './ProductSelect';
 import UnitSelect from './UnitSelect';
 import ProductCategorySelect from './ProductCategorySelect';
-import { GENERATE_BARCODE, SAVE_PRODUCT_NEW, BASE_URL } from '../Constants';
+import { GENERATE_BARCODE, SAVE_PRODUCT_NEW, UPDATE_PRODUCT_NEW, BASE_URL } from '../Constants';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 
@@ -47,6 +47,58 @@ const AddNewProductNew = () => {
 
   // File input ref
   const fileInputRef = useRef(null);
+
+  // Initialize form with data from localStorage if editing
+  useEffect(() => {
+    const editProductData = localStorage.getItem('editProductData');
+    if (editProductData) {
+      try {
+        const product = JSON.parse(editProductData);
+        
+        // Pre-fill form fields with product data
+        setProductName(product.name || '');
+        setProductHSN(product.hsn || '');
+        setProductCategory(product.category?.name || '');
+        setSelectedCategory(product.category || null);
+        setProductCode(product.code || '');
+        
+        // Pre-fill pricing fields if available
+        if (product.salePrice) setSalePrice(product.salePrice.toString());
+        if (product.salePriceType) setSalePriceType(product.salePriceType);
+        if (product.discountAmount) setDiscountAmount(product.discountAmount.toString());
+        if (product.discountType) setDiscountType(product.discountType);
+        
+        // Pre-fill stock fields if available
+        if (product.stock?.openingQuantity) setOpeningQuantity(product.stock.openingQuantity.toString());
+        if (product.stock?.atPrice) setAtPrice(product.stock.atPrice.toString());
+        if (product.stock?.asOfDate) setAsOfDate(product.stock.asOfDate);
+        if (product.stock?.minStock) setMinStock(product.stock.minStock.toString());
+        if (product.stock?.location) setLocation(product.stock.location);
+        
+        // Pre-fill purchase and tax fields if available
+        if (product.purchasePrice) setPurchasePrice(product.purchasePrice.toString());
+        if (product.purchasePriceType) setPurchasePriceType(product.purchasePriceType);
+        if (product.tax) setSelectedTax(product.tax);
+        
+        // Clear the localStorage data after pre-filling
+        localStorage.removeItem('editProductData');
+        
+        // Set editing mode and store product ID
+        setIsEditing(true);
+        setEditingProductId(product.id);
+        
+        // Update the page title to indicate editing mode
+        document.title = 'Edit Product - CityFashion POS';
+      } catch (error) {
+        console.error('Error parsing product data from localStorage:', error);
+        localStorage.removeItem('editProductData');
+      }
+    }
+  }, []);
+
+  // State to track if we're editing an existing product
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingProductId, setEditingProductId] = useState(null);
 
   // Load HSN codes from Excel file
   const loadHSNCodes = async () => {
@@ -339,6 +391,7 @@ const handleSaveProduct = async () => {
       }
       // Prepare product JSON
       const productData = {
+        ...(isEditing && { id: editingProductId }), // Include ID if editing
         name: productName.trim(),
         hsn: productHSN.trim(),
         category: selectedCategory,
@@ -376,22 +429,35 @@ const handleSaveProduct = async () => {
 
       console.log(formData);
   
-      // Send request
-      const response = await axios.post(`${BASE_URL}/${SAVE_PRODUCT_NEW}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      // Send request - use UPDATE_PRODUCT_NEW if editing, SAVE_PRODUCT_NEW if creating new
+      const apiEndpoint = isEditing ? UPDATE_PRODUCT_NEW : SAVE_PRODUCT_NEW;
+      
+      let response;
+      if (isEditing) {
+        // Use PUT for updates
+        response = await axios.put(`${BASE_URL}/${apiEndpoint}/${editingProductId}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+      } else {
+        // Use POST for creating new products
+        response = await axios.post(`${BASE_URL}/${apiEndpoint}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+      }
   
       if (response.data?.success) {
-        alert("Product saved successfully!");
+        alert(isEditing ? "Product updated successfully!" : "Product saved successfully!");
         resetForm();
       } else {
-        alert("Failed to save product. Please try again.");
+        alert(isEditing ? "Failed to update product. Please try again." : "Failed to save product. Please try again.");
       }
     } catch (error) {
-      console.error("Error saving product:", error);
-      alert("Error saving product. Please check your connection and try again.");
+      console.error(isEditing ? "Error updating product:" : "Error saving product:", error);
+      alert(isEditing ? "Error updating product. Please check your connection and try again." : "Error saving product. Please check your connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -428,13 +494,20 @@ const handleSaveProduct = async () => {
     
     // Reset active tab
     setActiveTab('pricing');
+    
+    // Reset editing state
+    setIsEditing(false);
+    setEditingProductId(null);
+    
+    // Reset page title
+    document.title = 'Add New Product - CityFashion POS';
   };
 
   return (
     <div className="add-new-product-container">
       {/* Header */}
       <div className="product-header">
-        <h2 className="product-title">Add New Product</h2>
+        <h2 className="product-title">{isEditing ? 'Edit Product' : 'Add New Product'}</h2>
       </div>
 
       {/* Main Form Section */}
@@ -753,7 +826,7 @@ const handleSaveProduct = async () => {
       {/* Footer Save Button */}
       <div className="product-footer-row">
         <button className="footer-btn" onClick={handleSaveProduct} disabled={loading}>
-          {loading ? 'Saving...' : 'Save'}
+          {loading ? 'Saving...' : (isEditing ? 'Update Product' : 'Save')}
         </button>
       </div>
 

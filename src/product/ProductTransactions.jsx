@@ -1,9 +1,11 @@
 import "./ProductTransactions.css";
 import { useState, useEffect, useRef } from "react";
-import { BASE_URL, GET_ALL_PRODUCTS_NEW, STOCK_ADJUSTMENT } from "../Constants";
+import { useNavigate } from "react-router-dom";
+import { BASE_URL, GET_ALL_PRODUCTS_NEW, STOCK_ADJUSTMENT,GET_PRODUCT_TRANSACTIONS,GET_TRANSACTIONS_BY_DATE_RANGE,GET_TRANSACTIONS_BY_TYPE,CREATE_TRANSACTION } from "../Constants";
 import axios from "axios";
 
 const ProductTransactions = () => {
+  const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
   const [showImportDropdown, setShowImportDropdown] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -30,6 +32,88 @@ const ProductTransactions = () => {
   const importDropdownRef = useRef(null);
   const searchInputRef = useRef(null);
   const filterDropdownRef = useRef(null);
+
+  // Add this state for real transactions
+  const [transactions, setTransactions] = useState([]);
+  const [transactionsLoading, setTransactionsLoading] = useState(false);
+
+  // Product actions menu state
+  const [showProductActionsMenu, setShowProductActionsMenu] = useState(false);
+  const [activeProductId, setActiveProductId] = useState(null);
+  const productActionsRef = useRef(null);
+
+  // Add this function to load real transactions
+  const loadProductTransactions = async (productId) => {
+    if (!productId) return;
+
+    try {
+      setTransactionsLoading(true);
+      const response = await axios.get(
+        `${BASE_URL}/${GET_PRODUCT_TRANSACTIONS}/${productId}`
+      );
+      setTransactions(response.data);
+    } catch (error) {
+      console.error("Error loading transactions:", error);
+    } finally {
+      setTransactionsLoading(false);
+    }
+  };
+
+  // Function to determine status dot class based on transaction type
+  const getStatusDotClass = (transactionType) => {
+    if (!transactionType) return "neutral";
+    
+    const type = transactionType.toUpperCase();
+    
+    // Positive transactions (add stock, sales returns, etc.)
+    if (type.includes("ADD") || type.includes("SALE_RETURN") || type.includes("PURCHASE")) {
+      return "positive";
+    }
+    
+    // Negative transactions (reduce stock, sales, etc.)
+    if (type.includes("REDUCE") || type.includes("SALE") || type.includes("DAMAGE") || type.includes("LOSS")) {
+      return "negative";
+    }
+    
+    // Neutral transactions (transfers, adjustments, etc.)
+    if (type.includes("TRANSFER") || type.includes("ADJUSTMENT") || type.includes("CORRECTION")) {
+      return "neutral";
+    }
+    
+    // Default to neutral for unknown transaction types
+    return "neutral";
+  };
+
+  // Function to format transaction dates
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    
+    try {
+      const date = new Date(dateString);
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return "-";
+      }
+      
+      // Format as DD/MM/YYYY
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      
+      return `${day}/${month}/${year}`;
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "-";
+    }
+  };
+
+  // Call this when a product is selected
+  useEffect(() => {
+    if (selectedProductId) {
+      loadProductTransactions(selectedProductId);
+    }
+  }, [selectedProductId]);
 
   // Load products from backend
   useEffect(() => {
@@ -75,9 +159,38 @@ const ProductTransactions = () => {
   };
 
   // Handle product actions click
-  const handleProductActionsClick = (productId) => {
-    console.log("Product actions clicked for:", productId);
-    // TODO: Show product actions menu
+  const handleProductActionsClick = (productId, event) => {
+    event.stopPropagation(); // Prevent product row selection
+    setActiveProductId(productId);
+    setShowProductActionsMenu(true);
+  };
+
+  // Handle product action selection
+  const handleProductAction = (action, productId) => {
+    console.log(`${action} action for product:`, productId);
+    
+    switch (action) {
+      case 'view_edit':
+        // Find the product data and store it in localStorage for pre-filling
+        const product = products.find(p => p.id === productId);
+        if (product) {
+          // Store product data in localStorage for the AddNewProductNew component
+          localStorage.setItem('editProductData', JSON.stringify(product));
+          // Navigate to the add product page
+          navigate('/products/add');
+        }
+        break;
+      case 'delete':
+        // TODO: Show delete confirmation
+        console.log('Delete product:', productId);
+        break;
+      default:
+        console.log('Unknown action:', action);
+    }
+    
+    // Close the menu
+    setShowProductActionsMenu(false);
+    setActiveProductId(null);
   };
 
   // Handle clicks outside dropdowns to close them
@@ -97,6 +210,13 @@ const ProductTransactions = () => {
         !filterDropdownRef.current.contains(event.target)
       ) {
         setShowFilterDropdown(false);
+      }
+      if (
+        productActionsRef.current &&
+        !productActionsRef.current.contains(event.target)
+      ) {
+        setShowProductActionsMenu(false);
+        setActiveProductId(null);
       }
     };
 
@@ -155,33 +275,33 @@ const ProductTransactions = () => {
     e.preventDefault();
     setIsResizing(true);
     setCurrentResizeColumn(columnIndex);
-    
+
     const startX = e.clientX;
-    const startWidth = e.target.closest('th').offsetWidth;
-    
+    const startWidth = e.target.closest("th").offsetWidth;
+
     const handleMouseMove = (moveEvent) => {
       if (isResizing) {
         const currentX = moveEvent.clientX;
         const diff = currentX - startX;
         const newWidth = Math.max(50, startWidth + diff); // Minimum width of 50px
-        
-        const table = e.target.closest('table');
+
+        const table = e.target.closest("table");
         const th = table.querySelector(`th:nth-child(${columnIndex + 1})`);
         if (th) {
           th.style.width = `${newWidth}px`;
         }
       }
     };
-    
+
     const handleMouseUp = () => {
       setIsResizing(false);
       setCurrentResizeColumn(null);
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
-    
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
   };
 
   const handleFilterClick = (columnName) => {
@@ -217,13 +337,13 @@ const ProductTransactions = () => {
         `${BASE_URL}/${STOCK_ADJUSTMENT}`,
         adjustmentData
       );
-      
+
       if (response.status === 200 || response.status === 201) {
         console.log("Stock adjustment saved successfully:", response.data);
-        
+
         // Show success message
         alert("Stock adjustment saved successfully!");
-        
+
         // Close modal and reset form
         setShowAdjustModal(false);
         setTotalQuantity("");
@@ -321,7 +441,7 @@ const ProductTransactions = () => {
       }
     } catch (error) {
       console.error("Error saving stock adjustment:", error);
-      
+
       // Show error message to user
       if (error.response) {
         alert(
@@ -337,9 +457,9 @@ const ProductTransactions = () => {
     }
   };
 
-    return (
+  return (
     <div className="product-transactions-container">
-            <h2>Product Transactions</h2>
+      <h2>Product Transactions</h2>
 
       <div className="transactions-layout">
         {/* First div - Left side, 20% width, full height */}
@@ -515,7 +635,8 @@ const ProductTransactions = () => {
 
           {/* Product list */}
           <div className="product-list-container">
-            {filteredProducts.map((product, index) => (
+            <div className="products-scroll-wrapper">
+              {filteredProducts.map((product, index) => (
               <div
                 key={product.id || index}
                 className={`product-row ${
@@ -538,11 +659,29 @@ const ProductTransactions = () => {
                     className="product-three-dots"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleProductActionsClick(product.id);
+                      handleProductActionsClick(product.id, e);
                     }}
                   >
                     ⋮
                   </div>
+                  
+                  {/* Product Actions Menu - positioned relative to this product */}
+                  {showProductActionsMenu && activeProductId === product.id && (
+                    <div className="product-actions-menu" ref={productActionsRef}>
+                      <div 
+                        className="product-action-item"
+                        onClick={() => handleProductAction('view_edit', product.id)}
+                      >
+                        View/Edit
+                      </div>
+                      <div 
+                        className="product-action-item"
+                        onClick={() => handleProductAction('delete', product.id)}
+                      >
+                        Delete
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -556,7 +695,10 @@ const ProductTransactions = () => {
             {!loading && filteredProducts.length === 0 && (
               <div className="no-products-message">No products found</div>
             )}
+            </div>
           </div>
+
+
         </div>
 
         {/* Container for middle and right panels */}
@@ -715,142 +857,144 @@ const ProductTransactions = () => {
                 </button>
               </div>
             </div>
-            
+
             {/* Transactions Table */}
             <div className="transactions-table-container">
               <table className="transactions-table">
                 <thead>
                   <tr>
-                    <th 
-                      className={`status-dot-header ${currentResizeColumn === 0 ? 'resizing' : ''}`} 
+                    <th
+                      className={`status-dot-header ${
+                        currentResizeColumn === 0 ? "resizing" : ""
+                      }`}
                       data-column="status"
                       onMouseDown={(e) => handleMouseDown(e, 0)}
                     >
                       <div className="column-header-content">
                         <span></span>
-                        <div 
+                        <div
                           className="filter-icon-container"
-                          onClick={() => handleFilterClick('status')}
+                          onClick={() => handleFilterClick("status")}
                         >
                           <span className="filter-icon">🔽</span>
                         </div>
                       </div>
                     </th>
-                    <th 
-                      className={currentResizeColumn === 1 ? 'resizing' : ''}
+                    <th
+                      className={currentResizeColumn === 1 ? "resizing" : ""}
                       data-column="type"
                       onMouseDown={(e) => handleMouseDown(e, 1)}
                     >
                       <div className="column-header-content">
                         <span>TYPE</span>
-                        <div 
+                        <div
                           className="filter-icon-container"
-                          onClick={() => handleFilterClick('type')}
+                          onClick={() => handleFilterClick("type")}
                         >
                           <span className="filter-icon">🔽</span>
                         </div>
                       </div>
                     </th>
-                    <th 
-                      className={currentResizeColumn === 2 ? 'resizing' : ''}
+                    <th
+                      className={currentResizeColumn === 2 ? "resizing" : ""}
                       data-column="invoice"
                       onMouseDown={(e) => handleMouseDown(e, 2)}
                     >
                       <div className="column-header-content">
                         <span>INVOICE</span>
-                        <div 
+                        <div
                           className="filter-icon-container"
-                          onClick={() => handleFilterClick('invoice')}
+                          onClick={() => handleFilterClick("invoice")}
                         >
                           <span className="filter-icon">🔽</span>
                         </div>
                       </div>
                     </th>
-                    <th 
-                      className={currentResizeColumn === 3 ? 'resizing' : ''}
+                    <th
+                      className={currentResizeColumn === 3 ? "resizing" : ""}
                       data-column="name"
                       onMouseDown={(e) => handleMouseDown(e, 3)}
                     >
                       <div className="column-header-content">
                         <span>NAME</span>
-                        <div 
+                        <div
                           className="filter-icon-container"
-                          onClick={() => handleFilterClick('name')}
+                          onClick={() => handleFilterClick("name")}
                         >
                           <span className="filter-icon">🔽</span>
                         </div>
                       </div>
                     </th>
-                    <th 
-                      className={currentResizeColumn === 4 ? 'resizing' : ''}
+                    <th
+                      className={currentResizeColumn === 4 ? "resizing" : ""}
                       data-column="date"
                       onMouseDown={(e) => handleMouseDown(e, 4)}
                     >
                       <div className="column-header-content">
                         <span>DATE</span>
-                        <div 
+                        <div
                           className="filter-icon-container"
-                          onClick={() => handleFilterClick('date')}
+                          onClick={() => handleFilterClick("date")}
                         >
                           <span className="filter-icon">🔽</span>
                         </div>
                       </div>
                     </th>
-                    <th 
-                      className={currentResizeColumn === 5 ? 'resizing' : ''}
+                    <th
+                      className={currentResizeColumn === 5 ? "resizing" : ""}
                       data-column="quantity"
                       onMouseDown={(e) => handleMouseDown(e, 5)}
                     >
                       <div className="column-header-content">
                         <span>QUANTITY</span>
-                        <div 
+                        <div
                           className="filter-icon-container"
-                          onClick={() => handleFilterClick('quantity')}
+                          onClick={() => handleFilterClick("quantity")}
                         >
                           <span className="filter-icon">🔽</span>
                         </div>
                       </div>
                     </th>
-                    <th 
-                      className={currentResizeColumn === 6 ? 'resizing' : ''}
+                    <th
+                      className={currentResizeColumn === 6 ? "resizing" : ""}
                       data-column="price"
                       onMouseDown={(e) => handleMouseDown(e, 6)}
                     >
                       <div className="column-header-content">
                         <span>PRICE</span>
-                        <div 
+                        <div
                           className="filter-icon-container"
-                          onClick={() => handleFilterClick('price')}
+                          onClick={() => handleFilterClick("price")}
                         >
                           <span className="filter-icon">🔽</span>
                         </div>
                       </div>
                     </th>
-                    <th 
-                      className={currentResizeColumn === 7 ? 'resizing' : ''}
+                    <th
+                      className={currentResizeColumn === 7 ? "resizing" : ""}
                       data-column="status"
                       onMouseDown={(e) => handleMouseDown(e, 7)}
                     >
                       <div className="column-header-content">
                         <span>STATUS</span>
-                        <div 
+                        <div
                           className="filter-icon-container"
-                          onClick={() => handleFilterClick('status')}
+                          onClick={() => handleFilterClick("status")}
                         >
                           <span className="filter-icon">🔽</span>
                         </div>
                       </div>
                     </th>
-                    <th 
-                      className={currentResizeColumn === 8 ? 'resizing' : ''}
+                    <th
+                      className={currentResizeColumn === 8 ? "resizing" : ""}
                       data-column="actions"
                       onMouseDown={(e) => handleMouseDown(e, 8)}
                     >
                       <div className="column-header-content">
                         <span></span>
-                        <div 
+                        <div
                           className="filter-icon-container"
-                          onClick={() => handleFilterClick('actions')}
+                          onClick={() => handleFilterClick("actions")}
                         >
                           <span className="filter-icon">🔽</span>
                         </div>
@@ -859,127 +1003,48 @@ const ProductTransactions = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {/* Sample transaction data - replace with actual data */}
-                  <tr>
-                    <td>
-                      <div className="status-dot neutral"></div>
-                    </td>
-                    <td>Stock Adjustment</td>
-                    <td>-</td>
-                    <td>Opening stock added</td>
-                    <td>2024-01-15</td>
-                    <td>+50</td>
-                    <td>₹25.00</td>
-                    <td>Completed</td>
-                    <td>
-                      <div className="action-dots">⋮</div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div className="status-dot positive"></div>
-                    </td>
-                    <td>SALE</td>
-                    <td>INV-001</td>
-                    <td>Customer purchase</td>
-                    <td>2024-01-15</td>
-                    <td>-2</td>
-                    <td>₹30.00</td>
-                    <td>Completed</td>
-                    <td>
-                      <div className="action-dots">⋮</div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div className="status-dot negative"></div>
-                    </td>
-                    <td>Stock Reduction</td>
-                    <td>-</td>
-                    <td>Damaged items removed</td>
-                    <td>2024-01-14</td>
-                    <td>-5</td>
-                    <td>₹25.00</td>
-                    <td>Completed</td>
-                    <td>
-                      <div className="action-dots">⋮</div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div className="status-dot positive"></div>
-                    </td>
-                    <td>PURCHASE</td>
-                    <td>PO-001</td>
-                    <td>Supplier restock</td>
-                    <td>2024-01-13</td>
-                    <td>+100</td>
-                    <td>₹22.50</td>
-                    <td>Completed</td>
-                    <td>
-                      <div className="action-dots">⋮</div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div className="status-dot positive"></div>
-                    </td>
-                    <td>SALE</td>
-                    <td>INV-002</td>
-                    <td>Bulk order</td>
-                    <td>2024-01-12</td>
-                    <td>-15</td>
-                    <td>₹28.00</td>
-                    <td>Completed</td>
-                    <td>
-                      <div className="action-dots">⋮</div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div className="status-dot neutral"></div>
-                    </td>
-                    <td>Stock Transfer</td>
-                    <td>TR-001</td>
-                    <td>Warehouse transfer</td>
-                    <td>2024-01-11</td>
-                    <td>+25</td>
-                    <td>₹0.00</td>
-                    <td>Completed</td>
-                    <td>
-                      <div className="action-dots">⋮</div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div className="status-dot negative"></div>
-                    </td>
-                    <td>Stock Reduction</td>
-                    <td>-</td>
-                    <td>Expired items</td>
-                    <td>2024-01-10</td>
-                    <td>-8</td>
-                    <td>₹25.00</td>
-                    <td>Completed</td>
-                    <td>
-                      <div className="action-dots">⋮</div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div className="status-dot positive"></div>
-                    </td>
-                    <td>SALE</td>
-                    <td>INV-003</td>
-                    <td>Retail customer</td>
-                    <td>2024-01-09</td>
-                    <td>-3</td>
-                    <td>₹32.00</td>
-                    <td>Completed</td>
-                    <td>
-                      <div className="action-dots">⋮</div>
-                    </td>
-                  </tr>
+                  {transactionsLoading ? (
+                    <tr>
+                      <td colSpan="9" className="loading-message">
+                        Loading transactions...
+                      </td>
+                    </tr>
+                  ) : transactions.length === 0 ? (
+                    <tr>
+                      <td colSpan="9" className="no-transactions-message">
+                        No transactions found
+                      </td>
+                    </tr>
+                  ) : (
+                    transactions.map((transaction) => (
+                      <tr key={transaction.id}>
+                        <td>
+                          <div
+                            className={`status-dot ${getStatusDotClass(
+                              transaction.transactionType
+                            )}`}
+                          ></div>
+                        </td>
+                        <td>{transaction.transactionType}</td>
+                        <td>{transaction.referenceNumber || "-"}</td>
+                        <td>{transaction.description}</td>
+                        <td>{formatDate(transaction.transactionDate)}</td>
+                        <td
+                          className={
+                            transaction.quantity > 0 ? "positive" : "negative"
+                          }
+                        >
+                          {transaction.quantity > 0 ? "+" : ""}
+                          {transaction.quantity}
+                        </td>
+                        <td>₹{transaction.unitPrice?.toFixed(2) || "0.00"}</td>
+                        <td>{transaction.status}</td>
+                        <td>
+                          <div className="action-dots">⋮</div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -1000,8 +1065,8 @@ const ProductTransactions = () => {
                 <div className="stock-toggle-container">
                   <span className="toggle-label">Add Stock</span>
                   <label className="toggle-switch">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       className="toggle-input"
                       checked={stockMode === "reduce"}
                       onChange={(e) =>
@@ -1013,8 +1078,8 @@ const ProductTransactions = () => {
                   <span className="toggle-label">Reduce Stock</span>
                 </div>
               </div>
-              <button 
-                className="modal-close-btn" 
+              <button
+                className="modal-close-btn"
                 onClick={() => setShowAdjustModal(false)}
               >
                 ✕
@@ -1032,8 +1097,8 @@ const ProductTransactions = () => {
               </div>
               <div className="adjustment-date-section">
                 <label className="date-label">Adjustment Date</label>
-                <input 
-                  type="date" 
+                <input
+                  type="date"
                   className="date-picker"
                   value={adjustmentDate}
                   onChange={(e) => setAdjustmentDate(e.target.value)}
@@ -1044,8 +1109,8 @@ const ProductTransactions = () => {
               <div className="input-row">
                 <div className="total-qty-section">
                   <label className="total-qty-label">Total Qty</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     className="total-qty-input"
                     placeholder="Enter quantity"
                     value={totalQuantity}
@@ -1063,8 +1128,8 @@ const ProductTransactions = () => {
                 </div>
                 <div className="at-price-section">
                   <label className="at-price-label">At Price</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     className="at-price-input"
                     placeholder="Enter price"
                     value={atPrice}
@@ -1074,8 +1139,8 @@ const ProductTransactions = () => {
                 </div>
                 <div className="description-section">
                   <label className="description-label">Description</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     className="description-input"
                     placeholder="Enter description"
                     value={description}

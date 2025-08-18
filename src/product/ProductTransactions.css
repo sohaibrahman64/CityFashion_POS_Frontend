@@ -21,6 +21,7 @@
 .left-panel {
   flex: 0 0 30%; /* Default width when sidebar is expanded */
   height: 100%;
+  overflow-y: auto;
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -1173,7 +1174,17 @@
 .product-list-container {
   flex: 1;
   overflow-y: auto;
-  margin: 0 5px;
+  min-height: 0;
+  /* overflow: visible; */
+  /* margin: 0 5px; */
+  /* position: relative; */
+}
+
+/* Scrollable products wrapper */
+.products-scroll-wrapper {
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 5px;
 }
 
 /* Product row */
@@ -1231,6 +1242,7 @@
   align-items: center;
   justify-content: center;
   min-width: 40px;
+  position: relative;
 }
 
 /* Product three dots */
@@ -1257,4 +1269,54 @@
   color: #666;
   font-style: italic;
   font-size: 14px;
+}
+
+/* Product Actions Menu */
+.product-actions-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 120px;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease-in-out;
+  margin-top: 5px;
+  white-space: nowrap;
+}
+
+.product-action-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+}
+
+.product-action-item:last-child {
+  border-bottom: none;
+}
+
+.product-action-item:hover {
+  background-color: #f8f9fa;
+  color: #007bff;
+}
+
+.product-action-item:active {
+  background-color: #e9ecef;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
