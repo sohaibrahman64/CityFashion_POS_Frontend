@@ -1,7 +1,7 @@
 import "./ProductTransactions.css";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { BASE_URL, GET_ALL_PRODUCTS_NEW, STOCK_ADJUSTMENT,GET_PRODUCT_TRANSACTIONS,GET_TRANSACTIONS_BY_DATE_RANGE,GET_TRANSACTIONS_BY_TYPE,CREATE_TRANSACTION } from "../Constants";
+import { BASE_URL, GET_ALL_PRODUCTS_NEW, STOCK_ADJUSTMENT,GET_PRODUCT_TRANSACTIONS,GET_TRANSACTIONS_BY_DATE_RANGE,GET_TRANSACTIONS_BY_TYPE,CREATE_TRANSACTION, DELETE_PRODUCT_NEW } from "../Constants";
 import axios from "axios";
 
 const ProductTransactions = () => {
@@ -36,6 +36,7 @@ const ProductTransactions = () => {
   // Add this state for real transactions
   const [transactions, setTransactions] = useState([]);
   const [transactionsLoading, setTransactionsLoading] = useState(false);
+  const [showBackButton, setShowBackButton] = useState(false);
 
   // Product actions menu state
   const [showProductActionsMenu, setShowProductActionsMenu] = useState(false);
@@ -166,7 +167,7 @@ const ProductTransactions = () => {
   };
 
   // Handle product action selection
-  const handleProductAction = (action, productId) => {
+  const handleProductAction = async (action, productId) => {
     console.log(`${action} action for product:`, productId);
     
     switch (action) {
@@ -177,12 +178,48 @@ const ProductTransactions = () => {
           // Store product data in localStorage for the AddNewProductNew component
           localStorage.setItem('editProductData', JSON.stringify(product));
           // Navigate to the add product page
-          navigate('/products/add');
+          navigate('/products/add', { 
+            state: { fromComponent: 'ProductTransactions' }
+          });
         }
         break;
       case 'delete':
-        // TODO: Show delete confirmation
-        console.log('Delete product:', productId);
+        // Show delete confirmation
+        if (window.confirm("Are you sure you want to delete this product? This action cannot be undone.")) {
+          try {
+            // Call the delete API
+            await axios.delete(`${BASE_URL}/${DELETE_PRODUCT_NEW}/${productId}`);
+            
+            // Remove the product from local state
+            setProducts(prev => prev.filter(p => p.id !== productId));
+            setFilteredProducts(prev => prev.filter(p => p.id !== productId));
+            
+            // If the deleted product was selected, clear selection and select another product if available
+            if (selectedProductId === productId) {
+              setSelectedProductId(null);
+              // Reset adjustment modal state and form fields
+              setShowAdjustModal(false);
+              setTotalQuantity("");
+              setAtPrice("");
+              setDescription("");
+              // Clear transactions for the deleted product
+              setTransactions([]);
+              // Select the first available product if there are any left
+              setFilteredProducts(prev => {
+                if (prev.length > 0) {
+                  setSelectedProductId(prev[0].id);
+                }
+                return prev;
+              });
+            }
+            
+            // Show success message
+            alert("Product deleted successfully!");
+          } catch (error) {
+            console.error("Error deleting product:", error);
+            alert("Failed to delete product. Please try again.");
+          }
+        }
         break;
       default:
         console.log('Unknown action:', action);
@@ -502,7 +539,9 @@ const ProductTransactions = () => {
                 <div className="add-item-container">
                   <button
                     className="add-item-btn"
-                    onClick={() => (window.location.href = "/add")}
+                    onClick={() => navigate('/products/add', { 
+                      state: { fromComponent: 'ProductTransactions' }
+                    })}
                   >
                     Add Item
                   </button>

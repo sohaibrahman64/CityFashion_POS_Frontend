@@ -6,8 +6,12 @@ import ProductCategorySelect from './ProductCategorySelect';
 import { GENERATE_BARCODE, SAVE_PRODUCT_NEW, UPDATE_PRODUCT_NEW, BASE_URL } from '../Constants';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const AddNewProductNew = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   // State for form fields
   const [productName, setProductName] = useState('');
   const [productHSN, setProductHSN] = useState('');
@@ -31,7 +35,7 @@ const AddNewProductNew = () => {
   const [atPrice, setAtPrice] = useState('');
   const [asOfDate, setAsOfDate] = useState('');
   const [minStock, setMinStock] = useState('');
-  const [location, setLocation] = useState('');
+  const [stockLocation, setStockLocation] = useState('');
 
   // Purchase and Tax state
   const [purchasePrice, setPurchasePrice] = useState('');
@@ -44,6 +48,7 @@ const AddNewProductNew = () => {
   const [filteredHsnCodes, setFilteredHsnCodes] = useState([]);
   const [hsnSearchTerm, setHsnSearchTerm] = useState('');
   const [hsnLoading, setHsnLoading] = useState(false);
+  const [showBackButton, setShowBackButton] = useState(false);
 
   // File input ref
   const fileInputRef = useRef(null);
@@ -73,7 +78,7 @@ const AddNewProductNew = () => {
         if (product.stock?.atPrice) setAtPrice(product.stock.atPrice.toString());
         if (product.stock?.asOfDate) setAsOfDate(product.stock.asOfDate);
         if (product.stock?.minStock) setMinStock(product.stock.minStock.toString());
-        if (product.stock?.location) setLocation(product.stock.location);
+        if (product.stock?.location) setStockLocation(product.stock.location);
         
         // Pre-fill purchase and tax fields if available
         if (product.purchasePrice) setPurchasePrice(product.purchasePrice.toString());
@@ -99,6 +104,43 @@ const AddNewProductNew = () => {
   // State to track if we're editing an existing product
   const [isEditing, setIsEditing] = useState(false);
   const [editingProductId, setEditingProductId] = useState(null);
+
+  // Determine if we should show back button based on navigation source
+  useEffect(() => {
+    // Check if we came from a specific component via navigation state
+    const shouldShowBack = location.state?.fromComponent && 
+                          location.state.fromComponent !== 'DynamicRoutes' && 
+                          location.state.fromComponent !== 'Sidebar';
+    
+    if (shouldShowBack) {
+      setShowBackButton(true);
+      return;
+    }
+    
+    // Check if we have a referrer (came from another page)
+    const referrer = document.referrer;
+    if (referrer && referrer !== '' && referrer !== window.location.href) {
+      // Only show back button if referrer is from our domain and not from main navigation
+      const referrerUrl = new URL(referrer);
+      const currentUrl = new URL(window.location.href);
+      
+      if (referrerUrl.origin === currentUrl.origin && 
+          !referrerUrl.pathname.includes('sidebar') && 
+          !referrerUrl.pathname.includes('dynamic')) {
+        setShowBackButton(true);
+      }
+    }
+  }, [location.state]);
+
+  // Handle back navigation
+  const handleBackNavigation = () => {
+    if (window.history.length > 1) {
+      navigate(-1); // Go back to previous page
+    } else {
+      // Fallback: navigate to a default route
+      navigate('/products');
+    }
+  };
 
   // Load HSN codes from Excel file
   const loadHSNCodes = async () => {
@@ -408,7 +450,7 @@ const handleSaveProduct = async () => {
           atPrice: parseFloat(atPrice) || 0,
           asOfDate,
           minStock: parseInt(minStock) || 0,
-          location: location.trim(),
+          location: stockLocation.trim(),
         },
         purchasePriceTaxes: {
           purchasePrice: parseFloat(purchasePrice) || 0,
@@ -485,7 +527,7 @@ const handleSaveProduct = async () => {
     setAtPrice('');
     setAsOfDate('');
     setMinStock('');
-    setLocation('');
+    setStockLocation('');
     
     // Reset purchase and tax
     setPurchasePrice('');
@@ -507,6 +549,15 @@ const handleSaveProduct = async () => {
     <div className="add-new-product-container">
       {/* Header */}
       <div className="product-header">
+        {showBackButton && (
+          <button 
+            className="back-button"
+            onClick={handleBackNavigation}
+            title="Go back"
+          >
+            ←
+          </button>
+        )}
         <h2 className="product-title">{isEditing ? 'Edit Product' : 'Add New Product'}</h2>
       </div>
 

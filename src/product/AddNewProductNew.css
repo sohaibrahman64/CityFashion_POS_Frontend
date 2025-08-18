@@ -7,9 +7,44 @@
 
 .product-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
+  gap: 15px;
+}
+
+.product-header:has(.back-button) {
+  /* When back button is present */
+}
+
+.product-header:not(:has(.back-button)) {
+  /* When no back button is present */
+  justify-content: center;
+}
+
+.back-button {
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background: #e0e0e0;
+  border-color: #ccc;
+  color: #333;
+  transform: scale(1.05);
+}
+
+.back-button:active {
+  transform: scale(0.95);
 }
 
 .product-title {

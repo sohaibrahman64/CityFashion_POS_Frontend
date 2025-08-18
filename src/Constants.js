@@ -12,6 +12,7 @@ export const GET_ALL_PRODUCTS_NEW = "api/products/getAllProductsNew";
 export const UPDATE_PRODUCT = "api/products/updateProduct";
 export const UPDATE_PRODUCT_NEW = "api/products/updateProductNew";
 export const DELETE_PRODUCT = "api/products/deleteProduct";
+export const DELETE_PRODUCT_NEW = "api/products/deleteProductNew";
 export const GET_ALL_PAYMENT_MODES = "api/payment-modes/getAllPaymentModes";
 export const GET_PRODUCT_BY_BARCODE = "api/products/getProductByBarcode";
 export const GET_INVENTORY_BY_BARCODE = "api/inventory/checkByBarcode";
