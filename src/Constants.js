@@ -9,6 +9,7 @@ export const SAVE_PRODUCT = "api/products/saveProduct";
 export const SAVE_PRODUCT_NEW = "api/products/saveProductNew";
 export const GET_ALL_PRODUCTS = "api/products/getAllProducts";
 export const GET_ALL_PRODUCTS_NEW = "api/products/getAllProductsNew";
+export const SEARCH_PRODUCTS_STARTS_WITH = "api/products/searchStartsWith";
 export const UPDATE_PRODUCT = "api/products/updateProduct";
 export const UPDATE_PRODUCT_NEW = "api/products/updateProductNew";
 export const DELETE_PRODUCT = "api/products/deleteProduct";

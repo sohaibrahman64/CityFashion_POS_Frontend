@@ -1,7 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Dashboard from "../dashboard/Dashboard";
-import NewSales from "../sales/NewSales";
+import NewSalesNew from "../sales/NewSalesNew";
 import PastSales from "../sales/PastSales";
 import AddNewProductNew from "../product/AddNewProductNew";
 import ProductList from "../product/ProductList";
@@ -36,7 +36,7 @@ import ProductTransactions from "../product/ProductTransactions";
 
 const routeComponentMap = {
   "/dashboard": <Dashboard />,
-  "/sales/new": <NewSales />,
+  "/sales/new": <NewSalesNew />,
   "/sales/history": <PastSales />,
   "/products/add": <AddNewProductNew />,
   "/products/transactions": <ProductTransactions />,
