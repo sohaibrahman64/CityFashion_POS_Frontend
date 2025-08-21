@@ -8,6 +8,7 @@ const NewSalesNew = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [activeRowIndex, setActiveRowIndex] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [itemInputs, setItemInputs] = useState([
     {
@@ -93,23 +94,37 @@ const NewSalesNew = () => {
     newItemInputs[index].itemName = value;
     setItemInputs(newItemInputs);
 
-    // Clear previous suggestions and update search term
+    // Set this row as active and update search term
+    setActiveRowIndex(index);
     setSuggestions([]);
     setShowSuggestions(false);
     setSearchTerm(value);
   };
 
   const handleProductSelect = (product, index) => {
-    const newItemInputs = [...itemInputs];
-    newItemInputs[index] = {
-      ...newItemInputs[index],
-      itemName: product.productName || product.name,
+    // const newItemInputs = [...itemInputs];
+    // newItemInputs[index] = {
+    //   ...itemInputs[index],
+    //   itemName: product.name,
+    //   price: product.pricing.salePrice || "0.00",
+    //   quantity: "1",
+    //   discount: "0",
+    //   total: "0.00",
+    // };
+    itemInputs[index] = {
+      ...itemInputs[index],
+      itemName: product.name,
       price: product.pricing.salePrice || "0.00",
+      quantity: "1",
+      discount: "0",
+      total: "0.00",
     };
-    setItemInputs(newItemInputs);
+    setItemInputs(itemInputs);
+    console.log("itemInputs", itemInputs);
     setSelectedProduct(product);
     setShowSuggestions(false);
     setSearchTerm("");
+    setActiveRowIndex(null);
 
     // Calculate total for this row
     calculateRowTotal(index);
@@ -240,16 +255,17 @@ const NewSalesNew = () => {
                           type="text"
                           placeholder="Enter Item"
                           value={item.itemName}
-                          onChange={(e) =>
-                            handleItemNameChange(index, e.target.value)
-                          }
-                          onFocus={() => {
-                            if (item.itemName.trim()) {
-                              setSearchTerm(item.itemName);
+                          onChange={(e) => {
+                              handleItemNameChange(index, e.target.value);
                             }
-                          }}
+                          }
+                          // onFocus={() => {
+                          //   if (item.itemName.trim()) {
+                          //     setSearchTerm(item.itemName);
+                          //   }
+                          // }}
                         />
-                        {showSuggestions && searchTerm.trim() && (
+                        {showSuggestions && searchTerm.trim() && activeRowIndex === index && (
                           <div
                             className="suggestions-dropdown"
                             ref={suggestionsRef}
