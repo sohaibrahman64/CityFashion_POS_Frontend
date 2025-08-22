@@ -538,7 +538,7 @@ const ProductTransactions = () => {
                 {/* Add Item button and dropdown */}
                 <div className="add-item-container">
                   <button
-                    className="add-item-btn"
+                    className="add-item-btn-product-transactions"
                     onClick={() => navigate('/products/add', { 
                       state: { fromComponent: 'ProductTransactions' }
                     })}

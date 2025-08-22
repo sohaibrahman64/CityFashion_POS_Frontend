@@ -78,7 +78,7 @@
 }
 
 /* Add Item button */
-.add-item-btn {
+.add-item-btn-product-transactions {
   background-color: #007bff;
   color: white;
   border: none;
@@ -91,7 +91,7 @@
   border-right: 1px solid #0056b3; /* Border between buttons */
 }
 
-.add-item-btn:hover {
+.add-item-btn-product-transactions:hover {
   background-color: #0056b3;
 }
 
