@@ -358,11 +358,14 @@
 .checkbox-group input[type="checkbox"] {
   width: 16px;
   height: 16px;
+  accent-color: #0a69b9;
+  cursor: pointer;
 }
 
 .checkbox-group label {
   font-size: 14px;
   color: #333;
+  cursor: pointer;
 }
 
 .summary-row {
