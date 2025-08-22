@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { BASE_URL, SEARCH_PRODUCTS_STARTS_WITH } from "../Constants";
+import { BASE_URL, SEARCH_PRODUCTS_STARTS_WITH, GET_ALL_PRODUCTS_NEW } from "../Constants";
 import "./NewSalesNew.css";
 
 const NewSalesNew = () => {
@@ -65,13 +65,23 @@ const NewSalesNew = () => {
     };
   }, [searchTerm]);
 
+  // Fetch all products when activeRowIndex changes (on focus)
+  useEffect(() => {
+    if (activeRowIndex !== null) {
+      fetchAllProducts();
+    }
+  }, [activeRowIndex]);
+
   const searchProducts = async (query) => {
     try {
-      const response = await fetch(
-        `${BASE_URL}/${SEARCH_PRODUCTS_STARTS_WITH}?searchTerm=${encodeURIComponent(
-          query
-        )}`
-      );
+      let url = `${BASE_URL}/${SEARCH_PRODUCTS_STARTS_WITH}`;
+      
+      // If query is provided, add it as search parameter
+      if (query && query.trim()) {
+        url += `?searchTerm=${encodeURIComponent(query)}`;
+      }
+      
+      const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
         console.log("data", data.products);
@@ -84,6 +94,26 @@ const NewSalesNew = () => {
       }
     } catch (error) {
       console.error("Error searching products:", error);
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const fetchAllProducts = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/${GET_ALL_PRODUCTS_NEW}`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log("All products data:", data.products);
+        setSuggestions(data.products);
+        setShowSuggestions(data.products.length > 0);
+      } else {
+        console.error("Failed to fetch all products");
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    } catch (error) {
+      console.error("Error fetching all products:", error);
       setSuggestions([]);
       setShowSuggestions(false);
     }
@@ -197,12 +227,7 @@ const NewSalesNew = () => {
       <div className="header-section">
         <div className="header-left">
           <span className="sale-label">Sale</span>
-          {/* <button className="switch-mode-btn">Switch to Full Mode</button> */}
         </div>
-        {/* <div className="header-right">
-          <span className="customer-support">Customer Support : (+91)-6364444752</span>
-          <span className="support-text">Get Instant Online Support</span>
-        </div> */}
       </div>
 
       {/* Main Content - Two Columns */}
@@ -259,13 +284,12 @@ const NewSalesNew = () => {
                               handleItemNameChange(index, e.target.value);
                             }
                           }
-                          // onFocus={() => {
-                          //   if (item.itemName.trim()) {
-                          //     setSearchTerm(item.itemName);
-                          //   }
-                          // }}
+                          onFocus={() => {
+                            setActiveRowIndex(index);
+                            //handleItemNameChange(index, "");
+                          }}
                         />
-                        {showSuggestions && searchTerm.trim() && activeRowIndex === index && (
+                        {showSuggestions && activeRowIndex === index && (
                           <div
                             className="suggestions-dropdown"
                             ref={suggestionsRef}
