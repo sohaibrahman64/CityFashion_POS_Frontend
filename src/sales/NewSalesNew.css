@@ -312,27 +312,41 @@
 
 .payment-row {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 20px;
+}
+
+.payment-label {
+  display: flex;
   align-items: center;
 }
 
-.payment-input {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.payment-input label {
+.payment-label label {
   font-weight: 600;
   color: #333;
   font-size: 14px;
+  white-space: nowrap;
 }
 
-.payment-input input {
+.payment-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.payment-controls input {
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  width: 150px;
+  width: 120px;
+}
+
+.balance-row {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
 }
 
 .checkbox-group {

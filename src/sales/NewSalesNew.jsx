@@ -10,6 +10,8 @@ const NewSalesNew = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeRowIndex, setActiveRowIndex] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [receivedAmount, setReceivedAmount] = useState("");
+  const [isFullyReceived, setIsFullyReceived] = useState(false);
   const [itemInputs, setItemInputs] = useState([
     {
       id: 1,
@@ -221,6 +223,17 @@ const NewSalesNew = () => {
     );
   };
 
+  const handleFullyReceivedChange = (checked) => {
+    setIsFullyReceived(checked);
+    if (checked) {
+      // When checkbox is checked, set received amount to sub total
+      setReceivedAmount(calculateSubTotal().toFixed(2));
+    } else {
+      // When checkbox is unchecked, clear the received amount
+      setReceivedAmount("");
+    }
+  };
+
     return (
     <div className="new-sales-container">
       {/* Header Section */}
@@ -373,24 +386,38 @@ const NewSalesNew = () => {
             </div>
 
             <div className="payment-section">
-              <div className="payment-row">
-                <div className="payment-input">
-                  <label>Received</label>
-                  <input type="number" placeholder="0.00" />
-                </div>
-                <div className="checkbox-group">
-                  <input type="checkbox" id="fullyReceived" />
-                  <label htmlFor="fullyReceived">Fully Received</label>
-                </div>
-              </div>
               <div className="summary-row">
                 <div className="summary-item">
                   <span>Sub Total</span>
                   <span>₹ {calculateSubTotal().toFixed(2)}</span>
                 </div>
+              </div>
+              <div className="payment-row">
+                <div className="payment-label">
+                  <label>Received</label>
+                </div>
+                <div className="payment-controls">
+                  <input 
+                    type="number" 
+                    placeholder="0.00" 
+                    value={receivedAmount}
+                    onChange={(e) => setReceivedAmount(e.target.value)}
+                  />
+                  <div className="checkbox-group">
+                    <input 
+                      type="checkbox" 
+                      id="fullyReceived" 
+                      checked={isFullyReceived}
+                      onChange={(e) => handleFullyReceivedChange(e.target.checked)}
+                    />
+                    <label htmlFor="fullyReceived">Fully Received</label>
+                  </div>
+                </div>
+              </div>
+              <div className="balance-row">
                 <div className="summary-item">
                   <span>Balance:</span>
-                  <span>₹ 0.00</span>
+                  <span>₹ {(calculateSubTotal() - parseFloat(receivedAmount || 0)).toFixed(2)}</span>
                 </div>
               </div>
             </div>
