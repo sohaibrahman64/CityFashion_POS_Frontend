@@ -221,7 +221,7 @@ const NewSalesNew = () => {
     );
   };
 
-  return (
+    return (
     <div className="new-sales-container">
       {/* Header Section */}
       <div className="header-section">
@@ -286,7 +286,6 @@ const NewSalesNew = () => {
                           }
                           onFocus={() => {
                             setActiveRowIndex(index);
-                            //handleItemNameChange(index, "");
                           }}
                         />
                         {showSuggestions && activeRowIndex === index && (
