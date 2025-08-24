@@ -234,6 +234,61 @@ const NewSalesNew = () => {
     }
   };
 
+  // Function to convert number to words
+  const numberToWords = (num) => {
+    if (num === 0) return "Zero";
+    
+    const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+    const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+    
+    const convertLessThanOneThousand = (n) => {
+      if (n === 0) return '';
+      
+      if (n < 10) return ones[n];
+      if (n < 20) return teens[n - 10];
+      if (n < 100) return tens[Math.floor(n / 10)] + (n % 10 !== 0 ? ' ' + ones[n % 10] : '');
+      if (n < 1000) return ones[Math.floor(n / 100)] + ' Hundred' + (n % 100 !== 0 ? ' ' + convertLessThanOneThousand(n % 100) : '');
+    };
+    
+    const convert = (n) => {
+      if (n === 0) return 'Zero';
+      
+      const crore = Math.floor(n / 10000000);
+      const lakh = Math.floor((n % 10000000) / 100000);
+      const thousand = Math.floor((n % 100000) / 1000);
+      const remainder = n % 1000;
+      
+      let result = '';
+      
+      if (crore > 0) {
+        result += convertLessThanOneThousand(crore) + ' Crore ';
+      }
+      if (lakh > 0) {
+        result += convertLessThanOneThousand(lakh) + ' Lakh ';
+      }
+      if (thousand > 0) {
+        result += convertLessThanOneThousand(thousand) + ' Thousand ';
+      }
+      if (remainder > 0) {
+        result += convertLessThanOneThousand(remainder);
+      }
+      
+      return result.trim();
+    };
+    
+    const rupees = Math.floor(num);
+    const paise = Math.round((num - rupees) * 100);
+    
+    let result = convert(rupees) + ' Rupees';
+    if (paise > 0) {
+      result += ' and ' + convert(paise) + ' Paisa';
+    }
+    result += ' Only';
+    
+    return result;
+  };
+
     return (
     <div className="new-sales-container">
       {/* Header Section */}
@@ -440,65 +495,124 @@ const NewSalesNew = () => {
               <div className="logo-placeholder">LOGO</div>
             </div>
 
+            <div className="header-separator"></div>
+
             <h2 className="invoice-title">Tax Invoice</h2>
 
             <div className="invoice-details">
-              <div className="bill-to">
-                <h4>Bill To:</h4>
-                <p>{customerName || "Customer Name"}</p>
-                <p>{customerPhone || "Phone Number"}</p>
+              <div className="details-header">
+                <div className="bill-to">
+                  <h4>Bill To</h4>
+                  <p>{customerName || "Customer Name"}</p>
+                  <p>{customerPhone || "Contact No."}</p>
+                </div>
+
+                <div className="invoice-info">
+                  <h4>Invoice Details</h4>
+                  <div className="info-row">
+                    <span>Invoice No.: 2</span>
+                  </div>
+                  <div className="info-row">
+                    <span>Date: 15-08-2025</span>
+                  </div>
+                </div>
               </div>
 
-              <div className="invoice-info">
-                <div className="info-row">
-                  <span>Invoice No.:</span>
-                  <span>2</span>
+              {/* Items Table - Only visible when items are selected */}
+              {itemInputs.some(item => item.itemName.trim() !== "") && (
+                <div className="invoice-items-table">
+                  <table className="items-preview-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Item Name</th>
+                        <th>HSN</th>
+                        <th>Qty</th>
+                        <th>Price/Unit</th>
+                        <th>Discount</th>
+                        <th>Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {itemInputs
+                        .filter(item => item.itemName.trim() !== "")
+                        .map((item, index) => (
+                          <tr key={item.id} className="item-preview-row">
+                            <td>{index + 1}</td>
+                            <td>{item.itemName}</td>
+                            <td>HSN Code</td>
+                            <td>{item.quantity || "0"}</td>
+                            <td>₹ {parseFloat(item.price || 0).toFixed(2)}</td>
+                            <td>
+                              ₹ {((parseFloat(item.price || 0) * parseFloat(item.quantity || 0) * parseFloat(item.discount || 0)) / 100).toFixed(2)}
+                              <span className="discount-percentage">({item.discount || 0}%)</span>
+                            </td>
+                            <td>₹ {parseFloat(item.total || 0).toFixed(2)}</td>
+                          </tr>
+                        ))}
+                      {/* Total Row */}
+                      <tr className="total-row">
+                        <td colSpan="3"><strong>Total</strong></td>
+                        <td><strong>{itemInputs.filter(item => item.itemName.trim() !== "").reduce((sum, item) => sum + parseFloat(item.quantity || 0), 0)}</strong></td>
+                        <td></td>
+                        <td><strong>₹ {itemInputs.filter(item => item.itemName.trim() !== "").reduce((sum, item) => sum + ((parseFloat(item.price || 0) * parseFloat(item.quantity || 0) * parseFloat(item.discount || 0)) / 100), 0).toFixed(2)}</strong></td>
+                        <td><strong>₹ {calculateSubTotal().toFixed(2)}</strong></td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
-                <div className="info-row">
-                  <span>Date:</span>
-                  <span>15-08-2025</span>
+              )}
+
+              {/* Two Column Layout Below Items Table */}
+              <div className="invoice-bottom-section">
+                <div className="left-column-content">
+                  <div className="amount-words">
+                    <p><strong>Invoice Amount in Words:</strong> {numberToWords(calculateSubTotal())}</p>
+                  </div>
+                  <div className="terms">
+                    <p><strong>Terms and Conditions</strong> Thanks for doing business with us!</p>
+                  </div>
+                </div>
+
+                <div className="right-column-content">
+                  <div className="summary-item">
+                    <span>Sub Total</span>
+                    <span>₹ {calculateSubTotal().toFixed(2)}</span>
+                  </div>
+                  <div className="summary-item">
+                    <span>Total</span>
+                    <span>₹ {calculateSubTotal().toFixed(2)}</span>
+                  </div>
+                  <div className="summary-item">
+                    <span>Received</span>
+                    <span>₹ {parseFloat(receivedAmount || 0).toFixed(2)}</span>
+                  </div>
+                  <div className="summary-item">
+                    <span>Balance</span>
+                    <span>₹ {(calculateSubTotal() - parseFloat(receivedAmount || 0)).toFixed(2)}</span>
+                  </div>
+                  <div className="summary-item">
+                    <span>You Saved</span>
+                    <span>₹ {itemInputs.filter(item => item.itemName.trim() !== "").reduce((sum, item) => sum + ((parseFloat(item.price || 0) * parseFloat(item.quantity || 0) * parseFloat(item.discount || 0)) / 100), 0).toFixed(2)}</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="amount-words">
-                <p>Invoice Amount in Words: Zero</p>
-              </div>
-
-              <div className="terms">
-                <p>Terms and Conditions</p>
-                <p>Thanks for doing business with us!</p>
-              </div>
-
-              <div className="invoice-summary">
-                <div className="summary-row">
-                  <span>Total</span>
-                  <span>₹ {calculateSubTotal().toFixed(2)}</span>
-                </div>
-                <div className="summary-row">
-                  <span>Received</span>
-                  <span>₹ 0.00</span>
-                </div>
-                <div className="summary-row">
-                  <span>Balance</span>
-                  <span>₹ 0.00</span>
+              <div className="invoice-footer">
+                <div className="company-signature">
+                  <p>For : My Company</p>
+                  <p>Authorized Signatory</p>
                 </div>
               </div>
             </div>
 
-            <div className="invoice-footer">
-              <div className="company-signature">
-                <p>For : My Company</p>
-                <p>Authorized Signatory</p>
+            <div className="action-buttons">
+              <button className="save-new-btn">Save & New</button>
+              <div className="action-icons">
+                <button className="icon-btn whatsapp">📱</button>
+                <button className="icon-btn print">🖨️</button>
+                <button className="icon-btn download">⬇️</button>
               </div>
-            </div>
-          </div>
-
-          <div className="action-buttons">
-            <button className="save-new-btn">Save & New</button>
-            <div className="action-icons">
-              <button className="icon-btn whatsapp">📱</button>
-              <button className="icon-btn print">🖨️</button>
-              <button className="icon-btn download">⬇️</button>
             </div>
           </div>
         </div>
