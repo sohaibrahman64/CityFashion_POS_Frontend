@@ -86,7 +86,6 @@ const NewSalesNew = () => {
       const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
-        console.log("data", data.products);
         setSuggestions(data.products);
         setShowSuggestions(data.products.length > 0);
       } else {
@@ -106,7 +105,6 @@ const NewSalesNew = () => {
       const response = await fetch(`${BASE_URL}/${GET_ALL_PRODUCTS_NEW}`);
       if (response.ok) {
         const data = await response.json();
-        console.log("All products data:", data.products);
         setSuggestions(data.products);
         setShowSuggestions(data.products.length > 0);
       } else {
@@ -134,15 +132,6 @@ const NewSalesNew = () => {
   };
 
   const handleProductSelect = (product, index) => {
-    // const newItemInputs = [...itemInputs];
-    // newItemInputs[index] = {
-    //   ...itemInputs[index],
-    //   itemName: product.name,
-    //   price: product.pricing.salePrice || "0.00",
-    //   quantity: "1",
-    //   discount: "0",
-    //   total: "0.00",
-    // };
     itemInputs[index] = {
       ...itemInputs[index],
       itemName: product.name,
@@ -152,7 +141,6 @@ const NewSalesNew = () => {
       total: "0.00",
     };
     setItemInputs(itemInputs);
-    console.log("itemInputs", itemInputs);
     setSelectedProduct(product);
     setShowSuggestions(false);
     setSearchTerm("");
@@ -232,6 +220,12 @@ const NewSalesNew = () => {
       // When checkbox is unchecked, clear the received amount
       setReceivedAmount("");
     }
+  };
+
+  // Function to format number with commas
+  const formatNumberWithCommas = (num) => {
+    if (num === null || num === undefined || isNaN(num)) return "0.00";
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
   // Function to convert number to words
@@ -444,7 +438,7 @@ const NewSalesNew = () => {
               <div className="summary-row">
                 <div className="summary-item">
                   <span>Sub Total</span>
-                  <span>₹ {calculateSubTotal().toFixed(2)}</span>
+                  <span>₹ {formatNumberWithCommas(calculateSubTotal().toFixed(2))}</span>
                 </div>
               </div>
               <div className="payment-row">
@@ -472,14 +466,14 @@ const NewSalesNew = () => {
               <div className="balance-row">
                 <div className="summary-item">
                   <span>Balance:</span>
-                  <span>₹ {(calculateSubTotal() - parseFloat(receivedAmount || 0)).toFixed(2)}</span>
+                  <span>₹ {formatNumberWithCommas((calculateSubTotal() - parseFloat(receivedAmount || 0)).toFixed(2))}</span>
                 </div>
               </div>
             </div>
 
             <div className="total-amount-bar">
               <span>Total Amount (₹)</span>
-              <span>{calculateSubTotal().toFixed(2)}</span>
+              <span>{formatNumberWithCommas(calculateSubTotal().toFixed(2))}</span>
             </div>
           </div>
         </div>
@@ -542,12 +536,12 @@ const NewSalesNew = () => {
                             <td>{item.itemName}</td>
                             <td>HSN Code</td>
                             <td>{item.quantity || "0"}</td>
-                            <td>₹ {parseFloat(item.price || 0).toFixed(2)}</td>
+                            <td>₹ {formatNumberWithCommas(parseFloat(item.price || 0).toFixed(2))}</td>
                             <td>
-                              ₹ {((parseFloat(item.price || 0) * parseFloat(item.quantity || 0) * parseFloat(item.discount || 0)) / 100).toFixed(2)}
+                              ₹ {formatNumberWithCommas(((parseFloat(item.price || 0) * parseFloat(item.quantity || 0) * parseFloat(item.discount || 0)) / 100).toFixed(2))}
                               <span className="discount-percentage">({item.discount || 0}%)</span>
                             </td>
-                            <td>₹ {parseFloat(item.total || 0).toFixed(2)}</td>
+                            <td>₹ {formatNumberWithCommas(parseFloat(item.total || 0).toFixed(2))}</td>
                           </tr>
                         ))}
                       {/* Total Row */}
@@ -555,8 +549,8 @@ const NewSalesNew = () => {
                         <td colSpan="3"><strong>Total</strong></td>
                         <td><strong>{itemInputs.filter(item => item.itemName.trim() !== "").reduce((sum, item) => sum + parseFloat(item.quantity || 0), 0)}</strong></td>
                         <td></td>
-                        <td><strong>₹ {itemInputs.filter(item => item.itemName.trim() !== "").reduce((sum, item) => sum + ((parseFloat(item.price || 0) * parseFloat(item.quantity || 0) * parseFloat(item.discount || 0)) / 100), 0).toFixed(2)}</strong></td>
-                        <td><strong>₹ {calculateSubTotal().toFixed(2)}</strong></td>
+                        <td><strong>₹ {formatNumberWithCommas(itemInputs.filter(item => item.itemName.trim() !== "").reduce((sum, item) => sum + ((parseFloat(item.price || 0) * parseFloat(item.quantity || 0) * parseFloat(item.discount || 0)) / 100), 0).toFixed(2))}</strong></td>
+                        <td><strong>₹ {formatNumberWithCommas(calculateSubTotal().toFixed(2))}</strong></td>
                       </tr>
                     </tbody>
                   </table>
@@ -577,23 +571,23 @@ const NewSalesNew = () => {
                 <div className="right-column-content">
                   <div className="summary-item">
                     <span>Sub Total</span>
-                    <span>₹ {calculateSubTotal().toFixed(2)}</span>
+                    <span>₹ {formatNumberWithCommas(calculateSubTotal().toFixed(2))}</span>
                   </div>
-                  <div className="summary-item">
-                    <span>Total</span>
-                    <span>₹ {calculateSubTotal().toFixed(2)}</span>
+                  <div className="summary-item no-border">
+                    <span className="total-label"><strong>Total</strong></span>
+                    <span>₹ {formatNumberWithCommas(calculateSubTotal().toFixed(2))}</span>
                   </div>
                   <div className="summary-item">
                     <span>Received</span>
-                    <span>₹ {parseFloat(receivedAmount || 0).toFixed(2)}</span>
+                    <span>₹ {formatNumberWithCommas(parseFloat(receivedAmount || 0).toFixed(2))}</span>
                   </div>
                   <div className="summary-item">
                     <span>Balance</span>
-                    <span>₹ {(calculateSubTotal() - parseFloat(receivedAmount || 0)).toFixed(2)}</span>
+                    <span>₹ {formatNumberWithCommas((calculateSubTotal() - parseFloat(receivedAmount || 0)).toFixed(2))}</span>
                   </div>
                   <div className="summary-item">
                     <span>You Saved</span>
-                    <span>₹ {itemInputs.filter(item => item.itemName.trim() !== "").reduce((sum, item) => sum + ((parseFloat(item.price || 0) * parseFloat(item.quantity || 0) * parseFloat(item.discount || 0)) / 100), 0).toFixed(2)}</span>
+                    <span>₹ {formatNumberWithCommas(itemInputs.filter(item => item.itemName.trim() !== "").reduce((sum, item) => sum + ((parseFloat(item.price || 0) * parseFloat(item.quantity || 0) * parseFloat(item.discount || 0)) / 100), 0).toFixed(2))}</span>
                   </div>
                 </div>
               </div>

@@ -544,14 +544,18 @@
 }
 
 .invoice-footer {
-  margin-top: 30px;
+  margin-top: 15px;
   text-align: center;
 }
 
 .company-signature p {
-  margin: 5px 0;
+  margin: 0;
   color: #666;
   font-size: 14px;
+}
+
+.company-signature p:first-child {
+  margin-bottom: 20px;
 }
 
 /* Action Buttons */
@@ -739,12 +743,22 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #eee;
+  padding: 3px 0;
+  border-bottom: 1px solid #000000;
 }
 
 .summary-item:last-child {
   border-bottom: none;
+}
+
+.summary-item.no-border {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.total-label {
+  font-weight: bold;
 }
 
 .summary-item span:first-child {
