@@ -3,6 +3,7 @@ import { BASE_URL, SEARCH_PRODUCTS_STARTS_WITH, GET_ALL_PRODUCTS_NEW } from "../
 import "./NewSalesNew.css";
 
 const NewSalesNew = () => {
+  const [isMobile, setIsMobile] = useState(false);
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -25,6 +26,19 @@ const NewSalesNew = () => {
 
   const suggestionsRef = useRef(null);
   const searchTimeoutRef = useRef(null);
+
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Close suggestions when clicking outside
   useEffect(() => {
@@ -283,8 +297,19 @@ const NewSalesNew = () => {
     return result;
   };
 
+    // Show mobile message if on mobile device
+    if (isMobile) {
+      return (
+        <div className="desktop-only-message">
+          <h2>Desktop Only Application</h2>
+          <p>This application is designed for desktop use only. Please access it from a computer or laptop.</p>
+          <p>Minimum screen width required: 769px</p>
+        </div>
+      );
+    }
+
     return (
-    <div className="new-sales-container">
+      <div className="new-sales-container">
       {/* Header Section */}
       <div className="header-section">
         <div className="header-left">
