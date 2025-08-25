@@ -563,7 +563,7 @@
 /* Action Buttons */
 .action-buttons {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   background-color: white;
   border-radius: 8px;
@@ -578,7 +578,7 @@
 }
 
 .save-new-btn {
-  background-color: #dc3545;
+  background-color: #0a69b9;
   color: white;
   border: none;
   padding: 12px 24px;
@@ -591,6 +591,7 @@
 .action-icons {
   display: flex;
   gap: 10px;
+  margin-left: auto;
 }
 
 .icon-btn {

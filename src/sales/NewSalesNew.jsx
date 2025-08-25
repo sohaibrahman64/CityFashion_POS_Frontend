@@ -212,7 +212,7 @@ const NewSalesNew = () => {
   };
 
   const removeRow = (index) => {
-    if (itemInputs.length > 1) {
+    if (itemInputs.length > 1 || index === 0) {
       const newItemInputs = itemInputs.filter((_, i) => i !== index);
       setItemInputs(newItemInputs);
     }
@@ -440,7 +440,7 @@ const NewSalesNew = () => {
                       </td>
                       <td className="cell">{item.total}</td>
                       <td className="cell">
-                        {itemInputs.length > 1 && (
+                        {(itemInputs.length > 1 || index === 0) && (
                           <button
                             className="remove-row-btn"
                             onClick={() => removeRow(index)}
