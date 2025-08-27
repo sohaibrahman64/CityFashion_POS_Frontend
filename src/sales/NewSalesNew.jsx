@@ -6,6 +6,8 @@ import {
   CREATE_NEW_SALES_INVOICE,
 } from "../Constants";
 import "./NewSalesNew.css";
+import Toast from "../components/Toast";
+import html2pdf from "html2pdf.js";
 
 const NewSalesNew = () => {
   const [isMobile, setIsMobile] = useState(false);
@@ -26,11 +28,16 @@ const NewSalesNew = () => {
       price: "",
       discount: "",
       total: "0.00",
+      productId: null,
     },
   ]);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
 
   const suggestionsRef = useRef(null);
   const searchTimeoutRef = useRef(null);
+  const invoicePreviewRef = useRef(null);
 
   // Check if device is mobile
   useEffect(() => {
@@ -93,6 +100,125 @@ const NewSalesNew = () => {
     }
   }, [activeRowIndex]);
 
+  const shareViaWhatsApp = () => {
+    try {
+      // Create a simple text message for WhatsApp
+      const message = `Invoice Details:
+Customer: ${customerName || 'N/A'}
+Total Amount: ₹${calculateSubTotal().toFixed(2)}
+Items: ${itemInputs.filter(item => item.itemName.trim() !== '').length} items
+Date: ${new Date().toLocaleDateString()}
+
+Thank you for your business!`;
+      
+      // Encode the message for WhatsApp
+      const encodedMessage = encodeURIComponent(message);
+      const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+      
+      // Open WhatsApp in a new window
+      window.open(whatsappUrl, '_blank');
+    } catch (error) {
+      console.error("Error sharing via WhatsApp:", error);
+      setToastMessage("Error sharing via WhatsApp. Please try again.");
+      setToastType("error");
+      setShowToast(true);
+    }
+  };
+
+  const printInvoice = () => {
+    if (!invoicePreviewRef.current) {
+      console.error("Invoice preview element not found");
+      return;
+    }
+
+    // Clone the invoice preview element to avoid modifying the original
+    const element = invoicePreviewRef.current.cloneNode(true);
+    
+    // Remove action buttons from print
+    const actionButtons = element.querySelector('.action-buttons');
+    if (actionButtons) {
+      actionButtons.remove();
+    }
+
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Print Invoice</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .invoice-preview { max-width: 800px; margin: 0 auto; }
+            table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; }
+            .invoice-header { text-align: center; margin-bottom: 20px; }
+            .invoice-title { text-align: center; color: #333; }
+            .invoice-details { margin: 20px 0; }
+            .summary-item { display: flex; justify-content: space-between; margin: 5px 0; }
+            .total-row { font-weight: bold; background-color: #f9f9f9; }
+            @media print {
+              body { margin: 0; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          ${element.outerHTML}
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  };
+
+  const generateAndDownloadPDF = async () => {
+    try {
+      if (!invoicePreviewRef.current) {
+        console.error("Invoice preview element not found");
+        return;
+      }
+
+      // Clone the invoice preview element to avoid modifying the original
+      const element = invoicePreviewRef.current.cloneNode(true);
+      
+      // Remove action buttons from PDF
+      const actionButtons = element.querySelector('.action-buttons');
+      if (actionButtons) {
+        actionButtons.remove();
+      }
+
+      // Configure PDF options
+      const opt = {
+        margin: [10, 10, 10, 10],
+        filename: `Invoice_${customerName || 'Customer'}_${new Date().toISOString().split('T')[0]}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          allowTaint: true
+        },
+        jsPDF: { 
+          unit: 'mm', 
+          format: 'a4', 
+          orientation: 'portrait' 
+        }
+      };
+
+      // Generate and download PDF
+      await html2pdf().set(opt).from(element).save();
+      
+      console.log("PDF generated and downloaded successfully");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      setToastMessage("Error generating PDF. Please try again.");
+      setToastType("error");
+      setShowToast(true);
+    }
+  };
+
   const searchProducts = async (query) => {
     try {
       let url = `${BASE_URL}/${SEARCH_PRODUCTS_STARTS_WITH}`;
@@ -153,12 +279,47 @@ const NewSalesNew = () => {
       if (response.ok) {
         const data = await response.json();
         console.log("Invoice created successfully:", data);
+        setToastMessage("Invoice created successfully!");
+        setToastType("success");
+        setShowToast(true);
+        
+        // Clear all form fields after successful invoice creation
+        setCustomerName("");
+        setCustomerPhone("");
+        setReceivedAmount("");
+        setIsFullyReceived(false);
+        setItemInputs([
+          {
+            id: 1,
+            itemName: "",
+            quantity: "",
+            price: "",
+            discount: "",
+            total: "0.00",
+            productId: null,
+          },
+        ]);
+        setSearchTerm("");
+        setSuggestions([]);
+        setShowSuggestions(false);
+        setActiveRowIndex(null);
+        setSelectedProduct(null);
+        
+        // Generate and download PDF after successful invoice creation
+        await generateAndDownloadPDF();
+        
         // Add any additional logic here, like redirecting to the invoice page
       } else {
         console.error("Failed to create invoice");
+        setToastMessage("Failed to create invoice. Please try again.");
+        setToastType("error");
+        setShowToast(true);
       }
     } catch (error) {
       console.error("Error creating invoice:", error);
+      setToastMessage("Error creating invoice. Please check your connection and try again.");
+      setToastType("error");
+      setShowToast(true);
     }
   };
 
@@ -201,6 +362,7 @@ const NewSalesNew = () => {
       quantity: "1",
       discount: "0",
       total: "0.00",
+      productId: product.id,
     };
     setItemInputs(itemInputs);
     setSelectedProduct(product);
@@ -255,6 +417,7 @@ const NewSalesNew = () => {
       price: "",
       discount: "",
       total: "0.00",
+      productId: null,
     };
     setItemInputs([...itemInputs, newRow]);
   };
@@ -609,7 +772,7 @@ const NewSalesNew = () => {
 
         {/* Right Column - Invoice Preview */}
         <div className="right-column">
-          <div className="invoice-preview">
+          <div className="invoice-preview" ref={invoicePreviewRef}>
             <div className="invoice-header">
               <div className="company-info">
                 <h3>My Company</h3>
@@ -831,14 +994,24 @@ const NewSalesNew = () => {
                 Save & New
               </button>
               <div className="action-icons">
-                <button className="icon-btn whatsapp">📱</button>
-                <button className="icon-btn print">🖨️</button>
-                <button className="icon-btn download">⬇️</button>
+                <button className="icon-btn whatsapp" onClick={shareViaWhatsApp}>📱</button>
+                <button className="icon-btn print" onClick={printInvoice}>🖨️</button>
+                <button className="icon-btn download" onClick={generateAndDownloadPDF}>⬇️</button>
               </div>
             </div>
           </div>
         </div>
       </div>
+      
+      {/* Toast Notification */}
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          duration={2000}
+          onClose={() => setShowToast(false)}
+        />
+      )}
     </div>
   );
 };

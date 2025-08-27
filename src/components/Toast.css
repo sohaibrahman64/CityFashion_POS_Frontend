@@ -1,0 +1,140 @@
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  min-width: 300px;
+  max-width: 400px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  overflow: hidden;
+  animation: slideInRight 0.3s ease-out;
+  border-left: 4px solid #4caf50;
+}
+
+.toast-success {
+  border-left-color: #4caf50;
+}
+
+.toast-error {
+  border-left-color: #f44336;
+}
+
+.toast-warning {
+  border-left-color: #ff9800;
+}
+
+.toast-info {
+  border-left-color: #2196f3;
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: white;
+}
+
+.toast-message {
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  margin-right: 12px;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.toast-close:hover {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.toast-progress {
+  height: 3px;
+  background: #f0f0f0;
+  overflow: hidden;
+}
+
+.toast-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50, #45a049);
+  transition: width 0.1s linear;
+}
+
+.toast-success .toast-progress-bar {
+  background: linear-gradient(90deg, #4caf50, #45a049);
+}
+
+.toast-error .toast-progress-bar {
+  background: linear-gradient(90deg, #f44336, #d32f2f);
+}
+
+.toast-warning .toast-progress-bar {
+  background: linear-gradient(90deg, #ff9800, #f57c00);
+}
+
+.toast-info .toast-progress-bar {
+  background: linear-gradient(90deg, #2196f3, #1976d2);
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.toast.hiding {
+  animation: slideOutRight 0.3s ease-in forwards;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .toast {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    min-width: auto;
+    max-width: none;
+  }
+  
+  .toast-content {
+    padding: 14px 16px;
+  }
+  
+  .toast-message {
+    font-size: 13px;
+  }
+}
