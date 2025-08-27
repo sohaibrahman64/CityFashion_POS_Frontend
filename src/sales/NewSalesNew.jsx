@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { BASE_URL, SEARCH_PRODUCTS_STARTS_WITH, GET_ALL_PRODUCTS_NEW } from "../Constants";
+import {
+  BASE_URL,
+  SEARCH_PRODUCTS_STARTS_WITH,
+  GET_ALL_PRODUCTS_NEW,
+  CREATE_NEW_SALES_INVOICE,
+} from "../Constants";
 import "./NewSalesNew.css";
 
 const NewSalesNew = () => {
@@ -33,11 +38,11 @@ const NewSalesNew = () => {
       const mobile = window.innerWidth <= 768;
       setIsMobile(mobile);
     };
-    
+
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   // Close suggestions when clicking outside
@@ -91,12 +96,12 @@ const NewSalesNew = () => {
   const searchProducts = async (query) => {
     try {
       let url = `${BASE_URL}/${SEARCH_PRODUCTS_STARTS_WITH}`;
-      
+
       // If query is provided, add it as search parameter
       if (query && query.trim()) {
         url += `?searchTerm=${encodeURIComponent(query)}`;
       }
-      
+
       const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
@@ -111,6 +116,49 @@ const NewSalesNew = () => {
       console.error("Error searching products:", error);
       setSuggestions([]);
       setShowSuggestions(false);
+    }
+  };
+
+  const handleSaveNew = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/${CREATE_NEW_SALES_INVOICE}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+          customerName: customerName,
+          customerPhone: customerPhone,
+          items: itemInputs,
+          receivedAmount: receivedAmount,
+          totalAmount: calculateSubTotal(),
+          balanceAmount:
+            calculateSubTotal() - parseFloat(receivedAmount || 0),
+          discountAmount:
+            itemInputs
+              .filter((item) => item.itemName.trim() !== "")
+              .reduce(
+                (sum, item) =>
+                  sum +
+                  (parseFloat(item.price || 0) *
+                    parseFloat(item.quantity || 0) *
+                    parseFloat(item.discount || 0)) /
+                    100,
+                0
+              ),
+          isFullyReceived: isFullyReceived,
+        }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Invoice created successfully:", data);
+        // Add any additional logic here, like redirecting to the invoice page
+      } else {
+        console.error("Failed to create invoice");
+      }
+    } catch (error) {
+      console.error("Error creating invoice:", error);
     }
   };
 
@@ -245,71 +293,115 @@ const NewSalesNew = () => {
   // Function to convert number to words
   const numberToWords = (num) => {
     if (num === 0) return "Zero";
-    
-    const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
-    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-    const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
-    
+
+    const ones = [
+      "",
+      "One",
+      "Two",
+      "Three",
+      "Four",
+      "Five",
+      "Six",
+      "Seven",
+      "Eight",
+      "Nine",
+    ];
+    const tens = [
+      "",
+      "",
+      "Twenty",
+      "Thirty",
+      "Forty",
+      "Fifty",
+      "Sixty",
+      "Seventy",
+      "Eighty",
+      "Ninety",
+    ];
+    const teens = [
+      "Ten",
+      "Eleven",
+      "Twelve",
+      "Thirteen",
+      "Fourteen",
+      "Fifteen",
+      "Sixteen",
+      "Seventeen",
+      "Eighteen",
+      "Nineteen",
+    ];
+
     const convertLessThanOneThousand = (n) => {
-      if (n === 0) return '';
-      
+      if (n === 0) return "";
+
       if (n < 10) return ones[n];
       if (n < 20) return teens[n - 10];
-      if (n < 100) return tens[Math.floor(n / 10)] + (n % 10 !== 0 ? ' ' + ones[n % 10] : '');
-      if (n < 1000) return ones[Math.floor(n / 100)] + ' Hundred' + (n % 100 !== 0 ? ' ' + convertLessThanOneThousand(n % 100) : '');
+      if (n < 100)
+        return (
+          tens[Math.floor(n / 10)] + (n % 10 !== 0 ? " " + ones[n % 10] : "")
+        );
+      if (n < 1000)
+        return (
+          ones[Math.floor(n / 100)] +
+          " Hundred" +
+          (n % 100 !== 0 ? " " + convertLessThanOneThousand(n % 100) : "")
+        );
     };
-    
+
     const convert = (n) => {
-      if (n === 0) return 'Zero';
-      
+      if (n === 0) return "Zero";
+
       const crore = Math.floor(n / 10000000);
       const lakh = Math.floor((n % 10000000) / 100000);
       const thousand = Math.floor((n % 100000) / 1000);
       const remainder = n % 1000;
-      
-      let result = '';
-      
+
+      let result = "";
+
       if (crore > 0) {
-        result += convertLessThanOneThousand(crore) + ' Crore ';
+        result += convertLessThanOneThousand(crore) + " Crore ";
       }
       if (lakh > 0) {
-        result += convertLessThanOneThousand(lakh) + ' Lakh ';
+        result += convertLessThanOneThousand(lakh) + " Lakh ";
       }
       if (thousand > 0) {
-        result += convertLessThanOneThousand(thousand) + ' Thousand ';
+        result += convertLessThanOneThousand(thousand) + " Thousand ";
       }
       if (remainder > 0) {
         result += convertLessThanOneThousand(remainder);
       }
-      
+
       return result.trim();
     };
-    
+
     const rupees = Math.floor(num);
     const paise = Math.round((num - rupees) * 100);
-    
-    let result = convert(rupees) + ' Rupees';
+
+    let result = convert(rupees) + " Rupees";
     if (paise > 0) {
-      result += ' and ' + convert(paise) + ' Paisa';
+      result += " and " + convert(paise) + " Paisa";
     }
-    result += ' Only';
-    
+    result += " Only";
+
     return result;
   };
 
-    // Show mobile message if on mobile device
-    if (isMobile) {
-      return (
-        <div className="desktop-only-message">
-          <h2>Desktop Only Application</h2>
-          <p>This application is designed for desktop use only. Please access it from a computer or laptop.</p>
-          <p>Minimum screen width required: 769px</p>
-        </div>
-      );
-    }
-
+  // Show mobile message if on mobile device
+  if (isMobile) {
     return (
-      <div className="new-sales-container">
+      <div className="desktop-only-message">
+        <h2>Desktop Only Application</h2>
+        <p>
+          This application is designed for desktop use only. Please access it
+          from a computer or laptop.
+        </p>
+        <p>Minimum screen width required: 769px</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="new-sales-container">
       {/* Header Section */}
       <div className="header-section">
         <div className="header-left">
@@ -368,9 +460,8 @@ const NewSalesNew = () => {
                           placeholder="Enter Item"
                           value={item.itemName}
                           onChange={(e) => {
-                              handleItemNameChange(index, e.target.value);
-                            }
-                          }
+                            handleItemNameChange(index, e.target.value);
+                          }}
                           onFocus={() => {
                             setActiveRowIndex(index);
                           }}
@@ -463,7 +554,9 @@ const NewSalesNew = () => {
               <div className="summary-row">
                 <div className="summary-item">
                   <span>Sub Total</span>
-                  <span>₹ {formatNumberWithCommas(calculateSubTotal().toFixed(2))}</span>
+                  <span>
+                    ₹ {formatNumberWithCommas(calculateSubTotal().toFixed(2))}
+                  </span>
                 </div>
               </div>
               <div className="payment-row">
@@ -471,18 +564,20 @@ const NewSalesNew = () => {
                   <label>Received</label>
                 </div>
                 <div className="payment-controls">
-                  <input 
-                    type="number" 
-                    placeholder="0.00" 
+                  <input
+                    type="number"
+                    placeholder="0.00"
                     value={receivedAmount}
                     onChange={(e) => setReceivedAmount(e.target.value)}
                   />
                   <div className="checkbox-group">
-                    <input 
-                      type="checkbox" 
-                      id="fullyReceived" 
+                    <input
+                      type="checkbox"
+                      id="fullyReceived"
                       checked={isFullyReceived}
-                      onChange={(e) => handleFullyReceivedChange(e.target.checked)}
+                      onChange={(e) =>
+                        handleFullyReceivedChange(e.target.checked)
+                      }
                     />
                     <label htmlFor="fullyReceived">Fully Received</label>
                   </div>
@@ -491,14 +586,23 @@ const NewSalesNew = () => {
               <div className="balance-row">
                 <div className="summary-item">
                   <span>Balance:</span>
-                  <span>₹ {formatNumberWithCommas((calculateSubTotal() - parseFloat(receivedAmount || 0)).toFixed(2))}</span>
+                  <span>
+                    ₹{" "}
+                    {formatNumberWithCommas(
+                      (
+                        calculateSubTotal() - parseFloat(receivedAmount || 0)
+                      ).toFixed(2)
+                    )}
+                  </span>
                 </div>
               </div>
             </div>
 
             <div className="total-amount-bar">
               <span>Total Amount (₹)</span>
-              <span>{formatNumberWithCommas(calculateSubTotal().toFixed(2))}</span>
+              <span>
+                {formatNumberWithCommas(calculateSubTotal().toFixed(2))}
+              </span>
             </div>
           </div>
         </div>
@@ -538,7 +642,7 @@ const NewSalesNew = () => {
               </div>
 
               {/* Items Table - Only visible when items are selected */}
-              {itemInputs.some(item => item.itemName.trim() !== "") && (
+              {itemInputs.some((item) => item.itemName.trim() !== "") && (
                 <div className="invoice-items-table">
                   <table className="items-preview-table">
                     <thead>
@@ -554,28 +658,85 @@ const NewSalesNew = () => {
                     </thead>
                     <tbody>
                       {itemInputs
-                        .filter(item => item.itemName.trim() !== "")
+                        .filter((item) => item.itemName.trim() !== "")
                         .map((item, index) => (
                           <tr key={item.id} className="item-preview-row">
                             <td>{index + 1}</td>
                             <td>{item.itemName}</td>
                             <td>HSN Code</td>
                             <td>{item.quantity || "0"}</td>
-                            <td>₹ {formatNumberWithCommas(parseFloat(item.price || 0).toFixed(2))}</td>
                             <td>
-                              ₹ {formatNumberWithCommas(((parseFloat(item.price || 0) * parseFloat(item.quantity || 0) * parseFloat(item.discount || 0)) / 100).toFixed(2))}
-                              <span className="discount-percentage">({item.discount || 0}%)</span>
+                              ₹{" "}
+                              {formatNumberWithCommas(
+                                parseFloat(item.price || 0).toFixed(2)
+                              )}
                             </td>
-                            <td>₹ {formatNumberWithCommas(parseFloat(item.total || 0).toFixed(2))}</td>
+                            <td>
+                              ₹{" "}
+                              {formatNumberWithCommas(
+                                (
+                                  (parseFloat(item.price || 0) *
+                                    parseFloat(item.quantity || 0) *
+                                    parseFloat(item.discount || 0)) /
+                                  100
+                                ).toFixed(2)
+                              )}
+                              <span className="discount-percentage">
+                                ({item.discount || 0}%)
+                              </span>
+                            </td>
+                            <td>
+                              ₹{" "}
+                              {formatNumberWithCommas(
+                                parseFloat(item.total || 0).toFixed(2)
+                              )}
+                            </td>
                           </tr>
                         ))}
                       {/* Total Row */}
                       <tr className="total-row">
-                        <td colSpan="3"><strong>Total</strong></td>
-                        <td><strong>{itemInputs.filter(item => item.itemName.trim() !== "").reduce((sum, item) => sum + parseFloat(item.quantity || 0), 0)}</strong></td>
+                        <td colSpan="3">
+                          <strong>Total</strong>
+                        </td>
+                        <td>
+                          <strong>
+                            {itemInputs
+                              .filter((item) => item.itemName.trim() !== "")
+                              .reduce(
+                                (sum, item) =>
+                                  sum + parseFloat(item.quantity || 0),
+                                0
+                              )}
+                          </strong>
+                        </td>
                         <td></td>
-                        <td><strong>₹ {formatNumberWithCommas(itemInputs.filter(item => item.itemName.trim() !== "").reduce((sum, item) => sum + ((parseFloat(item.price || 0) * parseFloat(item.quantity || 0) * parseFloat(item.discount || 0)) / 100), 0).toFixed(2))}</strong></td>
-                        <td><strong>₹ {formatNumberWithCommas(calculateSubTotal().toFixed(2))}</strong></td>
+                        <td>
+                          <strong>
+                            ₹{" "}
+                            {formatNumberWithCommas(
+                              itemInputs
+                                .filter((item) => item.itemName.trim() !== "")
+                                .reduce(
+                                  (sum, item) =>
+                                    sum +
+                                    (parseFloat(item.price || 0) *
+                                      parseFloat(item.quantity || 0) *
+                                      parseFloat(item.discount || 0)) /
+                                      100,
+                                  0
+                                )
+                                .toFixed(2)
+                            )}
+                          </strong>
+                        </td>
+                        <td>
+                          <strong>
+                            ₹{" "}
+                            {formatNumberWithCommas(
+                              calculateSubTotal().toFixed(2)
+                            )}
+                          </strong>
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -586,33 +747,73 @@ const NewSalesNew = () => {
               <div className="invoice-bottom-section">
                 <div className="left-column-content">
                   <div className="amount-words">
-                    <p><strong>Invoice Amount in Words:</strong> {numberToWords(calculateSubTotal())}</p>
+                    <p>
+                      <strong>Invoice Amount in Words:</strong>{" "}
+                      {numberToWords(calculateSubTotal())}
+                    </p>
                   </div>
                   <div className="terms">
-                    <p><strong>Terms and Conditions</strong> Thanks for doing business with us!</p>
+                    <p>
+                      <strong>Terms and Conditions</strong> Thanks for doing
+                      business with us!
+                    </p>
                   </div>
                 </div>
 
                 <div className="right-column-content">
                   <div className="summary-item">
                     <span>Sub Total</span>
-                    <span>₹ {formatNumberWithCommas(calculateSubTotal().toFixed(2))}</span>
+                    <span>
+                      ₹ {formatNumberWithCommas(calculateSubTotal().toFixed(2))}
+                    </span>
                   </div>
                   <div className="summary-item no-border">
-                    <span className="total-label"><strong>Total</strong></span>
-                    <span>₹ {formatNumberWithCommas(calculateSubTotal().toFixed(2))}</span>
+                    <span className="total-label">
+                      <strong>Total</strong>
+                    </span>
+                    <span>
+                      ₹ {formatNumberWithCommas(calculateSubTotal().toFixed(2))}
+                    </span>
                   </div>
                   <div className="summary-item">
                     <span>Received</span>
-                    <span>₹ {formatNumberWithCommas(parseFloat(receivedAmount || 0).toFixed(2))}</span>
+                    <span>
+                      ₹{" "}
+                      {formatNumberWithCommas(
+                        parseFloat(receivedAmount || 0).toFixed(2)
+                      )}
+                    </span>
                   </div>
                   <div className="summary-item">
                     <span>Balance</span>
-                    <span>₹ {formatNumberWithCommas((calculateSubTotal() - parseFloat(receivedAmount || 0)).toFixed(2))}</span>
+                    <span>
+                      ₹{" "}
+                      {formatNumberWithCommas(
+                        (
+                          calculateSubTotal() - parseFloat(receivedAmount || 0)
+                        ).toFixed(2)
+                      )}
+                    </span>
                   </div>
                   <div className="summary-item">
                     <span>You Saved</span>
-                    <span>₹ {formatNumberWithCommas(itemInputs.filter(item => item.itemName.trim() !== "").reduce((sum, item) => sum + ((parseFloat(item.price || 0) * parseFloat(item.quantity || 0) * parseFloat(item.discount || 0)) / 100), 0).toFixed(2))}</span>
+                    <span>
+                      ₹{" "}
+                      {formatNumberWithCommas(
+                        itemInputs
+                          .filter((item) => item.itemName.trim() !== "")
+                          .reduce(
+                            (sum, item) =>
+                              sum +
+                              (parseFloat(item.price || 0) *
+                                parseFloat(item.quantity || 0) *
+                                parseFloat(item.discount || 0)) /
+                                100,
+                            0
+                          )
+                          .toFixed(2)
+                      )}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -626,7 +827,9 @@ const NewSalesNew = () => {
             </div>
 
             <div className="action-buttons">
-              <button className="save-new-btn">Save & New</button>
+              <button className="save-new-btn" onClick={handleSaveNew}>
+                Save & New
+              </button>
               <div className="action-icons">
                 <button className="icon-btn whatsapp">📱</button>
                 <button className="icon-btn print">🖨️</button>
@@ -637,7 +840,7 @@ const NewSalesNew = () => {
         </div>
       </div>
     </div>
-    );
-  };
-  
-  export default NewSalesNew;
+  );
+};
+
+export default NewSalesNew;

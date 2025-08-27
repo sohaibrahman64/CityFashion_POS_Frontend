@@ -21,6 +21,7 @@ export const SEARCH_CUSTOMER = "api/customers/searchByName";
 export const ADD_CUSTOMER = 'api/customers/saveCustomer';
 export const GENERATE_INVOICE_NUMBER = "api/invoice/generateInvoiceNumber";
 export const CREATE_INVOICE = "api/invoice/createInvoice";
+export const CREATE_NEW_SALES_INVOICE = "api/new-sales-invoice/create";
 export const SHOP_NAME = "RetailStack";
 export const SHOP_ADDRESS = "Shop no.40, Gr.floor, Amba complex, below Cafe Peter, Opp: Wonderland, M.G.Road, PUNE 411048";
 export const GET_PAST_INVOICES = "api/invoice/getPastInvoices";
