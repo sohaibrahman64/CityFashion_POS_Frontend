@@ -20,6 +20,7 @@ export const GET_INVENTORY_BY_BARCODE = "api/inventory/checkByBarcode";
 export const SEARCH_CUSTOMER = "api/customers/searchByName";
 export const ADD_CUSTOMER = 'api/customers/saveCustomer';
 export const GENERATE_INVOICE_NUMBER = "api/invoice/generateInvoiceNumber";
+export const GENERATE_INVOICE_NUMBER_NEW_SALES_INVOICE = "api/new-sales-invoice/invoice-number";
 export const CREATE_INVOICE = "api/invoice/createInvoice";
 export const CREATE_NEW_SALES_INVOICE = "api/new-sales-invoice/create";
 export const SHOP_NAME = "RetailStack";

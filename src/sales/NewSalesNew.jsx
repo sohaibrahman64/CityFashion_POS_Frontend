@@ -4,6 +4,7 @@ import {
   SEARCH_PRODUCTS_STARTS_WITH,
   GET_ALL_PRODUCTS_NEW,
   CREATE_NEW_SALES_INVOICE,
+  GENERATE_INVOICE_NUMBER_NEW_SALES_INVOICE, 
 } from "../Constants";
 import "./NewSalesNew.css";
 import Toast from "../components/Toast";
@@ -34,6 +35,7 @@ const NewSalesNew = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("success");
+  const [invoiceNumber, setInvoiceNumber] = useState(0);
 
   const suggestionsRef = useRef(null);
   const searchTimeoutRef = useRef(null);
@@ -99,6 +101,11 @@ const NewSalesNew = () => {
       fetchAllProducts();
     }
   }, [activeRowIndex]);
+
+  // Fetch invoice number when component mounts
+  useEffect(() => {
+    fetchInvoiceNumber();
+  }, []);
 
   const shareViaWhatsApp = () => {
     try {
@@ -305,6 +312,9 @@ Thank you for your business!`;
         setActiveRowIndex(null);
         setSelectedProduct(null);
         
+        // Increment invoice number for next invoice
+        setInvoiceNumber(prevNumber => prevNumber + 1);
+        
         // Generate and download PDF after successful invoice creation
         await generateAndDownloadPDF();
         
@@ -320,6 +330,23 @@ Thank you for your business!`;
       setToastMessage("Error creating invoice. Please check your connection and try again.");
       setToastType("error");
       setShowToast(true);
+    }
+  };
+
+  const fetchInvoiceNumber = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/${GENERATE_INVOICE_NUMBER_NEW_SALES_INVOICE}`);
+      console.log(response.body);
+      if (response.ok) {
+        const data = await response.json();
+        setInvoiceNumber(data.invoiceNumber || 0);
+      } else {
+        console.error("Failed to fetch invoice number");
+        setInvoiceNumber(0);
+      }
+    } catch (error) {
+      console.error("Error fetching invoice number:", error);
+      setInvoiceNumber(0);
     }
   };
 
@@ -339,7 +366,7 @@ Thank you for your business!`;
       console.error("Error fetching all products:", error);
       setSuggestions([]);
       setShowSuggestions(false);
-    }
+      }
   };
 
   const handleItemNameChange = (index, value) => {
@@ -796,10 +823,10 @@ Thank you for your business!`;
                 <div className="invoice-info">
                   <h4>Invoice Details</h4>
                   <div className="info-row">
-                    <span>Invoice No.: 2</span>
+                    <span>Invoice No.: {invoiceNumber}</span>
                   </div>
                   <div className="info-row">
-                    <span>Date: 15-08-2025</span>
+                    <span>Date: {new Date().toLocaleDateString('en-GB')}</span>
                   </div>
                 </div>
               </div>
