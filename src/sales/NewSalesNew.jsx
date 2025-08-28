@@ -304,6 +304,7 @@ Thank you for your business!`;
             discount: "",
             total: "0.00",
             productId: null,
+            hsnCode: null,
           },
         ]);
         setSearchTerm("");
@@ -405,6 +406,7 @@ Thank you for your business!`;
   };
 
   const handleProductSelect = (product, index) => {
+    console.log(product);
     itemInputs[index] = {
       ...itemInputs[index],
       itemName: product.name,
@@ -413,6 +415,7 @@ Thank you for your business!`;
       discount: "0",
       total: "0.00",
       productId: product.id,
+      hsnCode: product.hsn,
     };
     setItemInputs(itemInputs);
     setSelectedProduct(product);
@@ -468,6 +471,7 @@ Thank you for your business!`;
       discount: "",
       total: "0.00",
       productId: null,
+      hsnCode: null,
     };
     setItemInputs([...itemInputs, newRow]);
   };
@@ -862,7 +866,7 @@ Thank you for your business!`;
                       <tr>
                         <th>#</th>
                         <th>Item Name</th>
-                        <th>HSN</th>
+                        <th>HSN Code</th>
                         <th>Qty</th>
                         <th>Price/Unit</th>
                         <th>Discount</th>
@@ -876,7 +880,7 @@ Thank you for your business!`;
                           <tr key={item.id} className="item-preview-row">
                             <td>{index + 1}</td>
                             <td>{item.itemName}</td>
-                            <td>HSN Code</td>
+                            <td>{item.hsnCode || "N/A"}</td>
                             <td>{item.quantity || "0"}</td>
                             <td>
                               ₹{" "}
