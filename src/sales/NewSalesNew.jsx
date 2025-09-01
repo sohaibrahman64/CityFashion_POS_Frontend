@@ -4,7 +4,8 @@ import {
   SEARCH_PRODUCTS_STARTS_WITH,
   GET_ALL_PRODUCTS_NEW,
   CREATE_NEW_SALES_INVOICE,
-  GENERATE_INVOICE_NUMBER_NEW_SALES_INVOICE, 
+  GENERATE_INVOICE_NUMBER_NEW_SALES_INVOICE,
+  CREATE_PRODUCT_TRANSACTION,
 } from "../Constants";
 import "./NewSalesNew.css";
 import Toast from "../components/Toast";
@@ -290,6 +291,9 @@ Thank you for your business!`;
         setToastType("success");
         setShowToast(true);
         
+        // Create product transactions for all items sold
+        await createProductTransactions(data);
+        
         // Clear all form fields after successful invoice creation
         setCustomerName("");
         setCustomerPhone("");
@@ -355,6 +359,57 @@ Thank you for your business!`;
     
     // Default fallback
     return "RS-00001";
+  };
+
+  const createProductTransactions = async (invoiceData) => {
+    try {
+      // Filter out empty items and create transactions for each product sold
+      const validItems = itemInputs.filter(item => 
+        item.itemName.trim() !== "" && item.productId && item.quantity && item.price
+      );
+
+      if (validItems.length === 0) {
+        console.log("No valid items to create transactions for");
+        return;
+      }
+
+      const transactions = validItems.map(item => ({
+        productId: item.productId,
+        productName: item.itemName,
+        transactionType: "SALE",
+        referenceId: invoiceData.id || null, // Invoice ID from backend response
+        referenceType: "SALES_INVOICE",
+        referenceNumber: invoiceNumber,
+        quantity: parseFloat(item.quantity),
+        unitPrice: parseFloat(item.price),
+        totalValue: parseFloat(item.total),
+        description: `Sale of ${item.quantity} units of ${item.itemName} at ₹${item.price} per unit`,
+        transactionDate: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        createdBy: "SYSTEM", // You can replace this with actual user info if available
+        notes: `Invoice: ${invoiceNumber}, Customer: ${customerName}`,
+        status: "COMPLETED"
+      }));
+
+      const response = await fetch(`${BASE_URL}/${CREATE_PRODUCT_TRANSACTION}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(transactions),
+      });
+
+      if (response.ok) {
+        const transactionData = await response.json();
+        console.log("Product transactions created successfully:", transactionData);
+      } else {
+        console.error("Failed to create product transactions");
+        const errorText = await response.text();
+        console.error("Error response:", errorText);
+      }
+    } catch (error) {
+      console.error("Error creating product transactions:", error);
+    }
   };
 
   const fetchInvoiceNumber = async () => {

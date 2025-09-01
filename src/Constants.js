@@ -52,3 +52,4 @@ export const GET_PRODUCT_TRANSACTIONS = "api/product-transactions/product";
 export const GET_TRANSACTIONS_BY_DATE_RANGE = "api/product-transactions/date-range";
 export const GET_TRANSACTIONS_BY_TYPE = "api/product-transactions/type";
 export const CREATE_TRANSACTION = "api/product-transactions";
+export const CREATE_PRODUCT_TRANSACTION = "api/product-transactions/createTransaction";

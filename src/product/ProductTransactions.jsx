@@ -67,14 +67,21 @@ const ProductTransactions = () => {
     const type = transactionType.toUpperCase();
     
     // Positive transactions (add stock, sales returns, etc.)
-    if (type.includes("ADD") || type.includes("SALE_RETURN") || type.includes("PURCHASE")) {
+    // if (type.includes("ADD") || type.includes("SALE_RETURN") || type.includes("PURCHASE")) {
+    //   return "positive";
+    // }
+
+    if (type.includes("SALE") || type.includes("REDUCE_STOCK")) {
       return "positive";
     }
     
     // Negative transactions (reduce stock, sales, etc.)
-    if (type.includes("REDUCE") || type.includes("SALE") || type.includes("DAMAGE") || type.includes("LOSS")) {
-      return "negative";
-    }
+    // if (type.includes("REDUCE") || type.includes("SALE") || type.includes("DAMAGE") || type.includes("LOSS")) {
+    //   return "negative";
+    // }
+    if (type.includes("PURCHASE") || type.includes("SALE_RETURN") || type.includes("DAMAGE") || type.includes("LOSS")) {
+        return "negative";
+      }
     
     // Neutral transactions (transfers, adjustments, etc.)
     if (type.includes("TRANSFER") || type.includes("ADJUSTMENT") || type.includes("CORRECTION")) {
