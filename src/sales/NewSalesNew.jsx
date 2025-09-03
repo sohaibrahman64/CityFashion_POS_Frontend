@@ -31,8 +31,10 @@ const NewSalesNew = () => {
       quantity: "",
       price: "",
       discount: "",
+      discountAmount: "", // New field for discount amount
       total: "0.00",
       productId: null,
+      taxType: "With Tax", // New field for tax type
     },
   ]);
   const [showToast, setShowToast] = useState(false);
@@ -308,9 +310,11 @@ Thank you for your business!`;
             quantity: "",
             price: "",
             discount: "",
+            discountAmount: "",
             total: "0.00",
             productId: null,
             hsnCode: null,
+            taxType: "With Tax",
           },
         ]);
         setSearchTerm("");
@@ -470,6 +474,7 @@ Thank you for your business!`;
       price: product.pricing.salePrice || "0.00",
       quantity: "1",
       discount: "0",
+      discountAmount: "0.00",
       total: "0.00",
       productId: product.id,
       hsnCode: product.hsn,
@@ -501,8 +506,42 @@ Thank you for your business!`;
   const handleDiscountChange = (index, value) => {
     const newItemInputs = [...itemInputs];
     newItemInputs[index].discount = value;
+    
+    // Calculate discount amount from percentage
+    const price = parseFloat(newItemInputs[index].price) || 0;
+    const quantity = parseFloat(newItemInputs[index].quantity) || 0;
+    const discountPercent = parseFloat(value) || 0;
+    const discountAmount = (price * quantity * discountPercent) / 100;
+    newItemInputs[index].discountAmount = discountAmount.toFixed(2);
+    
     setItemInputs(newItemInputs);
     calculateRowTotal(index);
+  };
+
+  const handleDiscountAmountChange = (index, value) => {
+    const newItemInputs = [...itemInputs];
+    newItemInputs[index].discountAmount = value;
+    
+    // Calculate discount percentage from amount
+    const price = parseFloat(newItemInputs[index].price) || 0;
+    const quantity = parseFloat(newItemInputs[index].quantity) || 0;
+    const discountAmount = parseFloat(value) || 0;
+    
+    if (price > 0 && quantity > 0) {
+      const discountPercent = (discountAmount / (price * quantity)) * 100;
+      newItemInputs[index].discount = discountPercent.toFixed(2);
+    } else {
+      newItemInputs[index].discount = "0";
+    }
+    
+    setItemInputs(newItemInputs);
+    calculateRowTotal(index);
+  };
+
+  const handleTaxTypeChange = (index, value) => {
+    const newItemInputs = [...itemInputs];
+    newItemInputs[index].taxType = value;
+    setItemInputs(newItemInputs);
   };
 
   const calculateRowTotal = (index) => {
@@ -526,9 +565,11 @@ Thank you for your business!`;
       quantity: "",
       price: "",
       discount: "",
+      discountAmount: "",
       total: "0.00",
       productId: null,
       hsnCode: null,
+      taxType: "With Tax",
     };
     setItemInputs([...itemInputs, newRow]);
   };
@@ -717,14 +758,32 @@ Thank you for your business!`;
             </div>
 
             <div className="items-section">
-              <table className="items-table">
+              <table className="items-table-new-sales">
                 <thead>
                   <tr>
                     <th className="header-cell">#</th>
                     <th className="header-cell">ITEM</th>
                     <th className="header-cell">QTY</th>
-                    <th className="header-cell">PRICE</th>
-                    <th className="header-cell">DISCOUNT(%)</th>
+                    <th className="header-cell price-unit-header">
+                      <div className="price-unit-split">
+                        <div className="price-label">PRICE/UNIT</div>
+                        <div className="tax-type-select">
+                          <select className="header-tax-select">
+                            <option value="With Tax">With Tax</option>
+                            <option value="Without Tax">Without Tax</option>
+                          </select>
+                        </div>
+                      </div>
+                    </th>
+                    <th className="header-cell discount-header">
+                      <div className="discount-split">
+                        <div className="discount-label">DISCOUNT(%)</div>
+                        <div className="discount-sub-split">
+                          <div className="discount-percent-label">%</div>
+                          <div className="discount-amount-label">AMOUNT</div>
+                        </div>
+                      </div>
+                    </th>
                     <th className="header-cell">TOTAL</th>
                     <th className="header-cell">ACTION</th>
                   </tr>
@@ -788,7 +847,7 @@ Thank you for your business!`;
                           }
                         />
                       </td>
-                      <td className="cell">
+                      <td className="cell price-unit-cell">
                         <input
                           type="number"
                           placeholder="0.00"
@@ -796,17 +855,32 @@ Thank you for your business!`;
                           onChange={(e) =>
                             handlePriceChange(index, e.target.value)
                           }
+                          className="price-input"
                         />
                       </td>
-                      <td className="cell">
-                        <input
-                          type="number"
-                          placeholder="0"
-                          value={item.discount}
-                          onChange={(e) =>
-                            handleDiscountChange(index, e.target.value)
-                          }
-                        />
+                      <td className="cell discount-cell">
+                        <div className="discount-split">
+                          <div className="discount-sub-split">
+                            <input
+                              type="number"
+                              placeholder="0"
+                              value={item.discount}
+                              onChange={(e) =>
+                                handleDiscountChange(index, e.target.value)
+                              }
+                              className="discount-input"
+                            />
+                            <input
+                              type="number"
+                              placeholder="0.00"
+                              value={item.discountAmount}
+                              onChange={(e) =>
+                                handleDiscountAmountChange(index, e.target.value)
+                              }
+                              className="discount-amount-input"
+                            />
+                          </div>
+                        </div>
                       </td>
                       <td className="cell">{item.total}</td>
                       <td className="cell">

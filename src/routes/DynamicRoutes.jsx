@@ -2,6 +2,7 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Dashboard from "../dashboard/Dashboard";
 import NewSalesNew from "../sales/NewSalesNew";
+import NewSales from "../sales/NewSales";
 import PastSales from "../sales/PastSales";
 import AddNewProductNew from "../product/AddNewProductNew";
 import ProductList from "../product/ProductList";

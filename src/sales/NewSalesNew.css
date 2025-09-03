@@ -135,65 +135,70 @@
   overflow: auto;
 }
 
-.items-table {
+.items-table-new-sales {
   width: 100%;
   border-collapse: collapse;
 }
 
-.items-table thead {
+.items-table-new-sales thead {
   background-color: #f8f9fa;
 }
 
-.items-table th,
-.items-table td {
-  padding: 8px;
+.items-table-new-sales th,
+.items-table-new-sales td {
+  padding: 4px;
   text-align: center;
   border-right: 1px solid #ddd;
-  font-size: 12px;
+  font-size: 10px;
   vertical-align: middle;
 }
 
-.items-table th {
+.items-table-new-sales th {
   font-weight: 600;
-  color: #333;
-  padding: 12px 8px;
+  color: #0a69b9;
+  padding: 6px 4px;
+  font-size: 10px;
 }
 
-.items-table th:last-child,
-.items-table td:last-child {
+.items-table-new-sales th:last-child,
+.items-table-new-sales td:last-child {
   border-right: none;
 }
 
-.items-table tbody {
+.items-table-new-sales tbody {
   max-height: 300px;
   overflow-y: auto;
   overflow-x: auto;
 }
 
-.items-table tbody tr {
+.items-table-new-sales tbody tr {
   border-bottom: 1px solid #eee;
 }
 
-.items-table tbody tr:hover {
+.items-table-new-sales tbody tr:hover {
   background-color: #f8f9fa;
 }
 
 /* Item Name Cell with Auto-suggestion */
 .item-name-cell {
   position: relative;
-  min-width: 200px;
+  min-width: 180px;
 }
 
 .item-name-cell input {
   width: 100%;
   padding: 4px;
-  border: none;
+  border: 1px solid #ddd;
+  border-radius: 2px;
   text-align: left;
-  font-size: 12px;
+  font-size: 11px;
+  height: 24px;
+  box-sizing: border-box;
 }
 
 .item-name-cell input:focus {
   outline: none;
+  border-color: #007bff;
   background-color: #f0f8ff;
 }
 
@@ -282,25 +287,246 @@
 }
 
 /* Table Input Styling */
-.items-table .cell input {
+.items-table-new-sales .cell input {
   width: 100%;
-  padding: 4px;
-  border: none;
+  padding: 3px;
+  border: 1px solid #ddd;
+  border-radius: 2px;
   text-align: center;
-  font-size: 12px;
+  font-size: 11px;
+  height: 24px;
+  box-sizing: border-box;
 }
 
-.items-table .cell input:focus {
+.items-table-new-sales .cell input:focus {
   outline: none;
+  border-color: #007bff;
   background-color: #f0f8ff;
 }
 
-.items-table .cell input[type="number"] {
+.items-table-new-sales .cell input[type="number"] {
   text-align: center;
 }
 
-.items-table .cell input[type="text"] {
+.items-table-new-sales .cell input[type="text"] {
   text-align: left;
+}
+
+/* Column Width Constraints */
+.items-table-new-sales th:nth-child(1), /* # column */
+.items-table-new-sales td:nth-child(1) {
+  width: 30px;
+  max-width: 30px;
+  min-width: 30px;
+}
+
+.items-table-new-sales th:nth-child(2), /* ITEM column */
+.items-table-new-sales td:nth-child(2) {
+  width: 150px;
+  max-width: 150px;
+  min-width: 150px;
+}
+
+.items-table-new-sales th:nth-child(3), /* QTY column */
+.items-table-new-sales td:nth-child(3) {
+  width: 60px;
+  max-width: 60px;
+  min-width: 60px;
+}
+
+.items-table-new-sales th:nth-child(5), /* DISCOUNT column */
+.items-table-new-sales td:nth-child(5) {
+  width: 80px;
+  max-width: 80px;
+  min-width: 80px;
+}
+
+.items-table-new-sales th:nth-child(6), /* TOTAL column */
+.items-table-new-sales td:nth-child(6) {
+  width: 80px;
+  max-width: 80px;
+  min-width: 80px;
+}
+
+.items-table-new-sales th:nth-child(7), /* ACTION column */
+.items-table-new-sales td:nth-child(7) {
+  width: 50px;
+  max-width: 50px;
+  min-width: 50px;
+}
+
+/* Price/Unit Split Layout */
+.price-unit-header {
+  min-width: 80px;
+  max-width: 80px;
+}
+
+/* Discount Split Layout */
+.discount-header {
+  min-width: 80px;
+  max-width: 80px;
+}
+
+.price-unit-split {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  height: 100%;
+}
+
+.price-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #0a69b9;
+  text-align: center;
+  padding: 2px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.header-tax-select {
+  width: 100%;
+  padding: 2px;
+  border: 1px solid #ddd;
+  border-radius: 2px;
+  font-size: 9px;
+  height: 20px;
+  background-color: white;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.header-tax-select:focus {
+  outline: none;
+  border-color: #007bff;
+  background-color: #f0f8ff;
+}
+
+.header-tax-select option {
+  font-size: 9px;
+  padding: 2px;
+}
+
+.price-unit-cell {
+  padding: 2px !important;
+  vertical-align: middle;
+  width: 80px;
+  max-width: 80px;
+}
+
+.price-input {
+  width: 100%;
+  padding: 3px;
+  border: 1px solid #ddd;
+  border-radius: 2px;
+  text-align: center;
+  font-size: 11px;
+  height: 24px;
+  box-sizing: border-box;
+}
+
+.price-input:focus {
+  outline: none;
+  border-color: #007bff;
+  background-color: #f0f8ff;
+}
+
+/* Discount Split Styling */
+.discount-split {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  height: 100%;
+}
+
+.discount-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #0a69b9;
+  text-align: center;
+  padding: 2px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.discount-sub-split {
+  display: flex;
+  flex-direction: row;
+  gap: 1px;
+}
+
+.discount-percent-label {
+  font-size: 8px;
+  font-weight: 500;
+  color: #666;
+  text-align: center;
+  padding: 1px 0;
+  flex: 1;
+  border-right: 1px solid #ddd;
+}
+
+.discount-amount-label {
+  font-size: 8px;
+  font-weight: 500;
+  color: #666;
+  text-align: center;
+  padding: 1px 0;
+  flex: 1;
+}
+
+.discount-cell {
+  padding: 2px !important;
+  vertical-align: middle;
+  width: 80px;
+  max-width: 80px;
+}
+
+.discount-cell .discount-split {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  height: 100%;
+}
+
+.discount-cell .discount-sub-split {
+  display: flex;
+  flex-direction: row;
+  gap: 1px;
+  height: 100%;
+}
+
+.discount-input {
+  flex: 1;
+  padding: 3px;
+  border: 1px solid #ddd;
+  border-radius: 2px;
+  text-align: center;
+  font-size: 11px;
+  height: 24px;
+  box-sizing: border-box;
+}
+
+.discount-input:focus {
+  outline: none;
+  border-color: #007bff;
+  background-color: #f0f8ff;
+}
+
+.discount-amount-input {
+  flex: 1;
+  padding: 3px;
+  border: 1px solid #ddd;
+  border-radius: 2px;
+  text-align: center;
+  font-size: 11px;
+  height: 24px;
+  background-color: white;
+  color: #333;
+  box-sizing: border-box;
+}
+
+.discount-amount-input:focus {
+  outline: none;
+  border-color: #007bff;
+  background-color: #f0f8ff;
 }
 
 .add-row-btn {
