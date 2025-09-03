@@ -64,10 +64,11 @@ const Sidebar = ({ roleId }) => {
   };
 
   const handleMenuItemClick = (item) => {
+    if (item.path) {
+      navigate(item.path);
+    }
     if (item.children?.length > 0) {
       toggleMenuItem(item.id);
-    } else if (item.path) {
-      navigate(item.path);
     }
   };
 

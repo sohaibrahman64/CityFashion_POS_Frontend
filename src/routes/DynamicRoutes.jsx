@@ -33,9 +33,11 @@ import AddSupplier from "../suppliers/AddSupplier";
 import SuppliersList from "../suppliers/SuppliersList";
 import BarcodeGenerator from "../settings/BarcodeGenerator";
 import ProductTransactions from "../product/ProductTransactions";
+import SalesDashboard from "../sales/SalesDashboard";
 
 const routeComponentMap = {
   "/dashboard": <Dashboard />,
+  "/sales": <SalesDashboard />,
   "/sales/new": <NewSalesNew />,
   "/sales/history": <PastSales />,
   "/products/add": <AddNewProductNew />,

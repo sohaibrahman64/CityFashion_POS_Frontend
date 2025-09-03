@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   BASE_URL,
   SEARCH_PRODUCTS_STARTS_WITH,
@@ -12,6 +13,7 @@ import Toast from "../components/Toast";
 import html2pdf from "html2pdf.js";
 
 const NewSalesNew = () => {
+  const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(false);
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -678,6 +680,11 @@ Thank you for your business!`;
       <div className="header-section">
         <div className="header-left">
           <span className="sale-label">Sale</span>
+        </div>
+        <div className="header-right">
+          <button className="back-btn" onClick={() => navigate('/sales')}>
+            ← Back
+          </button>
         </div>
       </div>
 
