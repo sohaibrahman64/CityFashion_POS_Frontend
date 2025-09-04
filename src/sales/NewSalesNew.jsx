@@ -7,6 +7,8 @@ import {
   CREATE_NEW_SALES_INVOICE,
   GENERATE_INVOICE_NUMBER_NEW_SALES_INVOICE,
   CREATE_PRODUCT_TRANSACTION,
+  GET_TAX_RATES,
+  GET_TAX_RATES_LABELS,
 } from "../Constants";
 import "./NewSalesNew.css";
 import Toast from "../components/Toast";
@@ -35,8 +37,11 @@ const NewSalesNew = () => {
       total: "0.00",
       productId: null,
       taxType: "With Tax", // New field for tax type
+      taxRateId: null, // New field for selected tax rate ID
+      taxAmount: "0.00", // New field for tax amount
     },
   ]);
+  const [taxRates, setTaxRates] = useState([]);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("success");
@@ -74,6 +79,26 @@ const NewSalesNew = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
+  }, []);
+
+  // Fetch tax rates on component mount
+  useEffect(() => {
+    const fetchTaxRates = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/${GET_TAX_RATES_LABELS}`);
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Tax rates labels:", data);
+          setTaxRates(data);
+        } else {
+          console.error("Failed to fetch tax rates");
+        }
+      } catch (error) {
+        console.error("Error fetching tax rates:", error);
+      }
+    };
+
+    fetchTaxRates();
   }, []);
 
   // Search products when search term changes
@@ -544,6 +569,26 @@ Thank you for your business!`;
     setItemInputs(newItemInputs);
   };
 
+  const handleTaxRateChange = (index, value) => {
+    const newItemInputs = [...itemInputs];
+    newItemInputs[index].taxRateId = value;
+    
+    // Extract tax rate percentage from the selected string (e.g., "GST 18%" -> 18)
+    const selectedTaxRate = taxRates[parseInt(value)];
+    if (selectedTaxRate) {
+      const rateMatch = selectedTaxRate.match(/(\d+(?:\.\d+)?)%/);
+      const rate = rateMatch ? parseFloat(rateMatch[1]) : 0;
+      
+      const price = parseFloat(newItemInputs[index].price) || 0;
+      const quantity = parseFloat(newItemInputs[index].quantity) || 0;
+      const subtotal = price * quantity;
+      const taxAmount = (subtotal * rate) / 100;
+      newItemInputs[index].taxAmount = taxAmount.toFixed(2);
+    }
+    
+    setItemInputs(newItemInputs);
+  };
+
   const calculateRowTotal = (index) => {
     const newItemInputs = [...itemInputs];
     const quantity = parseFloat(newItemInputs[index].quantity) || 0;
@@ -552,8 +597,19 @@ Thank you for your business!`;
 
     const subtotal = quantity * price;
     const discountAmount = (subtotal * discount) / 100;
-    const total = subtotal - discountAmount;
+    const afterDiscount = subtotal - discountAmount;
+    
+    // Calculate tax on the amount after discount
+    const selectedTaxRate = taxRates[parseInt(newItemInputs[index].taxRateId)];
+    let taxAmount = 0;
+    if (selectedTaxRate) {
+      const rateMatch = selectedTaxRate.match(/(\d+(?:\.\d+)?)%/);
+      const rate = rateMatch ? parseFloat(rateMatch[1]) : 0;
+      taxAmount = (afterDiscount * rate) / 100;
+    }
+    const total = afterDiscount + taxAmount;
 
+    newItemInputs[index].taxAmount = taxAmount.toFixed(2);
     newItemInputs[index].total = total.toFixed(2);
     setItemInputs(newItemInputs);
   };
@@ -570,6 +626,8 @@ Thank you for your business!`;
       productId: null,
       hsnCode: null,
       taxType: "With Tax",
+      taxRateId: null,
+      taxAmount: "0.00",
     };
     setItemInputs([...itemInputs, newRow]);
   };
@@ -784,6 +842,15 @@ Thank you for your business!`;
                         </div>
                       </div>
                     </th>
+                    <th className="header-cell tax-header">
+                      <div className="tax-split">
+                        <div className="tax-label">TAX</div>
+                        <div className="tax-sub-split">
+                          <div className="tax-percent-label">%</div>
+                          <div className="tax-amount-label">AMOUNT</div>
+                        </div>
+                      </div>
+                    </th>
                     <th className="header-cell">TOTAL</th>
                     <th className="header-cell">ACTION</th>
                   </tr>
@@ -878,6 +945,33 @@ Thank you for your business!`;
                                 handleDiscountAmountChange(index, e.target.value)
                               }
                               className="discount-amount-input"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td className="cell tax-cell">
+                        <div className="tax-split">
+                          <div className="tax-sub-split">
+                            <select
+                              value={item.taxRateId || ""}
+                              onChange={(e) =>
+                                handleTaxRateChange(index, e.target.value)
+                              }
+                              className="tax-select"
+                            >
+                              <option value="">Select Tax</option>
+                              {taxRates.map((taxRate, index) => (
+                                <option key={index} value={index}>
+                                  {taxRate}
+                                </option>
+                              ))}
+                            </select>
+                            <input
+                              type="text"
+                              placeholder="0.00"
+                              value={item.taxAmount}
+                              readOnly
+                              className="tax-amount-display"
                             />
                           </div>
                         </div>

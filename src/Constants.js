@@ -53,3 +53,5 @@ export const GET_TRANSACTIONS_BY_DATE_RANGE = "api/product-transactions/date-ran
 export const GET_TRANSACTIONS_BY_TYPE = "api/product-transactions/type";
 export const CREATE_TRANSACTION = "api/product-transactions";
 export const CREATE_PRODUCT_TRANSACTION = "api/product-transactions/createTransaction";
+export const GET_TAX_RATES = "api/tax-rates/getAllActiveTaxRates";
+export const GET_TAX_RATES_LABELS = "api/tax-rates/getAllActiveTaxRateLabels";

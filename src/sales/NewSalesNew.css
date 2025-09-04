@@ -182,7 +182,7 @@
 /* Item Name Cell with Auto-suggestion */
 .item-name-cell {
   position: relative;
-  min-width: 180px;
+  min-width: 100px;
 }
 
 .item-name-cell input {
@@ -207,7 +207,7 @@
   position: absolute;
   top: 100%;
   left: 0;
-  right: 0;
+  width: 200px;
   background: white;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -322,9 +322,9 @@
 
 .items-table-new-sales th:nth-child(2), /* ITEM column */
 .items-table-new-sales td:nth-child(2) {
-  width: 150px;
-  max-width: 150px;
-  min-width: 150px;
+  width: 100px;
+  max-width: 100px;
+  min-width: 100px;
 }
 
 .items-table-new-sales th:nth-child(3), /* QTY column */
@@ -341,15 +341,22 @@
   min-width: 80px;
 }
 
-.items-table-new-sales th:nth-child(6), /* TOTAL column */
+.items-table-new-sales th:nth-child(6), /* TAX column */
 .items-table-new-sales td:nth-child(6) {
   width: 80px;
   max-width: 80px;
   min-width: 80px;
 }
 
-.items-table-new-sales th:nth-child(7), /* ACTION column */
+.items-table-new-sales th:nth-child(7), /* TOTAL column */
 .items-table-new-sales td:nth-child(7) {
+  width: 80px;
+  max-width: 80px;
+  min-width: 80px;
+}
+
+.items-table-new-sales th:nth-child(8), /* ACTION column */
+.items-table-new-sales td:nth-child(8) {
   width: 50px;
   max-width: 50px;
   min-width: 50px;
@@ -363,6 +370,12 @@
 
 /* Discount Split Layout */
 .discount-header {
+  min-width: 80px;
+  max-width: 80px;
+}
+
+/* Tax Split Layout */
+.tax-header {
   min-width: 80px;
   max-width: 80px;
 }
@@ -527,6 +540,138 @@
   outline: none;
   border-color: #007bff;
   background-color: #f0f8ff;
+}
+
+/* Tax Split Styling */
+.tax-split {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  height: 100%;
+}
+
+.tax-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #0a69b9;
+  text-align: center;
+  padding: 2px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.tax-sub-split {
+  display: flex;
+  flex-direction: row;
+  gap: 1px;
+}
+
+.tax-percent-label {
+  font-size: 8px;
+  font-weight: 500;
+  color: #666;
+  text-align: center;
+  padding: 1px 0;
+  flex: 1;
+  border-right: 1px solid #ddd;
+}
+
+.tax-amount-label {
+  font-size: 8px;
+  font-weight: 500;
+  color: #666;
+  text-align: center;
+  padding: 1px 0;
+  flex: 1;
+}
+
+.tax-cell {
+  padding: 2px !important;
+  vertical-align: middle;
+  width: 80px;
+  max-width: 80px;
+}
+
+.tax-cell .tax-split {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  height: 100%;
+}
+
+.tax-cell .tax-sub-split {
+  display: flex;
+  flex-direction: row;
+  gap: 1px;
+  height: 100%;
+}
+
+.tax-input {
+  flex: 1;
+  padding: 3px;
+  border: 1px solid #ddd;
+  border-radius: 2px;
+  text-align: center;
+  font-size: 11px;
+  height: 24px;
+  box-sizing: border-box;
+}
+
+.tax-input:focus {
+  outline: none;
+  border-color: #007bff;
+  background-color: #f0f8ff;
+}
+
+.tax-amount-input {
+  flex: 1;
+  padding: 3px;
+  border: 1px solid #ddd;
+  border-radius: 2px;
+  text-align: center;
+  font-size: 11px;
+  height: 24px;
+  background-color: white;
+  color: #333;
+  box-sizing: border-box;
+}
+
+.tax-amount-input:focus {
+  outline: none;
+  border-color: #007bff;
+  background-color: #f0f8ff;
+}
+
+.tax-select {
+  flex: 1;
+  padding: 3px;
+  border: 1px solid #ddd;
+  border-radius: 2px;
+  text-align: center;
+  font-size: 11px;
+  height: 24px;
+  box-sizing: border-box;
+  background-color: white;
+  cursor: pointer;
+}
+
+.tax-select:focus {
+  outline: none;
+  border-color: #007bff;
+  background-color: #f0f8ff;
+}
+
+.tax-amount-display {
+  flex: 1;
+  padding: 3px;
+  border: 1px solid #ddd;
+  border-radius: 2px;
+  text-align: center;
+  font-size: 11px;
+  height: 24px;
+  background-color: #f8f9fa;
+  color: #333;
+  box-sizing: border-box;
+  cursor: not-allowed;
 }
 
 .add-row-btn {
