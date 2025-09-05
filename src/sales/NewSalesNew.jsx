@@ -852,13 +852,23 @@ Thank you for your business!`;
                       </div>
                     </th>
                     <th className="header-cell">TOTAL</th>
-                    <th className="header-cell">ACTION</th>
                   </tr>
                 </thead>
                 <tbody>
                   {itemInputs.map((item, index) => (
                     <tr key={item.id} className="item-row">
-                      <td className="cell">{item.id}</td>
+                      <td className="cell item-id-cell">
+                        <span className="item-id">{item.id}</span>
+                        {(itemInputs.length > 1 || index === 0) && (
+                          <button
+                            className="remove-row-btn"
+                            onClick={() => removeRow(index)}
+                            title="Remove Row"
+                          >
+                            ×
+                          </button>
+                        )}
+                      </td>
                       <td className="cell item-name-cell">
                         <input
                           type="text"
@@ -960,9 +970,9 @@ Thank you for your business!`;
                               className="tax-select"
                             >
                               <option value="">Select Tax</option>
-                              {taxRates.map((taxRate, index) => (
-                                <option key={index} value={index}>
-                                  {taxRate}
+                              {taxRates.map((taxRate, rateIndex) => (
+                                <option key={rateIndex} value={rateIndex}>
+                                  {item.taxRateId == rateIndex ? `✓ ${taxRate}` : taxRate}
                                 </option>
                               ))}
                             </select>
@@ -977,17 +987,6 @@ Thank you for your business!`;
                         </div>
                       </td>
                       <td className="cell">{item.total}</td>
-                      <td className="cell">
-                        {(itemInputs.length > 1 || index === 0) && (
-                          <button
-                            className="remove-row-btn"
-                            onClick={() => removeRow(index)}
-                            title="Remove Row"
-                          >
-                            ×
-                          </button>
-                        )}
-                      </td>
                     </tr>
                   ))}
                 </tbody>

@@ -264,7 +264,18 @@
   font-style: italic;
 }
 
-/* Remove Row Button */
+/* Item ID Cell with Hover Effect */
+.item-id-cell {
+  position: relative;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.item-id {
+  display: inline-block;
+  transition: opacity 0.2s ease;
+}
+
 .remove-row-btn {
   background-color: #dc3545;
   color: white;
@@ -275,15 +286,27 @@
   cursor: pointer;
   font-size: 16px;
   font-weight: bold;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.item-id-cell:hover .item-id {
+  opacity: 0;
+}
+
+.item-id-cell:hover .remove-row-btn {
+  display: flex;
 }
 
 .remove-row-btn:hover {
   background-color: #c82333;
-  transform: scale(1.1);
+  transform: translate(-50%, -50%) scale(1.1);
 }
 
 /* Table Input Styling */
@@ -343,9 +366,9 @@
 
 .items-table-new-sales th:nth-child(6), /* TAX column */
 .items-table-new-sales td:nth-child(6) {
-  width: 80px;
-  max-width: 80px;
-  min-width: 80px;
+  width: 120px;
+  max-width: 120px;
+  min-width: 120px;
 }
 
 .items-table-new-sales th:nth-child(7), /* TOTAL column */
@@ -353,13 +376,6 @@
   width: 80px;
   max-width: 80px;
   min-width: 80px;
-}
-
-.items-table-new-sales th:nth-child(8), /* ACTION column */
-.items-table-new-sales td:nth-child(8) {
-  width: 50px;
-  max-width: 50px;
-  min-width: 50px;
 }
 
 /* Price/Unit Split Layout */
@@ -376,8 +392,8 @@
 
 /* Tax Split Layout */
 .tax-header {
-  min-width: 80px;
-  max-width: 80px;
+  min-width: 120px;
+  max-width: 120px;
 }
 
 .price-unit-split {
@@ -562,7 +578,7 @@
 .tax-sub-split {
   display: flex;
   flex-direction: row;
-  gap: 1px;
+  gap: 2px;
 }
 
 .tax-percent-label {
@@ -587,8 +603,8 @@
 .tax-cell {
   padding: 2px !important;
   vertical-align: middle;
-  width: 80px;
-  max-width: 80px;
+  width: 120px;
+  max-width: 120px;
 }
 
 .tax-cell .tax-split {
@@ -642,22 +658,29 @@
 }
 
 .tax-select {
-  flex: 1;
+  flex: 0.7;
   padding: 3px;
   border: 1px solid #ddd;
   border-radius: 2px;
-  text-align: center;
+  text-align: left;
   font-size: 11px;
+  width: 70%;
   height: 24px;
   box-sizing: border-box;
   background-color: white;
   cursor: pointer;
+  padding-left: 6px;
 }
 
 .tax-select:focus {
   outline: none;
   border-color: #007bff;
   background-color: #f0f8ff;
+}
+
+.tax-select option {
+  text-align: left;
+  padding-left: 6px;
 }
 
 .tax-amount-display {
