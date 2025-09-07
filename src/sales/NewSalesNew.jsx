@@ -42,6 +42,7 @@ const NewSalesNew = () => {
     },
   ]);
   const [taxRates, setTaxRates] = useState([]);
+  const [headerTaxType, setHeaderTaxType] = useState("With Tax");
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("success");
@@ -85,10 +86,10 @@ const NewSalesNew = () => {
   useEffect(() => {
     const fetchTaxRates = async () => {
       try {
-        const response = await fetch(`${BASE_URL}/${GET_TAX_RATES_LABELS}`);
+        const response = await fetch(`${BASE_URL}/${GET_TAX_RATES}`);
         if (response.ok) {
           const data = await response.json();
-          console.log("Tax rates labels:", data);
+          console.log("Tax rates:", data);
           setTaxRates(data);
         } else {
           console.error("Failed to fetch tax rates");
@@ -493,16 +494,64 @@ Thank you for your business!`;
 
   const handleProductSelect = (product, index) => {
     console.log(product);
+    
+    // Calculate discount values based on product's discount type
+    let discount = "0";
+    let discountAmount = "0.00";
+    
+    if (product.pricing && product.pricing.discountAmount > 0) {
+      if (product.pricing.discountType === "PERCENTAGE") {
+        discount = product.pricing.discountAmount.toString();
+        // Calculate amount from percentage
+        const price = parseFloat(product.pricing.salePrice) || 0;
+        const quantity = 1; // Default quantity
+        discountAmount = ((price * quantity * product.pricing.discountAmount) / 100).toFixed(2);
+      } else if (product.pricing.discountType === "AMOUNT") {
+        discountAmount = product.pricing.discountAmount.toString();
+        // Calculate percentage from amount
+        const price = parseFloat(product.pricing.salePrice) || 0;
+        const quantity = 1; // Default quantity
+        if (price > 0 && quantity > 0) {
+          discount = ((product.pricing.discountAmount / (price * quantity)) * 100).toFixed(2);
+        }
+      }
+    }
+    
+    // Find matching tax rate
+    let taxRateId = null;
+    if (product.purchasePriceTaxes && product.purchasePriceTaxes.taxRate) {
+      const productTaxRate = product.purchasePriceTaxes.taxRate;
+      const matchingTaxRateIndex = taxRates.findIndex(rate => 
+        rate.id === productTaxRate.id || 
+        rate.label === productTaxRate.label ||
+        rate.rate === productTaxRate.rate
+      );
+      if (matchingTaxRateIndex !== -1) {
+        taxRateId = matchingTaxRateIndex.toString();
+      }
+    }
+    
+    // Calculate price based on tax type selection
+    let calculatedPrice = product.pricing.salePrice || 0;
+    
+    if (headerTaxType === "With Tax" && product.purchasePriceTaxes && product.purchasePriceTaxes.taxRate) {
+      // If "With Tax" is selected, calculate price including tax
+      const taxRate = product.purchasePriceTaxes.taxRate.rate || 0;
+      calculatedPrice = product.pricing.salePrice + (product.pricing.salePrice * taxRate / 100);
+    }
+    
     itemInputs[index] = {
       ...itemInputs[index],
       itemName: product.name,
-      price: product.pricing.salePrice || "0.00",
+      price: calculatedPrice.toFixed(2),
       quantity: "1",
-      discount: "0",
-      discountAmount: "0.00",
+      discount: discount,
+      discountAmount: discountAmount,
       total: "0.00",
       productId: product.id,
       hsnCode: product.hsn,
+      taxRateId: taxRateId,
+      taxAmount: "0.00",
     };
     setItemInputs(itemInputs);
     setSelectedProduct(product);
@@ -573,11 +622,10 @@ Thank you for your business!`;
     const newItemInputs = [...itemInputs];
     newItemInputs[index].taxRateId = value;
     
-    // Extract tax rate percentage from the selected string (e.g., "GST 18%" -> 18)
+    // Get the selected tax rate by array index
     const selectedTaxRate = taxRates[parseInt(value)];
     if (selectedTaxRate) {
-      const rateMatch = selectedTaxRate.match(/(\d+(?:\.\d+)?)%/);
-      const rate = rateMatch ? parseFloat(rateMatch[1]) : 0;
+      const rate = selectedTaxRate.rate || 0;
       
       const price = parseFloat(newItemInputs[index].price) || 0;
       const quantity = parseFloat(newItemInputs[index].quantity) || 0;
@@ -603,8 +651,7 @@ Thank you for your business!`;
     const selectedTaxRate = taxRates[parseInt(newItemInputs[index].taxRateId)];
     let taxAmount = 0;
     if (selectedTaxRate) {
-      const rateMatch = selectedTaxRate.match(/(\d+(?:\.\d+)?)%/);
-      const rate = rateMatch ? parseFloat(rateMatch[1]) : 0;
+      const rate = selectedTaxRate.rate || 0;
       taxAmount = (afterDiscount * rate) / 100;
     }
     const total = afterDiscount + taxAmount;
@@ -826,7 +873,11 @@ Thank you for your business!`;
                       <div className="price-unit-split">
                         <div className="price-label">PRICE/UNIT</div>
                         <div className="tax-type-select">
-                          <select className="header-tax-select">
+                          <select 
+                            className="header-tax-select"
+                            value={headerTaxType}
+                            onChange={(e) => setHeaderTaxType(e.target.value)}
+                          >
                             <option value="With Tax">With Tax</option>
                             <option value="Without Tax">Without Tax</option>
                           </select>
@@ -971,8 +1022,8 @@ Thank you for your business!`;
                             >
                               <option value="">Select Tax</option>
                               {taxRates.map((taxRate, rateIndex) => (
-                                <option key={rateIndex} value={rateIndex}>
-                                  {item.taxRateId == rateIndex ? `✓ ${taxRate}` : taxRate}
+                                <option key={taxRate.id} value={rateIndex}>
+                                  {item.taxRateId == rateIndex ? `✓ ${taxRate.label}` : taxRate.label}
                                 </option>
                               ))}
                             </select>

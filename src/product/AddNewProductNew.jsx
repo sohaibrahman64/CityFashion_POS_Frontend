@@ -3,7 +3,7 @@ import './AddNewProductNew.css';
 import ProductSelect from './ProductSelect';
 import UnitSelect from './UnitSelect';
 import ProductCategorySelect from './ProductCategorySelect';
-import { GENERATE_BARCODE, SAVE_PRODUCT_NEW, UPDATE_PRODUCT_NEW, BASE_URL } from '../Constants';
+import { GENERATE_BARCODE, SAVE_PRODUCT_NEW, UPDATE_PRODUCT_NEW, BASE_URL, GET_TAX_RATES } from '../Constants';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -40,7 +40,8 @@ const AddNewProductNew = () => {
   // Purchase and Tax state
   const [purchasePrice, setPurchasePrice] = useState('');
   const [purchasePriceType, setPurchasePriceType] = useState('without_tax');
-  const [selectedTax, setSelectedTax] = useState('none');
+  const [selectedTax, setSelectedTax] = useState('');
+  const [taxRates, setTaxRates] = useState([]);
 
   // HSN Modal state
   const [showHSNModal, setShowHSNModal] = useState(false);
@@ -131,6 +132,26 @@ const AddNewProductNew = () => {
       }
     }
   }, [location.state]);
+
+  // Fetch tax rates on component mount
+  useEffect(() => {
+    const fetchTaxRates = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/${GET_TAX_RATES}`);
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Tax rates:", data);
+          setTaxRates(data);
+        } else {
+          console.error("Failed to fetch tax rates");
+        }
+      } catch (error) {
+        console.error("Error fetching tax rates:", error);
+      }
+    };
+
+    fetchTaxRates();
+  }, []);
 
   // Handle back navigation
   const handleBackNavigation = () => {
@@ -455,9 +476,11 @@ const handleSaveProduct = async () => {
         purchasePriceTaxes: {
           purchasePrice: parseFloat(purchasePrice) || 0,
           purchasePriceType,
-          taxType: selectedTax,
+          taxRate: selectedTax ? taxRates.find(rate => rate.id == selectedTax) : null,
         },
       };
+
+      console.log("ProductData: ", productData)
   
       // Prepare FormData
       const formData = new FormData();
@@ -853,22 +876,12 @@ const handleSaveProduct = async () => {
               onChange={(e) => setSelectedTax(e.target.value)}
               className="taxes-select"
             >
-              <option value="none">None</option>
-              <option value="igst_0">IGST@0%</option>
-              <option value="gst_0">GST@0%</option>
-              <option value="igst_025">IGST@0.25%</option>
-              <option value="gst_025">GST@0.25%</option>
-              <option value="igst_3">IGST@3%</option>
-              <option value="gst_3">GST@3%</option>
-              <option value="igst_5">IGST@5%</option>
-              <option value="gst_5">GST@5%</option>
-              <option value="igst_12">IGST@12%</option>
-              <option value="gst_12">GST@12%</option>
-              <option value="igst_18">IGST@18%</option>
-              <option value="gst_18">GST@18%</option>
-              <option value="igst_28">IGST@28%</option>
-              <option value="gst_28">GST@28%</option>
-              <option value="exempt">Exempt</option>
+              <option value="">Select Tax</option>
+              {taxRates.map((taxRate, index) => (
+                <option key={taxRate.id} value={taxRate.id}>
+                  {selectedTax == taxRate.id ? `✓ ${taxRate.label}` : taxRate.label}
+                </option>
+              ))}
             </select>
           </div>
         </div>
