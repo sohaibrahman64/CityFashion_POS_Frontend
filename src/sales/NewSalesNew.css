@@ -204,18 +204,15 @@
 
 /* Auto-suggestion Dropdown */
 .suggestions-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 200px;
+  position: fixed;
   background: white;
   border: 1px solid #ddd;
   border-radius: 4px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px #0000001a;
   max-height: 200px;
   overflow-y: auto;
   z-index: 1000;
-  margin-top: 2px;
+  width: 200px;
 }
 
 .suggestion-item {
