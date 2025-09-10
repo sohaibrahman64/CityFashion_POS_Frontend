@@ -707,6 +707,7 @@ Thank you for your business!`;
         // Recalculate total based on new header tax selection
         let calculatedTotal = parseFloat(item.price) || 0;
         let calculatedTaxAmount = item.taxAmount || "0.00";
+        let updatedPrice = parseFloat(item.price) || 0;
         
         // If "Without Tax" is selected and product includes tax, add tax to total
         if (newTaxType === "Without Tax" && item.isProductWithTax) {
@@ -722,6 +723,22 @@ Thank you for your business!`;
             calculatedTaxAmount = ((afterDiscount * taxRate) / 100).toFixed(2);
           }
         }
+        // If "Without Tax" is selected and product doesn't include tax, show price minus tax
+        else if (newTaxType === "Without Tax" && !item.isProductWithTax) {
+          const quantity = parseFloat(item.quantity) || 1;
+          const subtotal = parseFloat(item.price) * quantity;
+          const discountAmount = parseFloat(item.discountAmount) || 0;
+          const afterDiscount = subtotal - discountAmount;
+          
+          // Get tax rate from the selected tax rate
+          if (item.taxRateId && taxRates[parseInt(item.taxRateId)]) {
+            const taxRate = taxRates[parseInt(item.taxRateId)].rate || 0;
+            // Calculate price without tax
+            updatedPrice = parseFloat(item.price) / (1 + taxRate / 100);
+            calculatedTotal = afterDiscount;
+            calculatedTaxAmount = ((afterDiscount * taxRate) / 100).toFixed(2);
+          }
+        }
         // If "With Tax" is selected, calculate total as Price - Discount (no separate tax calculation)
         else if (newTaxType === "With Tax") {
           const quantity = parseFloat(item.quantity) || 1;
@@ -733,6 +750,7 @@ Thank you for your business!`;
         
         return {
           ...item,
+          price: updatedPrice.toFixed(2),
           total: calculatedTotal.toFixed(2),
           taxAmount: calculatedTaxAmount
         };
