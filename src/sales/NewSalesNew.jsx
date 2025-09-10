@@ -549,12 +549,12 @@ Thank you for your business!`;
     if (product.pricing.salePriceType === "WITH_TAX") {
       calculatedPrice = product.pricing.salePrice || 0;
     } else if (headerTaxType === "With Tax" && product.purchasePriceTaxes && product.purchasePriceTaxes.taxRate) {
-      // If product's salePriceType is not "WITH_TAX" and "With Tax" is selected, calculate price including tax
+      // If product's salePriceType is "WITHOUT_TAX" and "With Tax" is selected, calculate price including tax
       const taxRate = product.purchasePriceTaxes.taxRate.rate || 0;
       calculatedPrice = product.pricing.salePrice + (product.pricing.salePrice * taxRate / 100);
     }
     
-    // Calculate total with tax if "Without Tax" is selected but product includes tax
+    // Calculate total based on header tax selection and product type
     let calculatedTotal = calculatedPrice;
     if (headerTaxType === "Without Tax" && product.pricing.salePriceType === "WITH_TAX") {
       // Add tax to the total when header is "Without Tax" but product includes tax
@@ -564,15 +564,33 @@ Thank you for your business!`;
       const discountAmountValue = parseFloat(discountAmount) || 0;
       const afterDiscount = subtotal - discountAmountValue;
       calculatedTotal = afterDiscount + (afterDiscount * taxRate / 100);
+    } else if (headerTaxType === "With Tax" && product.pricing.salePriceType === "WITHOUT_TAX") {
+      // Calculate total as Price - Discount when "With Tax" is selected and product is WITHOUT_TAX
+      const quantity = 1; // Default quantity
+      const subtotal = calculatedPrice * quantity;
+      const discountAmountValue = parseFloat(discountAmount) || 0;
+      calculatedTotal = subtotal - discountAmountValue;
     }
     
     // Check if product already includes tax
     const isProductWithTax = product.pricing.salePriceType === "WITH_TAX";
     
     // Calculate tax amount based on product configuration
-    let calculatedTaxAmount = "0.00";
+    //let calculatedTaxAmount = "0.00";
+    let calculatedTaxAmount = ((product.pricing.salePrice) * (product.purchasePriceTaxes.taxRate.rate || 0) / 100).toFixed(2);
     if (!isProductWithTax && product.purchasePriceTaxes && product.purchasePriceTaxes.taxRate) {
       // For products without tax, calculate tax amount
+      const taxRate = product.purchasePriceTaxes.taxRate.rate || 0;
+      const basePrice = parseFloat(product.pricing.salePrice) || 0;
+      const quantity = 1; // Default quantity
+      const subtotal = basePrice * quantity;
+      //const subtotal = (basePrice * quantity) + ((basePrice * taxRate) / 100).toFixed(2);
+      const discountAmountValue = parseFloat(discountAmount) || 0;
+      const afterDiscount = subtotal - discountAmountValue;
+      calculatedTaxAmount = ((afterDiscount * taxRate) / 100).toFixed(2);
+      //calculatedTaxAmount = afterDiscount;
+    } else if (headerTaxType === "With Tax" && product.pricing.salePriceType === "WITHOUT_TAX" && product.purchasePriceTaxes && product.purchasePriceTaxes.taxRate) {
+      // When "With Tax" is selected and product is WITHOUT_TAX, calculate tax amount
       const taxRate = product.purchasePriceTaxes.taxRate.rate || 0;
       const basePrice = parseFloat(product.pricing.salePrice) || 0;
       const quantity = 1; // Default quantity
@@ -743,7 +761,7 @@ Thank you for your business!`;
     if (newItemInputs[index].isProductWithTax) {
       // For products with tax included, total = subtotal - discount amount (no additional tax calculation)
       total = subtotal - discountAmount;
-      newItemInputs[index].taxAmount = "0.00"; // No additional tax
+      //newItemInputs[index].taxAmount = "0.00"; // No additional tax
     } else {
       // For products without tax, calculate tax on the amount after discount
       const selectedTaxRate = taxRates[parseInt(newItemInputs[index].taxRateId)];
@@ -751,10 +769,11 @@ Thank you for your business!`;
         const rate = selectedTaxRate.rate || 0;
         taxAmount = (afterDiscount * rate) / 100;
       }
-      total = afterDiscount + taxAmount;
-      newItemInputs[index].taxAmount = taxAmount.toFixed(2);
+      //total = afterDiscount + taxAmount;
+      total = afterDiscount;
     }
 
+    //newItemInputs[index].taxAmount = taxAmount.toFixed(2);
     newItemInputs[index].total = total.toFixed(2);
     setItemInputs(newItemInputs);
   };
