@@ -627,6 +627,25 @@ Thank you for your business!`;
   const handleQuantityChange = (index, value) => {
     const newItemInputs = [...itemInputs];
     newItemInputs[index].quantity = value;
+    
+    // Recalculate discount amount based on new quantity
+    const price = parseFloat(newItemInputs[index].price) || 0;
+    const quantity = parseFloat(value) || 0;
+    const discountPercent = parseFloat(newItemInputs[index].discount) || 0;
+    const discountAmount = (price * quantity * discountPercent) / 100;
+    newItemInputs[index].discountAmount = discountAmount.toFixed(2);
+    
+    // Recalculate tax amount based on new quantity
+    const selectedTaxRate = taxRates[parseInt(newItemInputs[index].taxRateId)];
+    if (selectedTaxRate) {
+      const rate = selectedTaxRate.rate || 0;
+      const subtotal = price * quantity;
+      const discountAmountValue = parseFloat(newItemInputs[index].discountAmount) || 0;
+      const afterDiscount = subtotal - discountAmountValue;
+      const taxAmount = (afterDiscount * rate) / 100;
+      newItemInputs[index].taxAmount = taxAmount.toFixed(2);
+    }
+    
     setItemInputs(newItemInputs);
     calculateRowTotal(index);
   };
@@ -723,7 +742,7 @@ Thank you for your business!`;
             calculatedTaxAmount = ((afterDiscount * taxRate) / 100).toFixed(2);
           }
         }
-        // If "Without Tax" is selected and product doesn't include tax, show price minus tax
+        // If "Without Tax" is selected and product doesn't include tax, show price with tax added
         else if (newTaxType === "Without Tax" && !item.isProductWithTax) {
           const quantity = parseFloat(item.quantity) || 1;
           const subtotal = parseFloat(item.price) * quantity;
@@ -733,9 +752,11 @@ Thank you for your business!`;
           // Get tax rate from the selected tax rate
           if (item.taxRateId && taxRates[parseInt(item.taxRateId)]) {
             const taxRate = taxRates[parseInt(item.taxRateId)].rate || 0;
-            // Calculate price without tax
-            updatedPrice = parseFloat(item.price) / (1 + taxRate / 100);
-            calculatedTotal = afterDiscount;
+            // Calculate price with tax added (original price + tax amount)
+            const taxAmount = (parseFloat(item.price) * taxRate) / 100;
+            //updatedPrice = parseFloat(item.price) + taxAmount;
+            updatedPrice = parseFloat(item.price);
+            calculatedTotal = afterDiscount + (afterDiscount * taxRate / 100);
             calculatedTaxAmount = ((afterDiscount * taxRate) / 100).toFixed(2);
           }
         }
