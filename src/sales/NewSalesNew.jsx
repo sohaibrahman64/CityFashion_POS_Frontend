@@ -32,6 +32,7 @@ const NewSalesNew = () => {
       itemName: "",
       quantity: "",
       price: "",
+      originalSalePrice: null, // New field for original sale price
       discount: "",
       discountAmount: "", // New field for discount amount
       total: "0.00",
@@ -336,6 +337,7 @@ Thank you for your business!`;
             itemName: "",
             quantity: "",
             price: "",
+            originalSalePrice: null,
             discount: "",
             discountAmount: "",
             total: "0.00",
@@ -552,7 +554,13 @@ Thank you for your business!`;
       // If product's salePriceType is "WITHOUT_TAX" and "With Tax" is selected, calculate price including tax
       const taxRate = product.purchasePriceTaxes.taxRate.rate || 0;
       calculatedPrice = product.pricing.salePrice + (product.pricing.salePrice * taxRate / 100);
-    }
+    }else if (headerTaxType === "Without Tax" && product.purchasePriceTaxes && product.purchasePriceTaxes.taxRate && product.pricing.salePriceType === "WITHOUT_TAX") {
+      calculatedPrice = product.pricing.salePrice;
+    } else if (headerTaxType === "Without Tax" && product.purchasePriceTaxes && product.purchasePriceTaxes.taxRate) {
+      // If "Without Tax" is selected, show price without tax in the input field
+      const taxRate = product.purchasePriceTaxes.taxRate.rate || 0;
+      calculatedPrice = product.pricing.salePrice - (product.pricing.salePrice * taxRate / 100);
+    } 
     
     // Calculate total based on header tax selection and product type
     let calculatedTotal = calculatedPrice;
@@ -564,6 +572,7 @@ Thank you for your business!`;
       const discountAmountValue = parseFloat(discountAmount) || 0;
       const afterDiscount = subtotal - discountAmountValue;
       calculatedTotal = afterDiscount + (afterDiscount * taxRate / 100);
+      calculatedPrice = product.pricing.salePrice - (product.pricing.salePrice * (taxRate / 100));
     } else if (headerTaxType === "With Tax" && product.pricing.salePriceType === "WITHOUT_TAX") {
       // Calculate total as Price - Discount when "With Tax" is selected and product is WITHOUT_TAX
       const quantity = 1; // Default quantity
@@ -604,6 +613,7 @@ Thank you for your business!`;
       ...itemInputs[index],
       itemName: product.name,
       price: calculatedPrice.toFixed(2),
+      originalSalePrice: product.pricing.salePrice, // Store original sale price for calculations
       quantity: "1",
       discount: discount,
       discountAmount: discountAmount,
@@ -786,10 +796,13 @@ Thank you for your business!`;
     const newItemInputs = [...itemInputs];
     const quantity = parseFloat(newItemInputs[index].quantity) || 0;
     const price = parseFloat(newItemInputs[index].price) || 0;
+    const originalSalePrice = parseFloat(newItemInputs[index].originalSalePrice) || price;
     const discount = parseFloat(newItemInputs[index].discount) || 0;
     const discountAmount = parseFloat(newItemInputs[index].discountAmount) || 0;
 
-    const subtotal = quantity * price;
+    // Use original sale price for calculations when "Without Tax" is selected
+    const calculationPrice = headerTaxType === "Without Tax" ? originalSalePrice : price;
+    const subtotal = quantity * calculationPrice;
     const calculatedDiscountAmount = (subtotal * discount) / 100;
     const afterDiscount = subtotal - calculatedDiscountAmount;
     
@@ -808,8 +821,8 @@ Thank you for your business!`;
         const rate = selectedTaxRate.rate || 0;
         taxAmount = (afterDiscount * rate) / 100;
       }
-      //total = afterDiscount + taxAmount;
-      total = afterDiscount;
+      total = afterDiscount + taxAmount;
+      //total = afterDiscount;
     }
 
     //newItemInputs[index].taxAmount = taxAmount.toFixed(2);
@@ -823,6 +836,7 @@ Thank you for your business!`;
       itemName: "",
       quantity: "",
       price: "",
+      originalSalePrice: null, // New field for original sale price
       discount: "",
       discountAmount: "",
       total: "0.00",
