@@ -49,10 +49,19 @@ const NewSalesNew = () => {
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("success");
   const [invoiceNumber, setInvoiceNumber] = useState("RS-00001");
+  const [companyName, setCompanyName] = useState("My Company");
+  const [companyPhone, setCompanyPhone] = useState("My Phone Number");
+  const [isEditingCompanyName, setIsEditingCompanyName] = useState(false);
+  const [isEditingCompanyPhone, setIsEditingCompanyPhone] = useState(false);
+  const [tempCompanyName, setTempCompanyName] = useState("My Company");
+  const [tempCompanyPhone, setTempCompanyPhone] = useState("My Phone Number");
+  const [logoImage, setLogoImage] = useState(null);
+  const [logoPreview, setLogoPreview] = useState(null);
 
   const suggestionsRef = useRef(null);
   const searchTimeoutRef = useRef(null);
   const invoicePreviewRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   // Check if device is mobile
   useEffect(() => {
@@ -881,6 +890,71 @@ Thank you for your business!`;
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
+  // Functions for inline editing company info
+  const handleCompanyNameClick = () => {
+    setIsEditingCompanyName(true);
+    setTempCompanyName(companyName);
+  };
+
+  const handleCompanyPhoneClick = () => {
+    setIsEditingCompanyPhone(true);
+    setTempCompanyPhone(companyPhone);
+  };
+
+  const handleCompanyNameKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      setCompanyName(tempCompanyName);
+      setIsEditingCompanyName(false);
+    } else if (e.key === 'Escape') {
+      setTempCompanyName(companyName);
+      setIsEditingCompanyName(false);
+    }
+  };
+
+  const handleCompanyPhoneKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      setCompanyPhone(tempCompanyPhone);
+      setIsEditingCompanyPhone(false);
+    } else if (e.key === 'Escape') {
+      setTempCompanyPhone(companyPhone);
+      setIsEditingCompanyPhone(false);
+    }
+  };
+
+  const handleCompanyNameBlur = () => {
+    setCompanyName(tempCompanyName);
+    setIsEditingCompanyName(false);
+  };
+
+  const handleCompanyPhoneBlur = () => {
+    setCompanyPhone(tempCompanyPhone);
+    setIsEditingCompanyPhone(false);
+  };
+
+  // Functions for logo upload
+  const handleLogoClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      setLogoImage(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setLogoPreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // Show error toast if file is not an image
+      setToastMessage("Please select a valid image file.");
+      setToastType("error");
+      setShowToast(true);
+    }
+  };
+
   // Function to convert number to words
   const numberToWords = (num) => {
     if (num === 0) return "Zero";
@@ -1290,10 +1364,55 @@ Thank you for your business!`;
           <div className="invoice-preview" ref={invoicePreviewRef}>
             <div className="invoice-header">
               <div className="company-info">
-                <h3>My Company</h3>
-                <p>9823430425</p>
+                {isEditingCompanyName ? (
+                  <input
+                    type="text"
+                    value={tempCompanyName}
+                    onChange={(e) => setTempCompanyName(e.target.value)}
+                    onKeyPress={handleCompanyNameKeyPress}
+                    onBlur={handleCompanyNameBlur}
+                    className="company-name-input"
+                    autoFocus
+                  />
+                ) : (
+                  <h3 onClick={handleCompanyNameClick}>{companyName}</h3>
+                )}
+                {isEditingCompanyPhone ? (
+                  <input
+                    type="text"
+                    value={tempCompanyPhone}
+                    onChange={(e) => setTempCompanyPhone(e.target.value)}
+                    onKeyPress={handleCompanyPhoneKeyPress}
+                    onBlur={handleCompanyPhoneBlur}
+                    className="company-phone-input"
+                    autoFocus
+                  />
+                ) : (
+                  <p onClick={handleCompanyPhoneClick}>{companyPhone}</p>
+                )}
               </div>
-              <div className="logo-placeholder">LOGO</div>
+              <div className="logo-placeholder" onClick={handleLogoClick}>
+                {logoPreview ? (
+                  <img src={logoPreview} alt="Company Logo" className="logo-image" />
+                ) : (
+                  <>
+                    <span className="logo-text">LOGO</span>
+                    <div className="logo-upload-overlay">
+                      <div className="upload-content">
+                        <span className="camera-icon">📷</span>
+                        <span className="upload-text">Upload Image</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  style={{ display: 'none' }}
+                />
+              </div>
             </div>
 
             <div className="header-separator"></div>
@@ -1498,7 +1617,7 @@ Thank you for your business!`;
 
               <div className="invoice-footer">
                 <div className="company-signature">
-                  <p>For : My Company</p>
+                  <p>For : {companyName}</p>
                   <p>Authorized Signatory</p>
                 </div>
               </div>
