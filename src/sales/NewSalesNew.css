@@ -231,6 +231,7 @@
   border-collapse: collapse;
   font-size: 12px;
   table-layout: auto;
+  border: none;
 }
 
 .suggestions-table thead th {
@@ -239,7 +240,7 @@
   text-align: left;
   font-weight: 600;
   color: #333;
-  /* border-bottom: 1px solid #ddd; */
+  border: none;
   font-size: 11px;
   width: 100%; /* Larger width for Add Item column */
 }
@@ -256,7 +257,7 @@
 
 .suggestions-table tbody td {
   padding: 8px 12px;
-  border-bottom: 1px solid #eee;
+  border: none;
   vertical-align: top;
   /* Width is defined individually for each column type */
 }
@@ -330,14 +331,14 @@
   font-weight: 600;
   text-align: left;
   width: 20%; /* Smaller width for price columns */
-  /* padding: 8px 12px; */
+  padding: 8px 12px;
 }
 
 .stock {
   text-align: left;
   color: #666;
   width: 20%; /* Smaller width for stock column */
-  /* padding: 8px 12px; */
+  padding: 8px 12px;
 }
 
 /* Item ID Cell with Hover Effect */
