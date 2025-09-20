@@ -89,11 +89,19 @@ const NewSalesNew = () => {
 
     const updateDropdownPosition = () => {
       // Update dropdown position when scrolling or resizing
-      if (showSuggestions && activeRowIndex !== null && suggestionsRef.current) {
-        const activeInput = document.querySelector(`input[data-row-index="${activeRowIndex}"]`);
+      if (
+        showSuggestions &&
+        activeRowIndex !== null &&
+        suggestionsRef.current
+      ) {
+        const activeInput = document.querySelector(
+          `input[data-row-index="${activeRowIndex}"]`
+        );
         if (activeInput) {
           const rect = activeInput.getBoundingClientRect();
-          suggestionsRef.current.style.top = `${rect.bottom + window.scrollY + 2}px`;
+          suggestionsRef.current.style.top = `${
+            rect.bottom + window.scrollY + 2
+          }px`;
           suggestionsRef.current.style.left = `${rect.left + window.scrollX}px`;
         }
       }
@@ -102,7 +110,7 @@ const NewSalesNew = () => {
     document.addEventListener("mousedown", handleClickOutside);
     window.addEventListener("scroll", updateDropdownPosition);
     window.addEventListener("resize", updateDropdownPosition);
-    
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       window.removeEventListener("scroll", updateDropdownPosition);
@@ -170,19 +178,19 @@ const NewSalesNew = () => {
     try {
       // Create a simple text message for WhatsApp
       const message = `Invoice Details:
-Customer: ${customerName || 'N/A'}
+Customer: ${customerName || "N/A"}
 Total Amount: ₹${calculateSubTotal().toFixed(2)}
-Items: ${itemInputs.filter(item => item.itemName.trim() !== '').length} items
+Items: ${itemInputs.filter((item) => item.itemName.trim() !== "").length} items
 Date: ${new Date().toLocaleDateString()}
 
 Thank you for your business!`;
-      
+
       // Encode the message for WhatsApp
       const encodedMessage = encodeURIComponent(message);
       const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
-      
+
       // Open WhatsApp in a new window
-      window.open(whatsappUrl, '_blank');
+      window.open(whatsappUrl, "_blank");
     } catch (error) {
       console.error("Error sharing via WhatsApp:", error);
       setToastMessage("Error sharing via WhatsApp. Please try again.");
@@ -199,15 +207,15 @@ Thank you for your business!`;
 
     // Clone the invoice preview element to avoid modifying the original
     const element = invoicePreviewRef.current.cloneNode(true);
-    
+
     // Remove action buttons from print
-    const actionButtons = element.querySelector('.action-buttons');
+    const actionButtons = element.querySelector(".action-buttons");
     if (actionButtons) {
       actionButtons.remove();
     }
 
     // Create a new window for printing
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
     printWindow.document.write(`
       <html>
         <head>
@@ -249,9 +257,9 @@ Thank you for your business!`;
 
       // Clone the invoice preview element to avoid modifying the original
       const element = invoicePreviewRef.current.cloneNode(true);
-      
+
       // Remove action buttons from PDF
-      const actionButtons = element.querySelector('.action-buttons');
+      const actionButtons = element.querySelector(".action-buttons");
       if (actionButtons) {
         actionButtons.remove();
       }
@@ -259,23 +267,25 @@ Thank you for your business!`;
       // Configure PDF options
       const opt = {
         margin: [10, 10, 10, 10],
-        filename: `Invoice_${customerName || 'Customer'}_${new Date().toISOString().split('T')[0]}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
+        filename: `Invoice_${customerName || "Customer"}_${
+          new Date().toISOString().split("T")[0]
+        }.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: {
           scale: 2,
           useCORS: true,
-          allowTaint: true
+          allowTaint: true,
         },
-        jsPDF: { 
-          unit: 'mm', 
-          format: 'a4', 
-          orientation: 'portrait' 
-        }
+        jsPDF: {
+          unit: "mm",
+          format: "a4",
+          orientation: "portrait",
+        },
       };
 
       // Generate and download PDF
       await html2pdf().set(opt).from(element).save();
-      
+
       console.log("PDF generated and downloaded successfully");
     } catch (error) {
       console.error("Error generating PDF:", error);
@@ -297,6 +307,7 @@ Thank you for your business!`;
       const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
+        console.log(data.products);
         setSuggestions(data.products);
         setShowSuggestions(data.products.length > 0);
       } else {
@@ -322,16 +333,19 @@ Thank you for your business!`;
     }
 
     // Check if at least one item is added with all required fields
-    const validItems = itemInputs.filter(item => 
-      item.itemName.trim() !== "" && 
-      item.quantity && 
-      item.price && 
-      parseFloat(item.quantity) > 0 && 
-      parseFloat(item.price) > 0
+    const validItems = itemInputs.filter(
+      (item) =>
+        item.itemName.trim() !== "" &&
+        item.quantity &&
+        item.price &&
+        parseFloat(item.quantity) > 0 &&
+        parseFloat(item.price) > 0
     );
 
     if (validItems.length === 0) {
-      setToastMessage("Please add at least one item with valid quantity and price.");
+      setToastMessage(
+        "Please add at least one item with valid quantity and price."
+      );
       setToastType("error");
       setShowToast(true);
       return false;
@@ -340,21 +354,21 @@ Thank you for your business!`;
     // Check each valid item for completeness
     for (let i = 0; i < validItems.length; i++) {
       const item = validItems[i];
-      
+
       if (!item.itemName.trim()) {
         setToastMessage(`Please enter item name for row ${i + 1}.`);
         setToastType("error");
         setShowToast(true);
         return false;
       }
-      
+
       if (!item.quantity || parseFloat(item.quantity) <= 0) {
         setToastMessage(`Please enter valid quantity for "${item.itemName}".`);
         setToastType("error");
         setShowToast(true);
         return false;
       }
-      
+
       if (!item.price || parseFloat(item.price) <= 0) {
         setToastMessage(`Please enter valid price for "${item.itemName}".`);
         setToastType("error");
@@ -385,20 +399,18 @@ Thank you for your business!`;
           items: itemInputs,
           receivedAmount: receivedAmount,
           totalAmount: calculateSubTotal(),
-          balanceAmount:
-            calculateSubTotal() - parseFloat(receivedAmount || 0),
-          discountAmount:
-            itemInputs
-              .filter((item) => item.itemName.trim() !== "")
-              .reduce(
-                (sum, item) =>
-                  sum +
-                  (parseFloat(item.price || 0) *
-                    parseFloat(item.quantity || 0) *
-                    parseFloat(item.discount || 0)) /
-                    100,
-                0
-              ),
+          balanceAmount: calculateSubTotal() - parseFloat(receivedAmount || 0),
+          discountAmount: itemInputs
+            .filter((item) => item.itemName.trim() !== "")
+            .reduce(
+              (sum, item) =>
+                sum +
+                (parseFloat(item.price || 0) *
+                  parseFloat(item.quantity || 0) *
+                  parseFloat(item.discount || 0)) /
+                  100,
+              0
+            ),
           isFullyReceived: isFullyReceived,
         }),
       });
@@ -408,10 +420,10 @@ Thank you for your business!`;
         setToastMessage("Invoice created successfully!");
         setToastType("success");
         setShowToast(true);
-        
+
         // Create product transactions for all items sold
         await createProductTransactions(data);
-        
+
         // Clear all form fields after successful invoice creation
         setCustomerName("");
         setCustomerPhone("");
@@ -437,13 +449,13 @@ Thank you for your business!`;
         setShowSuggestions(false);
         setActiveRowIndex(null);
         setSelectedProduct(null);
-        
+
         // Increment invoice number for next invoice
-        setInvoiceNumber(prevNumber => incrementInvoiceNumber(prevNumber));
-        
+        setInvoiceNumber((prevNumber) => incrementInvoiceNumber(prevNumber));
+
         // Generate and download PDF after successful invoice creation
         await generateAndDownloadPDF();
-        
+
         // Add any additional logic here, like redirecting to the invoice page
       } else {
         console.error("Failed to create invoice");
@@ -453,7 +465,9 @@ Thank you for your business!`;
       }
     } catch (error) {
       console.error("Error creating invoice:", error);
-      setToastMessage("Error creating invoice. Please check your connection and try again.");
+      setToastMessage(
+        "Error creating invoice. Please check your connection and try again."
+      );
       setToastType("error");
       setShowToast(true);
     }
@@ -462,22 +476,22 @@ Thank you for your business!`;
   const incrementInvoiceNumber = (currentInvoiceNumber) => {
     // Handle alphanumeric invoice numbers like "RS-00012"
     const match = currentInvoiceNumber.match(/^([A-Z]+)-(\d+)$/);
-    
+
     if (match) {
       const prefix = match[1]; // "RS"
       const numberPart = parseInt(match[2], 10); // 12
       const nextNumber = numberPart + 1;
-      
+
       // Format the number part with leading zeros (minimum 5 digits)
-      const formattedNumber = nextNumber.toString().padStart(5, '0');
+      const formattedNumber = nextNumber.toString().padStart(5, "0");
       return `${prefix}-${formattedNumber}`;
     }
-    
+
     // Fallback: if format doesn't match, just increment as number
     if (!isNaN(currentInvoiceNumber)) {
       return parseInt(currentInvoiceNumber, 10) + 1;
     }
-    
+
     // Default fallback
     return "RS-00001";
   };
@@ -485,8 +499,12 @@ Thank you for your business!`;
   const createProductTransactions = async (invoiceData) => {
     try {
       // Filter out empty items and create transactions for each product sold
-      const validItems = itemInputs.filter(item => 
-        item.itemName.trim() !== "" && item.productId && item.quantity && item.price
+      const validItems = itemInputs.filter(
+        (item) =>
+          item.itemName.trim() !== "" &&
+          item.productId &&
+          item.quantity &&
+          item.price
       );
 
       if (validItems.length === 0) {
@@ -494,7 +512,7 @@ Thank you for your business!`;
         return;
       }
 
-      const transactions = validItems.map(item => ({
+      const transactions = validItems.map((item) => ({
         productId: item.productId,
         productName: item.itemName,
         transactionType: "SALE",
@@ -509,20 +527,26 @@ Thank you for your business!`;
         createdAt: new Date().toISOString(),
         createdBy: "SYSTEM", // You can replace this with actual user info if available
         notes: `Invoice: ${invoiceNumber}, Customer: ${customerName}`,
-        status: "COMPLETED"
+        status: "COMPLETED",
       }));
 
-      const response = await fetch(`${BASE_URL}/${CREATE_PRODUCT_TRANSACTION}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(transactions),
-      });
+      const response = await fetch(
+        `${BASE_URL}/${CREATE_PRODUCT_TRANSACTION}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(transactions),
+        }
+      );
 
       if (response.ok) {
         const transactionData = await response.json();
-        console.log("Product transactions created successfully:", transactionData);
+        console.log(
+          "Product transactions created successfully:",
+          transactionData
+        );
       } else {
         console.error("Failed to create product transactions");
         const errorText = await response.text();
@@ -535,7 +559,9 @@ Thank you for your business!`;
 
   const fetchInvoiceNumber = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/${GENERATE_INVOICE_NUMBER_NEW_SALES_INVOICE}`);
+      const response = await fetch(
+        `${BASE_URL}/${GENERATE_INVOICE_NUMBER_NEW_SALES_INVOICE}`
+      );
       console.log(response.body);
       if (response.ok) {
         const data = await response.json();
@@ -555,6 +581,7 @@ Thank you for your business!`;
       const response = await fetch(`${BASE_URL}/${GET_ALL_PRODUCTS_NEW}`);
       if (response.ok) {
         const data = await response.json();
+        console.log(data.products);
         setSuggestions(data.products);
         setShowSuggestions(data.products.length > 0);
       } else {
@@ -566,7 +593,7 @@ Thank you for your business!`;
       console.error("Error fetching all products:", error);
       setSuggestions([]);
       setShowSuggestions(false);
-      }
+    }
   };
 
   const handleItemNameChange = (index, value) => {
@@ -579,13 +606,17 @@ Thank you for your business!`;
     setSuggestions([]);
     setShowSuggestions(false);
     setSearchTerm(value);
-    
+
     // Position the dropdown below the specific input field
     setTimeout(() => {
-      const activeInput = document.querySelector(`input[data-row-index="${index}"]`);
+      const activeInput = document.querySelector(
+        `input[data-row-index="${index}"]`
+      );
       if (activeInput && suggestionsRef.current) {
         const rect = activeInput.getBoundingClientRect();
-        suggestionsRef.current.style.top = `${rect.bottom + window.scrollY + 2}px`;
+        suggestionsRef.current.style.top = `${
+          rect.bottom + window.scrollY + 2
+        }px`;
         suggestionsRef.current.style.left = `${rect.left + window.scrollX}px`;
       }
     }, 0);
@@ -593,87 +624,124 @@ Thank you for your business!`;
 
   const handleProductSelect = (product, index) => {
     console.log(product);
-    
+
     // Calculate discount values based on product's discount type
     let discount = "0";
     let discountAmount = "0.00";
-    
+
     if (product.pricing && product.pricing.discountAmount > 0) {
       if (product.pricing.discountType === "PERCENTAGE") {
         discount = product.pricing.discountAmount.toString();
         // Calculate amount from percentage
         const price = parseFloat(product.pricing.salePrice) || 0;
         const quantity = 1; // Default quantity
-        discountAmount = ((price * quantity * product.pricing.discountAmount) / 100).toFixed(2);
+        discountAmount = (
+          (price * quantity * product.pricing.discountAmount) /
+          100
+        ).toFixed(2);
       } else if (product.pricing.discountType === "AMOUNT") {
         discountAmount = product.pricing.discountAmount.toString();
         // Calculate percentage from amount
         const price = parseFloat(product.pricing.salePrice) || 0;
         const quantity = 1; // Default quantity
         if (price > 0 && quantity > 0) {
-          discount = ((product.pricing.discountAmount / (price * quantity)) * 100).toFixed(2);
+          discount = (
+            (product.pricing.discountAmount / (price * quantity)) *
+            100
+          ).toFixed(2);
         }
       }
     }
-    
+
     // Find matching tax rate
     let taxRateId = null;
     if (product.purchasePriceTaxes && product.purchasePriceTaxes.taxRate) {
       const productTaxRate = product.purchasePriceTaxes.taxRate;
-      const matchingTaxRateIndex = taxRates.findIndex(rate => 
-        rate.id === productTaxRate.id || 
-        rate.label === productTaxRate.label ||
-        rate.rate === productTaxRate.rate
+      const matchingTaxRateIndex = taxRates.findIndex(
+        (rate) =>
+          rate.id === productTaxRate.id ||
+          rate.label === productTaxRate.label ||
+          rate.rate === productTaxRate.rate
       );
       if (matchingTaxRateIndex !== -1) {
         taxRateId = matchingTaxRateIndex.toString();
       }
     }
-    
+
     // Calculate price based on product's salePriceType and header tax type selection
     let calculatedPrice = product.pricing.salePrice || 0;
-    
+
     // If product's salePriceType is "WITH_TAX", use the sale price directly regardless of header selection
     if (product.pricing.salePriceType === "WITH_TAX") {
       calculatedPrice = product.pricing.salePrice || 0;
-    } else if (headerTaxType === "With Tax" && product.purchasePriceTaxes && product.purchasePriceTaxes.taxRate) {
+    } else if (
+      headerTaxType === "With Tax" &&
+      product.purchasePriceTaxes &&
+      product.purchasePriceTaxes.taxRate
+    ) {
       // If product's salePriceType is "WITHOUT_TAX" and "With Tax" is selected, calculate price including tax
       const taxRate = product.purchasePriceTaxes.taxRate.rate || 0;
-      calculatedPrice = product.pricing.salePrice + (product.pricing.salePrice * taxRate / 100);
-    }else if (headerTaxType === "Without Tax" && product.purchasePriceTaxes && product.purchasePriceTaxes.taxRate && product.pricing.salePriceType === "WITHOUT_TAX") {
+      calculatedPrice =
+        product.pricing.salePrice + (product.pricing.salePrice * taxRate) / 100;
+    } else if (
+      headerTaxType === "Without Tax" &&
+      product.purchasePriceTaxes &&
+      product.purchasePriceTaxes.taxRate &&
+      product.pricing.salePriceType === "WITHOUT_TAX"
+    ) {
       calculatedPrice = product.pricing.salePrice;
-    } else if (headerTaxType === "Without Tax" && product.purchasePriceTaxes && product.purchasePriceTaxes.taxRate) {
+    } else if (
+      headerTaxType === "Without Tax" &&
+      product.purchasePriceTaxes &&
+      product.purchasePriceTaxes.taxRate
+    ) {
       // If "Without Tax" is selected, show price without tax in the input field
       const taxRate = product.purchasePriceTaxes.taxRate.rate || 0;
-      calculatedPrice = product.pricing.salePrice - (product.pricing.salePrice * taxRate / 100);
-    } 
-    
+      calculatedPrice =
+        product.pricing.salePrice - (product.pricing.salePrice * taxRate) / 100;
+    }
+
     // Calculate total based on header tax selection and product type
     let calculatedTotal = calculatedPrice;
-    if (headerTaxType === "Without Tax" && product.pricing.salePriceType === "WITH_TAX") {
+    if (
+      headerTaxType === "Without Tax" &&
+      product.pricing.salePriceType === "WITH_TAX"
+    ) {
       // Add tax to the total when header is "Without Tax" but product includes tax
       const taxRate = product.purchasePriceTaxes?.taxRate?.rate || 0;
       const quantity = 1; // Default quantity
       const subtotal = calculatedPrice * quantity;
       const discountAmountValue = parseFloat(discountAmount) || 0;
       const afterDiscount = subtotal - discountAmountValue;
-      calculatedTotal = afterDiscount + (afterDiscount * taxRate / 100);
-      calculatedPrice = product.pricing.salePrice - (product.pricing.salePrice * (taxRate / 100));
-    } else if (headerTaxType === "With Tax" && product.pricing.salePriceType === "WITHOUT_TAX") {
+      calculatedTotal = afterDiscount + (afterDiscount * taxRate) / 100;
+      calculatedPrice =
+        product.pricing.salePrice - product.pricing.salePrice * (taxRate / 100);
+    } else if (
+      headerTaxType === "With Tax" &&
+      product.pricing.salePriceType === "WITHOUT_TAX"
+    ) {
       // Calculate total as Price - Discount when "With Tax" is selected and product is WITHOUT_TAX
       const quantity = 1; // Default quantity
       const subtotal = calculatedPrice * quantity;
       const discountAmountValue = parseFloat(discountAmount) || 0;
       calculatedTotal = subtotal - discountAmountValue;
     }
-    
+
     // Check if product already includes tax
     const isProductWithTax = product.pricing.salePriceType === "WITH_TAX";
-    
+
     // Calculate tax amount based on product configuration
     //let calculatedTaxAmount = "0.00";
-    let calculatedTaxAmount = ((product.pricing.salePrice) * (product.purchasePriceTaxes.taxRate.rate || 0) / 100).toFixed(2);
-    if (!isProductWithTax && product.purchasePriceTaxes && product.purchasePriceTaxes.taxRate) {
+    let calculatedTaxAmount = (
+      (product.pricing.salePrice *
+        (product.purchasePriceTaxes.taxRate.rate || 0)) /
+      100
+    ).toFixed(2);
+    if (
+      !isProductWithTax &&
+      product.purchasePriceTaxes &&
+      product.purchasePriceTaxes.taxRate
+    ) {
       // For products without tax, calculate tax amount
       const taxRate = product.purchasePriceTaxes.taxRate.rate || 0;
       const basePrice = parseFloat(product.pricing.salePrice) || 0;
@@ -684,7 +752,12 @@ Thank you for your business!`;
       const afterDiscount = subtotal - discountAmountValue;
       calculatedTaxAmount = ((afterDiscount * taxRate) / 100).toFixed(2);
       //calculatedTaxAmount = afterDiscount;
-    } else if (headerTaxType === "With Tax" && product.pricing.salePriceType === "WITHOUT_TAX" && product.purchasePriceTaxes && product.purchasePriceTaxes.taxRate) {
+    } else if (
+      headerTaxType === "With Tax" &&
+      product.pricing.salePriceType === "WITHOUT_TAX" &&
+      product.purchasePriceTaxes &&
+      product.purchasePriceTaxes.taxRate
+    ) {
       // When "With Tax" is selected and product is WITHOUT_TAX, calculate tax amount
       const taxRate = product.purchasePriceTaxes.taxRate.rate || 0;
       const basePrice = parseFloat(product.pricing.salePrice) || 0;
@@ -694,7 +767,7 @@ Thank you for your business!`;
       const afterDiscount = subtotal - discountAmountValue;
       calculatedTaxAmount = ((afterDiscount * taxRate) / 100).toFixed(2);
     }
-    
+
     itemInputs[index] = {
       ...itemInputs[index],
       itemName: product.name,
@@ -723,25 +796,26 @@ Thank you for your business!`;
   const handleQuantityChange = (index, value) => {
     const newItemInputs = [...itemInputs];
     newItemInputs[index].quantity = value;
-    
+
     // Recalculate discount amount based on new quantity
     const price = parseFloat(newItemInputs[index].price) || 0;
     const quantity = parseFloat(value) || 0;
     const discountPercent = parseFloat(newItemInputs[index].discount) || 0;
     const discountAmount = (price * quantity * discountPercent) / 100;
     newItemInputs[index].discountAmount = discountAmount.toFixed(2);
-    
+
     // Recalculate tax amount based on new quantity
     const selectedTaxRate = taxRates[parseInt(newItemInputs[index].taxRateId)];
     if (selectedTaxRate) {
       const rate = selectedTaxRate.rate || 0;
       const subtotal = price * quantity;
-      const discountAmountValue = parseFloat(newItemInputs[index].discountAmount) || 0;
+      const discountAmountValue =
+        parseFloat(newItemInputs[index].discountAmount) || 0;
       const afterDiscount = subtotal - discountAmountValue;
       const taxAmount = (afterDiscount * rate) / 100;
       newItemInputs[index].taxAmount = taxAmount.toFixed(2);
     }
-    
+
     setItemInputs(newItemInputs);
     calculateRowTotal(index);
   };
@@ -756,14 +830,14 @@ Thank you for your business!`;
   const handleDiscountChange = (index, value) => {
     const newItemInputs = [...itemInputs];
     newItemInputs[index].discount = value;
-    
+
     // Calculate discount amount from percentage
     const price = parseFloat(newItemInputs[index].price) || 0;
     const quantity = parseFloat(newItemInputs[index].quantity) || 0;
     const discountPercent = parseFloat(value) || 0;
     const discountAmount = (price * quantity * discountPercent) / 100;
     newItemInputs[index].discountAmount = discountAmount.toFixed(2);
-    
+
     setItemInputs(newItemInputs);
     calculateRowTotal(index);
   };
@@ -771,19 +845,19 @@ Thank you for your business!`;
   const handleDiscountAmountChange = (index, value) => {
     const newItemInputs = [...itemInputs];
     newItemInputs[index].discountAmount = value;
-    
+
     // Calculate discount percentage from amount
     const price = parseFloat(newItemInputs[index].price) || 0;
     const quantity = parseFloat(newItemInputs[index].quantity) || 0;
     const discountAmount = parseFloat(value) || 0;
-    
+
     if (price > 0 && quantity > 0) {
       const discountPercent = (discountAmount / (price * quantity)) * 100;
       newItemInputs[index].discount = discountPercent.toFixed(2);
     } else {
       newItemInputs[index].discount = "0";
     }
-    
+
     setItemInputs(newItemInputs);
     calculateRowTotal(index);
   };
@@ -797,25 +871,25 @@ Thank you for your business!`;
   const handleTaxRateChange = (index, value) => {
     const newItemInputs = [...itemInputs];
     newItemInputs[index].taxRateId = value;
-    
+
     // Get the selected tax rate by array index
     const selectedTaxRate = taxRates[parseInt(value)];
     if (selectedTaxRate) {
       const rate = selectedTaxRate.rate || 0;
-      
+
       const price = parseFloat(newItemInputs[index].price) || 0;
       const quantity = parseFloat(newItemInputs[index].quantity) || 0;
       const subtotal = price * quantity;
       const taxAmount = (subtotal * rate) / 100;
       newItemInputs[index].taxAmount = taxAmount.toFixed(2);
     }
-    
+
     setItemInputs(newItemInputs);
   };
 
   const handleHeaderTaxTypeChange = (newTaxType) => {
     setHeaderTaxType(newTaxType);
-    
+
     // Recalculate all existing items based on new header tax selection
     const updatedItemInputs = itemInputs.map((item, index) => {
       if (item.productId) {
@@ -823,18 +897,18 @@ Thank you for your business!`;
         let calculatedTotal = parseFloat(item.price) || 0;
         let calculatedTaxAmount = item.taxAmount || "0.00";
         let updatedPrice = parseFloat(item.price) || 0;
-        
+
         // If "Without Tax" is selected and product includes tax, add tax to total
         if (newTaxType === "Without Tax" && item.isProductWithTax) {
           const quantity = parseFloat(item.quantity) || 1;
           const subtotal = parseFloat(item.price) * quantity;
           const discountAmount = parseFloat(item.discountAmount) || 0;
           const afterDiscount = subtotal - discountAmount;
-          
+
           // Get tax rate from the selected tax rate
           if (item.taxRateId && taxRates[parseInt(item.taxRateId)]) {
             const taxRate = taxRates[parseInt(item.taxRateId)].rate || 0;
-            calculatedTotal = afterDiscount + (afterDiscount * taxRate / 100);
+            calculatedTotal = afterDiscount + (afterDiscount * taxRate) / 100;
             calculatedTaxAmount = ((afterDiscount * taxRate) / 100).toFixed(2);
           }
         }
@@ -844,7 +918,7 @@ Thank you for your business!`;
           const subtotal = parseFloat(item.price) * quantity;
           const discountAmount = parseFloat(item.discountAmount) || 0;
           const afterDiscount = subtotal - discountAmount;
-          
+
           // Get tax rate from the selected tax rate
           if (item.taxRateId && taxRates[parseInt(item.taxRateId)]) {
             const taxRate = taxRates[parseInt(item.taxRateId)].rate || 0;
@@ -852,7 +926,7 @@ Thank you for your business!`;
             const taxAmount = (parseFloat(item.price) * taxRate) / 100;
             //updatedPrice = parseFloat(item.price) + taxAmount;
             updatedPrice = parseFloat(item.price);
-            calculatedTotal = afterDiscount + (afterDiscount * taxRate / 100);
+            calculatedTotal = afterDiscount + (afterDiscount * taxRate) / 100;
             calculatedTaxAmount = ((afterDiscount * taxRate) / 100).toFixed(2);
           }
         }
@@ -864,17 +938,17 @@ Thank you for your business!`;
           calculatedTotal = subtotal - discountAmount;
           calculatedTaxAmount = "0.00";
         }
-        
+
         return {
           ...item,
           price: updatedPrice.toFixed(2),
           total: calculatedTotal.toFixed(2),
-          taxAmount: calculatedTaxAmount
+          taxAmount: calculatedTaxAmount,
         };
       }
       return item;
     });
-    
+
     setItemInputs(updatedItemInputs);
   };
 
@@ -882,19 +956,21 @@ Thank you for your business!`;
     const newItemInputs = [...itemInputs];
     const quantity = parseFloat(newItemInputs[index].quantity) || 0;
     const price = parseFloat(newItemInputs[index].price) || 0;
-    const originalSalePrice = parseFloat(newItemInputs[index].originalSalePrice) || price;
+    const originalSalePrice =
+      parseFloat(newItemInputs[index].originalSalePrice) || price;
     const discount = parseFloat(newItemInputs[index].discount) || 0;
     const discountAmount = parseFloat(newItemInputs[index].discountAmount) || 0;
 
     // Use original sale price for calculations when "Without Tax" is selected
-    const calculationPrice = headerTaxType === "Without Tax" ? originalSalePrice : price;
+    const calculationPrice =
+      headerTaxType === "Without Tax" ? originalSalePrice : price;
     const subtotal = quantity * calculationPrice;
     const calculatedDiscountAmount = (subtotal * discount) / 100;
     const afterDiscount = subtotal - calculatedDiscountAmount;
-    
+
     let taxAmount = 0;
     let total = 0;
-    
+
     // Check if product already includes tax
     if (newItemInputs[index].isProductWithTax) {
       // For products with tax included, total = subtotal - discount amount (no additional tax calculation)
@@ -902,7 +978,8 @@ Thank you for your business!`;
       //newItemInputs[index].taxAmount = "0.00"; // No additional tax
     } else {
       // For products without tax, calculate tax on the amount after discount
-      const selectedTaxRate = taxRates[parseInt(newItemInputs[index].taxRateId)];
+      const selectedTaxRate =
+        taxRates[parseInt(newItemInputs[index].taxRateId)];
       if (selectedTaxRate) {
         const rate = selectedTaxRate.rate || 0;
         taxAmount = (afterDiscount * rate) / 100;
@@ -979,20 +1056,20 @@ Thank you for your business!`;
   };
 
   const handleCompanyNameKeyPress = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       setCompanyName(tempCompanyName);
       setIsEditingCompanyName(false);
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       setTempCompanyName(companyName);
       setIsEditingCompanyName(false);
     }
   };
 
   const handleCompanyPhoneKeyPress = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       setCompanyPhone(tempCompanyPhone);
       setIsEditingCompanyPhone(false);
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       setTempCompanyPhone(companyPhone);
       setIsEditingCompanyPhone(false);
     }
@@ -1015,9 +1092,9 @@ Thank you for your business!`;
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    if (file && file.type.startsWith('image/')) {
+    if (file && file.type.startsWith("image/")) {
       setLogoImage(file);
-      
+
       // Create preview URL
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -1150,7 +1227,7 @@ Thank you for your business!`;
           <span className="sale-label">Sale</span>
         </div>
         <div className="header-right">
-          <button className="back-btn" onClick={() => navigate('/sales')}>
+          <button className="back-btn" onClick={() => navigate("/sales")}>
             ← Back
           </button>
         </div>
@@ -1195,10 +1272,12 @@ Thank you for your business!`;
                       <div className="price-unit-split">
                         <div className="price-label">PRICE/UNIT</div>
                         <div className="tax-type-select">
-                          <select 
+                          <select
                             className="header-tax-select"
                             value={headerTaxType}
-                            onChange={(e) => handleHeaderTaxTypeChange(e.target.value)}
+                            onChange={(e) =>
+                              handleHeaderTaxTypeChange(e.target.value)
+                            }
                           >
                             <option value="With Tax">With Tax</option>
                             <option value="Without Tax">Without Tax</option>
@@ -1257,9 +1336,14 @@ Thank you for your business!`;
                             setTimeout(() => {
                               const inputElement = e.target;
                               if (inputElement && suggestionsRef.current) {
-                                const rect = inputElement.getBoundingClientRect();
-                                suggestionsRef.current.style.top = `${rect.bottom + window.scrollY + 2}px`;
-                                suggestionsRef.current.style.left = `${rect.left + window.scrollX}px`;
+                                const rect =
+                                  inputElement.getBoundingClientRect();
+                                suggestionsRef.current.style.top = `${
+                                  rect.bottom + window.scrollY + 2
+                                }px`;
+                                suggestionsRef.current.style.left = `${
+                                  rect.left + window.scrollX
+                                }px`;
                               }
                             }, 0);
                           }}
@@ -1269,31 +1353,53 @@ Thank you for your business!`;
                             className="suggestions-dropdown"
                             ref={suggestionsRef}
                           >
-                            {suggestions.length > 0 ? (
-                              suggestions.map((product) => (
-                                <div
-                                  key={product.id}
-                                  className="suggestion-item"
-                                  onClick={() =>
-                                    handleProductSelect(product, index)
-                                  }
-                                >
-                                  <div className="product-name">
-                                    {product.productName || product.name}
-                                  </div>
-                                  <div className="product-code">
-                                    {product.productCode || product.code}
-                                  </div>
-                                  <div className="product-price">
-                                    ₹{product.pricing.salePrice || "0.00"}
-                                  </div>
-                                </div>
-                              ))
-                            ) : (
-                              <div className="no-suggestions">
-                                No products found
-                              </div>
-                            )}
+                            <table className="suggestions-table">
+                              <thead>
+                                <tr>
+                                  <th>Add Item +</th>
+                                  <th>SALE PRICE</th>
+                                  <th>PURCHASE PRICE</th>
+                                  <th>STOCK</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {suggestions.length > 0 ? (
+                                  suggestions.map((product) => (
+                                    <tr
+                                      key={product.id}
+                                      className="suggestion-item"
+                                      onClick={() =>
+                                        handleProductSelect(product, index)
+                                      }
+                                    >
+                                      <td className="product-info">
+                                        {/* <div className="product-name"> */}
+                                        {product.productName || product.name} ({product.productCode || product.code})
+                                        {/* </div> */}
+                                      </td>
+                                      {/* <div className="product-code"> */}
+                                      <td className="sale-price">
+                                        ₹{product.pricing?.salePrice || "0.00"}
+                                      </td>
+                                      <td className="purchase-price">
+                                        ₹
+                                        {product.pricing?.purchasePrice ||
+                                          "0.00"}
+                                      </td>
+                                      <td className="stock">
+                                        {product.stock?.openingQuantity || "0"}
+                                      </td>
+                                    </tr>
+                                  ))
+                                ) : (
+                                  <tr>
+                                    <td colSpan="4" className="no-suggestions">
+                                      No products found
+                                    </td>
+                                  </tr>
+                                )}
+                              </tbody>
+                            </table>
                           </div>
                         )}
                       </td>
@@ -1335,7 +1441,10 @@ Thank you for your business!`;
                               placeholder="0.00"
                               value={item.discountAmount}
                               onChange={(e) =>
-                                handleDiscountAmountChange(index, e.target.value)
+                                handleDiscountAmountChange(
+                                  index,
+                                  e.target.value
+                                )
                               }
                               className="discount-amount-input"
                             />
@@ -1355,7 +1464,9 @@ Thank you for your business!`;
                               <option value="">Select Tax</option>
                               {taxRates.map((taxRate, rateIndex) => (
                                 <option key={taxRate.id} value={rateIndex}>
-                                  {item.taxRateId == rateIndex ? `✓ ${taxRate.label}` : taxRate.label}
+                                  {item.taxRateId == rateIndex
+                                    ? `✓ ${taxRate.label}`
+                                    : taxRate.label}
                                 </option>
                               ))}
                             </select>
@@ -1470,7 +1581,11 @@ Thank you for your business!`;
               </div>
               <div className="logo-placeholder" onClick={handleLogoClick}>
                 {logoPreview ? (
-                  <img src={logoPreview} alt="Company Logo" className="logo-image" />
+                  <img
+                    src={logoPreview}
+                    alt="Company Logo"
+                    className="logo-image"
+                  />
                 ) : (
                   <>
                     <span className="logo-text">LOGO</span>
@@ -1487,7 +1602,7 @@ Thank you for your business!`;
                   type="file"
                   accept="image/*"
                   onChange={handleFileChange}
-                  style={{ display: 'none' }}
+                  style={{ display: "none" }}
                 />
               </div>
             </div>
@@ -1510,7 +1625,7 @@ Thank you for your business!`;
                     <span>Invoice No.: {invoiceNumber}</span>
                   </div>
                   <div className="info-row">
-                    <span>Date: {new Date().toLocaleDateString('en-GB')}</span>
+                    <span>Date: {new Date().toLocaleDateString("en-GB")}</span>
                   </div>
                 </div>
               </div>
@@ -1705,15 +1820,27 @@ Thank you for your business!`;
                 Save & New
               </button>
               <div className="action-icons">
-                <button className="icon-btn whatsapp" onClick={shareViaWhatsApp}>📱</button>
-                <button className="icon-btn print" onClick={printInvoice}>🖨️</button>
-                <button className="icon-btn download" onClick={generateAndDownloadPDF}>⬇️</button>
+                <button
+                  className="icon-btn whatsapp"
+                  onClick={shareViaWhatsApp}
+                >
+                  📱
+                </button>
+                <button className="icon-btn print" onClick={printInvoice}>
+                  🖨️
+                </button>
+                <button
+                  className="icon-btn download"
+                  onClick={generateAndDownloadPDF}
+                >
+                  ⬇️
+                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
-      
+
       {/* Toast Notification */}
       {showToast && (
         <Toast

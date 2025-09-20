@@ -209,56 +209,135 @@
   border: 1px solid #ddd;
   border-radius: 4px;
   box-shadow: 0 4px 8px #0000001a;
+  /* max-height: 200px; */
   max-height: 200px;
   overflow-y: auto;
   z-index: 1000;
-  width: 200px;
+  width: auto;
 }
 
-.suggestion-item {
-  padding: 10px;
-  cursor: pointer;
-  border-bottom: 1px solid #eee;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: background-color 0.2s ease;
-}
-
-.suggestion-item:hover {
-  background-color: #f8f9fa;
-}
-
-.suggestion-item:last-child {
-  border-bottom: none;
-}
-
-.suggestion-item .product-name {
-  font-weight: 600;
-  color: #333;
-  flex: 2;
-  text-align: left;
-}
-
-.suggestion-item .product-code {
-  color: #666;
-  font-size: 11px;
-  flex: 1;
-  text-align: center;
-}
-
-.suggestion-item .product-price {
-  color: #007bff;
-  font-weight: 600;
-  flex: 1;
-  text-align: right;
-}
+/* Remove old suggestion-item styles as we're using table format now */
 
 .no-suggestions {
   padding: 15px;
   text-align: center;
   color: #666;
   font-style: italic;
+}
+
+/* New Table Format for Suggestions */
+.suggestions-table {
+  width: auto;
+  border-collapse: collapse;
+  font-size: 12px;
+  table-layout: auto;
+}
+
+.suggestions-table thead th {
+  background-color: #f8f9fa;
+  padding: 8px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  /* border-bottom: 1px solid #ddd; */
+  font-size: 11px;
+  width: 100%; /* Larger width for Add Item column */
+}
+
+.suggestions-table tbody tr {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  /* width: auto; */
+}
+
+.suggestions-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.suggestions-table tbody td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+  vertical-align: top;
+  /* Width is defined individually for each column type */
+}
+
+.suggestions-table thead tr:nth-child(1) th {
+  width: 200px;
+}
+
+.suggestions-table tbody tr:nth-child(1) td {
+  width: 200px;
+}
+
+.suggestions-table thead tr:nth-child(2) th {
+  width: 30px;
+}
+
+.suggestions-table tbody tr:nth-child(2) td {
+  width: 30px;
+}
+
+.suggestions-table thead tr:nth-child(3) th {
+  width: 30px;
+}
+
+.suggestions-table tbody tr:nth-child(3) td {
+  width: 30px;
+}
+
+.suggestions-table thead tr:nth-child(4) th {
+  width: 30px;
+}
+
+.suggestions-table tbody tr:nth-child(4) td {
+  width: 30px;
+}
+
+/* .suggestions-table tbody tr:last-child td {
+  border-bottom: none;
+} */
+
+.suggestion-item {
+  width: auto;
+}
+
+.product-info {
+  width: 60%; /* Larger width for Add Item column */
+  padding: 8px 12px;
+  white-space: wrap;
+  overflow: visible;
+  text-overflow: unset;
+}
+
+.suggestions-table .product-name {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2px;
+  font-size: 13px;
+}
+
+/* .suggestions-table .product-code {
+  color: #666;
+  font-size: 11px;
+  font-style: italic;
+  width: 20%; 
+  padding: 8px 12px;
+} */
+
+.sale-price,
+.purchase-price {
+  color: #007bff;
+  font-weight: 600;
+  text-align: left;
+  width: 20%; /* Smaller width for price columns */
+  /* padding: 8px 12px; */
+}
+
+.stock {
+  text-align: left;
+  color: #666;
+  width: 20%; /* Smaller width for stock column */
+  /* padding: 8px 12px; */
 }
 
 /* Item ID Cell with Hover Effect */
@@ -349,16 +428,16 @@
 
 .items-table-new-sales th:nth-child(3), /* QTY column */
 .items-table-new-sales td:nth-child(3) {
-  width: 60px;
-  max-width: 60px;
-  min-width: 60px;
+  width: 100px;
+  max-width: 100px;
+  min-width: 100px;
 }
 
 .items-table-new-sales th:nth-child(5), /* DISCOUNT column */
 .items-table-new-sales td:nth-child(5) {
-  width: 80px;
-  max-width: 80px;
-  min-width: 80px;
+  width: 100px;
+  max-width: 100px;
+  min-width: 100px;
 }
 
 .items-table-new-sales th:nth-child(6), /* TAX column */
@@ -865,7 +944,7 @@
 }
 
 .company-info h3:hover::after {
-  content: '✏️';
+  content: "✏️";
   position: absolute;
   top: -8px;
   right: -8px;
@@ -889,7 +968,7 @@
 }
 
 .company-info p:hover::after {
-  content: '✏️';
+  content: "✏️";
   position: absolute;
   top: -8px;
   right: -8px;
@@ -1179,7 +1258,7 @@
   .new-sales-container {
     display: none;
   }
-  
+
   .desktop-only-message {
     display: block;
     text-align: center;
@@ -1197,21 +1276,21 @@
     flex-direction: column;
     height: auto;
   }
-  
+
   .left-column,
   .right-column {
     flex: none;
   }
-  
+
   .customer-fields {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .items-table {
     font-size: 11px;
   }
-  
+
   .items-table th,
   .items-table td {
     padding: 6px 4px;
