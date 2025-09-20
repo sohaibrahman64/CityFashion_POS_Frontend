@@ -76,7 +76,7 @@ const NewSalesNew = () => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Close suggestions when clicking outside
+  // Close suggestions when clicking outside and update position on scroll/resize
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -87,11 +87,28 @@ const NewSalesNew = () => {
       }
     };
 
+    const updateDropdownPosition = () => {
+      // Update dropdown position when scrolling or resizing
+      if (showSuggestions && activeRowIndex !== null && suggestionsRef.current) {
+        const activeInput = document.querySelector(`input[data-row-index="${activeRowIndex}"]`);
+        if (activeInput) {
+          const rect = activeInput.getBoundingClientRect();
+          suggestionsRef.current.style.top = `${rect.bottom + window.scrollY + 2}px`;
+          suggestionsRef.current.style.left = `${rect.left + window.scrollX}px`;
+        }
+      }
+    };
+
     document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("scroll", updateDropdownPosition);
+    window.addEventListener("resize", updateDropdownPosition);
+    
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", updateDropdownPosition);
+      window.removeEventListener("resize", updateDropdownPosition);
     };
-  }, []);
+  }, [showSuggestions, activeRowIndex]);
 
   // Fetch tax rates on component mount
   useEffect(() => {
@@ -294,7 +311,67 @@ Thank you for your business!`;
     }
   };
 
+  // Validation function to check if required fields are filled
+  const validateInvoiceData = () => {
+    // Check if customer name is provided
+    if (!customerName.trim()) {
+      setToastMessage("Please enter customer name.");
+      setToastType("error");
+      setShowToast(true);
+      return false;
+    }
+
+    // Check if at least one item is added with all required fields
+    const validItems = itemInputs.filter(item => 
+      item.itemName.trim() !== "" && 
+      item.quantity && 
+      item.price && 
+      parseFloat(item.quantity) > 0 && 
+      parseFloat(item.price) > 0
+    );
+
+    if (validItems.length === 0) {
+      setToastMessage("Please add at least one item with valid quantity and price.");
+      setToastType("error");
+      setShowToast(true);
+      return false;
+    }
+
+    // Check each valid item for completeness
+    for (let i = 0; i < validItems.length; i++) {
+      const item = validItems[i];
+      
+      if (!item.itemName.trim()) {
+        setToastMessage(`Please enter item name for row ${i + 1}.`);
+        setToastType("error");
+        setShowToast(true);
+        return false;
+      }
+      
+      if (!item.quantity || parseFloat(item.quantity) <= 0) {
+        setToastMessage(`Please enter valid quantity for "${item.itemName}".`);
+        setToastType("error");
+        setShowToast(true);
+        return false;
+      }
+      
+      if (!item.price || parseFloat(item.price) <= 0) {
+        setToastMessage(`Please enter valid price for "${item.itemName}".`);
+        setToastType("error");
+        setShowToast(true);
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   const handleSaveNew = async () => {
+    // Validate the form before proceeding
+    if (!validateInvoiceData()) {
+      return; // Stop execution if validation fails
+    }
+
     try {
       const response = await fetch(`${BASE_URL}/${CREATE_NEW_SALES_INVOICE}`, {
         method: "POST",
@@ -503,11 +580,11 @@ Thank you for your business!`;
     setShowSuggestions(false);
     setSearchTerm(value);
     
-    // Position the dropdown below the table
+    // Position the dropdown below the specific input field
     setTimeout(() => {
-      const tableElement = document.querySelector('.item-table-new-sales');
-      if (tableElement && suggestionsRef.current) {
-        const rect = tableElement.getBoundingClientRect();
+      const activeInput = document.querySelector(`input[data-row-index="${index}"]`);
+      if (activeInput && suggestionsRef.current) {
+        const rect = activeInput.getBoundingClientRect();
         suggestionsRef.current.style.top = `${rect.bottom + window.scrollY + 2}px`;
         suggestionsRef.current.style.left = `${rect.left + window.scrollX}px`;
       }
@@ -1174,13 +1251,13 @@ Thank you for your business!`;
                           onChange={(e) => {
                             handleItemNameChange(index, e.target.value);
                           }}
-                          onFocus={() => {
+                          onFocus={(e) => {
                             setActiveRowIndex(index);
-                            // Position the dropdown below the table when input is focused
+                            // Position the dropdown below the specific input field
                             setTimeout(() => {
-                              const tableElement = document.querySelector('.item-table-new-sales');
-                              if (tableElement && suggestionsRef.current) {
-                                const rect = tableElement.getBoundingClientRect();
+                              const inputElement = e.target;
+                              if (inputElement && suggestionsRef.current) {
+                                const rect = inputElement.getBoundingClientRect();
                                 suggestionsRef.current.style.top = `${rect.bottom + window.scrollY + 2}px`;
                                 suggestionsRef.current.style.left = `${rect.left + window.scrollX}px`;
                               }
