@@ -9,10 +9,12 @@ import {
   CREATE_PRODUCT_TRANSACTION,
   GET_TAX_RATES,
   GET_TAX_RATES_LABELS,
+  CREATE_SALES_TRANSACTION,
 } from "../Constants";
 import "./NewSalesNew.css";
 import Toast from "../components/Toast";
 import html2pdf from "html2pdf.js";
+import CustomerSelect from "./CustomerSelect";
 
 const NewSalesNew = () => {
   const navigate = useNavigate();
@@ -32,6 +34,7 @@ const NewSalesNew = () => {
       itemName: "",
       quantity: "",
       price: "",
+      purchasePrice: null,
       originalSalePrice: null, // New field for original sale price
       discount: "",
       discountAmount: "", // New field for discount amount
@@ -97,12 +100,13 @@ const NewSalesNew = () => {
         const activeInput = document.querySelector(
           `input[data-row-index="${activeRowIndex}"]`
         );
-        if (activeInput) {
+        if (activeInput && suggestionsRef.current) {
           const rect = activeInput.getBoundingClientRect();
-          suggestionsRef.current.style.top = `${
-            rect.bottom + window.scrollY + 2
-          }px`;
-          suggestionsRef.current.style.left = `${rect.left + window.scrollX}px`;
+          const element = suggestionsRef.current;
+          element.style.position = "fixed";
+          element.style.top = `${rect.bottom + 2}px`;
+          element.style.left = `${rect.left}px`;
+          element.style.zIndex = "1000";
         }
       }
     };
@@ -110,11 +114,15 @@ const NewSalesNew = () => {
     document.addEventListener("mousedown", handleClickOutside);
     window.addEventListener("scroll", updateDropdownPosition);
     window.addEventListener("resize", updateDropdownPosition);
+    
+    // Also listen for scroll events on any scrollable containers
+    document.addEventListener("scroll", updateDropdownPosition, true);
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       window.removeEventListener("scroll", updateDropdownPosition);
       window.removeEventListener("resize", updateDropdownPosition);
+      document.removeEventListener("scroll", updateDropdownPosition, true);
     };
   }, [showSuggestions, activeRowIndex]);
 
@@ -168,6 +176,11 @@ const NewSalesNew = () => {
       fetchAllProducts();
     }
   }, [activeRowIndex]);
+
+  const handleCustomerSelect = (customer) => {
+    setCustomerName(customer?.name || "");
+    setCustomerPhone(customer?.phone || "");
+  };
 
   // Fetch invoice number when component mounts
   useEffect(() => {
@@ -424,6 +437,9 @@ Thank you for your business!`;
         // Create product transactions for all items sold
         await createProductTransactions(data);
 
+        // Also create sales transaction
+        await createSalesTransaction(data);
+
         // Clear all form fields after successful invoice creation
         setCustomerName("");
         setCustomerPhone("");
@@ -454,7 +470,7 @@ Thank you for your business!`;
         setInvoiceNumber((prevNumber) => incrementInvoiceNumber(prevNumber));
 
         // Generate and download PDF after successful invoice creation
-        await generateAndDownloadPDF();
+        //await generateAndDownloadPDF();
 
         // Add any additional logic here, like redirecting to the invoice page
       } else {
@@ -516,7 +532,7 @@ Thank you for your business!`;
         productId: item.productId,
         productName: item.itemName,
         transactionType: "SALE",
-        referenceId: invoiceData.id || null, // Invoice ID from backend response
+        referenceId: invoiceData.invoiceId || null, // Invoice ID from backend response
         referenceType: "SALES_INVOICE",
         referenceNumber: invoiceNumber,
         quantity: parseFloat(item.quantity),
@@ -554,6 +570,69 @@ Thank you for your business!`;
       }
     } catch (error) {
       console.error("Error creating product transactions:", error);
+    }
+  };
+
+  const createSalesTransaction = async (invoiceData) => {
+    try {
+      const validItemsForPayload = itemInputs.filter(
+        (i) => i.itemName.trim() !== ""
+      );
+      const costOfGoodsSold = validItemsForPayload.reduce(
+        (sum, item) =>
+          sum +
+          parseFloat(item.purchasePrice || 0) * parseFloat(item.quantity || 0),
+        0
+      );
+
+      console.log("validItemsForPayload", validItemsForPayload);
+      console.log("costOfGoodsSold", costOfGoodsSold);
+
+      const payload = {
+        invoiceId: invoiceData.invoiceId || null,
+        invoiceNumber: invoiceData.invoiceNumber || invoiceNumber,
+        customerName: customerName,
+        customerPhone: customerPhone,
+        totalAmount: calculateSubTotal(),
+        netAmount: calculateSubTotal(),
+        receivedAmount: parseFloat(receivedAmount || 0),
+        balanceAmount: calculateSubTotal() - parseFloat(receivedAmount || 0),
+        discountAmount: itemInputs
+          .filter((item) => item.itemName.trim() !== "")
+          .reduce(
+            (sum, item) =>
+              sum +
+              (parseFloat(item.price || 0) *
+                parseFloat(item.quantity || 0) *
+                parseFloat(item.discount || 0)) /
+                100,
+            0
+          ),
+        itemCount: validItemsForPayload.length,
+        items: validItemsForPayload,
+        costOfGoodsSold: costOfGoodsSold,
+        createdBy: "SYSTEM",
+        paymentMode: "Cash",
+        notes: `POS sale via NewSalesNew | Invoice: ${
+          invoiceData.invoiceNumber || invoiceNumber
+        }`,
+        createdAt: new Date().toISOString(),
+      };
+
+      console.log(payload);
+
+      const res = await fetch(`${BASE_URL}/${CREATE_SALES_TRANSACTION}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const txt = await res.text();
+        console.error("Failed to create sales transaction", txt);
+      }
+    } catch (err) {
+      console.error("Error creating sales transaction:", err);
     }
   };
 
@@ -614,10 +693,11 @@ Thank you for your business!`;
       );
       if (activeInput && suggestionsRef.current) {
         const rect = activeInput.getBoundingClientRect();
-        suggestionsRef.current.style.top = `${
-          rect.bottom + window.scrollY + 2
-        }px`;
-        suggestionsRef.current.style.left = `${rect.left + window.scrollX}px`;
+        const element = suggestionsRef.current;
+        element.style.position = "fixed";
+        element.style.top = `${rect.bottom + 2}px`;
+        element.style.left = `${rect.left}px`;
+        element.style.zIndex = "1000";
       }
     }, 0);
   };
@@ -655,13 +735,13 @@ Thank you for your business!`;
 
     // Find matching tax rate
     let taxRateId = null;
-    if (product.purchasePriceTaxes && product.purchasePriceTaxes.taxRate) {
-      const productTaxRate = product.purchasePriceTaxes.taxRate;
+    if (product.purchasePriceTaxes && product.purchasePriceTaxes?.taxRate) {
+      const productTaxRate = product.purchasePriceTaxes?.taxRate;
       const matchingTaxRateIndex = taxRates.findIndex(
         (rate) =>
           rate.id === productTaxRate.id ||
           rate.label === productTaxRate.label ||
-          rate.rate === productTaxRate.rate
+          rate.rate === productTaxRate?.rate
       );
       if (matchingTaxRateIndex !== -1) {
         taxRateId = matchingTaxRateIndex.toString();
@@ -734,16 +814,16 @@ Thank you for your business!`;
     //let calculatedTaxAmount = "0.00";
     let calculatedTaxAmount = (
       (product.pricing.salePrice *
-        (product.purchasePriceTaxes.taxRate.rate || 0)) /
+        (product.purchasePriceTaxes?.taxRate?.rate || 0)) /
       100
     ).toFixed(2);
     if (
       !isProductWithTax &&
       product.purchasePriceTaxes &&
-      product.purchasePriceTaxes.taxRate
+      product.purchasePriceTaxes?.taxRate
     ) {
       // For products without tax, calculate tax amount
-      const taxRate = product.purchasePriceTaxes.taxRate.rate || 0;
+      const taxRate = product.purchasePriceTaxes?.taxRate?.rate || 0;
       const basePrice = parseFloat(product.pricing.salePrice) || 0;
       const quantity = 1; // Default quantity
       const subtotal = basePrice * quantity;
@@ -756,10 +836,10 @@ Thank you for your business!`;
       headerTaxType === "With Tax" &&
       product.pricing.salePriceType === "WITHOUT_TAX" &&
       product.purchasePriceTaxes &&
-      product.purchasePriceTaxes.taxRate
+      product.purchasePriceTaxes?.taxRate
     ) {
       // When "With Tax" is selected and product is WITHOUT_TAX, calculate tax amount
-      const taxRate = product.purchasePriceTaxes.taxRate.rate || 0;
+      const taxRate = product.purchasePriceTaxes?.taxRate?.rate || 0;
       const basePrice = parseFloat(product.pricing.salePrice) || 0;
       const quantity = 1; // Default quantity
       const subtotal = basePrice * quantity;
@@ -772,6 +852,7 @@ Thank you for your business!`;
       ...itemInputs[index],
       itemName: product.name,
       price: calculatedPrice.toFixed(2),
+      purchasePrice: product.pricing?.purchasePrice ?? null,
       originalSalePrice: product.pricing.salePrice, // Store original sale price for calculations
       quantity: "1",
       discount: discount,
@@ -999,6 +1080,7 @@ Thank you for your business!`;
       itemName: "",
       quantity: "",
       price: "",
+      purchasePrice: null,
       originalSalePrice: null, // New field for original sale price
       discount: "",
       discountAmount: "",
@@ -1241,13 +1323,7 @@ Thank you for your business!`;
             <div className="customer-fields">
               <div className="input-group">
                 <label htmlFor="customerName">Customer Name*</label>
-                <input
-                  type="text"
-                  id="customerName"
-                  placeholder="Enter Name"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                />
+                <CustomerSelect onCustomerSelect={handleCustomerSelect} />
               </div>
               <div className="input-group">
                 <label htmlFor="customerPhone">Customer Phone Number</label>
@@ -1336,14 +1412,12 @@ Thank you for your business!`;
                             setTimeout(() => {
                               const inputElement = e.target;
                               if (inputElement && suggestionsRef.current) {
-                                const rect =
-                                  inputElement.getBoundingClientRect();
-                                suggestionsRef.current.style.top = `${
-                                  rect.bottom + window.scrollY + 2
-                                }px`;
-                                suggestionsRef.current.style.left = `${
-                                  rect.left + window.scrollX
-                                }px`;
+                                const rect = inputElement.getBoundingClientRect();
+                                const element = suggestionsRef.current;
+                                element.style.position = "fixed";
+                                element.style.top = `${rect.bottom + 2}px`;
+                                element.style.left = `${rect.left}px`;
+                                element.style.zIndex = "1000";
                               }
                             }, 0);
                           }}
@@ -1374,7 +1448,8 @@ Thank you for your business!`;
                                     >
                                       <td className="product-info">
                                         {/* <div className="product-name"> */}
-                                        {product.productName || product.name} ({product.productCode || product.code})
+                                        {product.productName || product.name} (
+                                        {product.productCode || product.code})
                                         {/* </div> */}
                                       </td>
                                       {/* <div className="product-code"> */}

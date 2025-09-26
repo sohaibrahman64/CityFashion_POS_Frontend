@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import AsyncSelect from "react-select/async";
 import axios from "axios";
-import { ADD_CUSTOMER, BASE_URL, SEARCH_CUSTOMER } from "../Constants";
+import { ADD_CUSTOMER, BASE_URL, SEARCH_CUSTOMER, GET_ALL_CUSTOMERS } from "../Constants";
 import './CustomerSelect.css';
 
 const CustomerSelect = ({onCustomerSelect }) => {
@@ -13,11 +13,19 @@ const CustomerSelect = ({onCustomerSelect }) => {
   const [address, setAddress] = useState("");
 
   const loadOptions = async (inputValue) => {
-    if (!inputValue) return [];
     try {
-      const response = await axios.get(`${BASE_URL}/${SEARCH_CUSTOMER}`, {
-        params: { keyword: inputValue },
-      });
+      let response;
+      
+      // If no input value, load all customers
+      if (!inputValue || inputValue.trim() === "") {
+        response = await axios.get(`${BASE_URL}/${GET_ALL_CUSTOMERS}`);
+      } else {
+        // If there's input, search customers
+        response = await axios.get(`${BASE_URL}/${SEARCH_CUSTOMER}`, {
+          params: { keyword: inputValue },
+        });
+      }
+      
       if (response.data.length > 0) {
         setSelectedCustomer(true);
         return response.data.map((c) => ({
@@ -74,11 +82,16 @@ const CustomerSelect = ({onCustomerSelect }) => {
     <div className="customer-select-container">
       <AsyncSelect
         styles={{
+          container: (base) => ({
+            ...base,
+            width: "100%",
+          }),
           control: (base, state) => ({
             ...base,
             border: "1px solid #ccc",
-            borderRadius: "6px",
+            borderRadius: "4px",
             minHeight: "38px",
+            height: "38px",
             boxShadow: state.isFocused ? "0 0 0 2px #0a69b933" : "none",
             "&:hover": {
               borderColor: "#999",
@@ -88,14 +101,44 @@ const CustomerSelect = ({onCustomerSelect }) => {
             ...base,
             margin: 0,
             padding: 0,
+            fontSize: "12px",
           }),
           valueContainer: (base) => ({
             ...base,
             padding: "0 10px",
+            fontSize: "12px",
+          }),
+          placeholder: (base) => ({
+            ...base,
+            fontSize: "12px",
+            color: "#999",
+          }),
+          singleValue: (base) => ({
+            ...base,
+            fontSize: "12px",
           }),
           indicatorsContainer: (base) => ({
             ...base,
             height: "38px",
+          }),
+          dropdownIndicator: (base) => ({
+            ...base,
+            paddingTop: 0,
+            paddingBottom: 0,
+          }),
+          clearIndicator: (base) => ({
+            ...base,
+            paddingTop: 0,
+            paddingBottom: 0,
+          }),
+          menu: (base) => ({
+            ...base,
+            fontSize: "12px",
+          }),
+          option: (base) => ({
+            ...base,
+            fontSize: "12px",
+            padding: "8px 12px",
           }),
         }}
         cacheOptions
