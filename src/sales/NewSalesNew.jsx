@@ -470,7 +470,7 @@ Thank you for your business!`;
         setInvoiceNumber((prevNumber) => incrementInvoiceNumber(prevNumber));
 
         // Generate and download PDF after successful invoice creation
-        //await generateAndDownloadPDF();
+        // await generateAndDownloadPDF();
 
         // Add any additional logic here, like redirecting to the invoice page
       } else {
@@ -852,7 +852,7 @@ Thank you for your business!`;
       ...itemInputs[index],
       itemName: product.name,
       price: calculatedPrice.toFixed(2),
-      purchasePrice: product.pricing?.purchasePrice ?? null,
+      purchasePrice: product.purchasePriceTaxes?.purchasePrice ?? null,
       originalSalePrice: product.pricing.salePrice, // Store original sale price for calculations
       quantity: "1",
       discount: discount,
