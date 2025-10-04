@@ -1,7 +1,7 @@
 import "./SalesDashboard.css";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { BASE_URL, GET_SALES_TOTALS } from "../Constants";
+import { BASE_URL, GET_SALES_TOTALS, GET_SALES_REPORTS } from "../Constants";
 
 const SalesDashboard = () => {
   const navigate = useNavigate();
@@ -75,6 +75,9 @@ const SalesDashboard = () => {
     totalBalanceAmount: 0,
     percentageChange: 0,
   });
+  const [salesTransactions, setSalesTransactions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Check if device is mobile
   useEffect(() => {
@@ -120,9 +123,44 @@ const SalesDashboard = () => {
     }
   };
 
-  // Fetch sales totals when component mounts or filter changes
+  // Fetch sales reports/transactions from API
+  const fetchSalesReports = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      let url = `${BASE_URL}/${GET_SALES_REPORTS}`;
+
+      // Add date range params if filter is applied
+      if (filterType !== "All Sale Invoices" && fromDate && toDate) {
+        url += `?fromDate=${fromDate}&toDate=${toDate}`;
+      }
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch sales reports: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Sales Reports Response: ", data);
+      
+      // Assuming the API returns data in data.data or data array format
+      const transactions = data.data || data || [];
+      setSalesTransactions(transactions);
+    } catch (error) {
+      console.error("Error fetching sales reports:", error);
+      setError(error.message);
+      setSalesTransactions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch sales totals and reports when component mounts or filter changes
   useEffect(() => {
     fetchSalesTotals();
+    fetchSalesReports();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterType, fromDate, toDate]);
 
@@ -384,11 +422,81 @@ const SalesDashboard = () => {
               </tr>
             </thead>
             <tbody>
-              <tr className="no-data-row">
-                <td colSpan="8" className="no-data-message">
-                  No Sales Transaction
-                </td>
-              </tr>
+              {loading ? (
+                <tr className="loading-row">
+                  <td colSpan="8" className="loading-message">
+                    Loading transactions...
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr className="error-row">
+                  <td colSpan="8" className="error-message">
+                    Error: {error}
+                  </td>
+                </tr>
+              ) : salesTransactions.length === 0 ? (
+                <tr className="no-data-row">
+                  <td colSpan="8" className="no-data-message">
+                    No Sales Transaction
+                  </td>
+                </tr>
+              ) : (
+                salesTransactions.map((transaction, index) => (
+                  <tr key={transaction.id || index} className="transaction-row">
+                    <td>
+                      {transaction.date ? 
+                        new Date(transaction.date).toLocaleDateString('en-IN') : 
+                        '-'
+                      }
+                    </td>
+                    <td>{transaction.invoiceNumber || transaction.invoiceNo || '-'}</td>
+                    <td>{transaction.customerName || transaction.partyName || '-'}</td>
+                    <td>{transaction.transactionType || transaction.transaction || 'Sale'}</td>
+                    <td>{transaction.paymentType || transaction.paymentMode || '-'}</td>
+                    <td>
+                      ₹ {transaction.netAmount ? 
+                        transaction.netAmount.toLocaleString('en-IN', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        }) : '0.00'
+                      }
+                    </td>
+                    <td>
+                      ₹ {transaction.balanceAmount ? 
+                        transaction.balanceAmount.toLocaleString('en-IN', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        }) : '0.00'
+                      }
+                    </td>
+                    {/* <td>
+                      <div className="action-buttons">
+                        <button 
+                          className="action-btn view-btn"
+                          title="View Details"
+                          onClick={() => console.log('View transaction:', transaction)}
+                        >
+                          👁️
+                        </button>
+                        <button 
+                          className="action-btn edit-btn"
+                          title="Edit"
+                          onClick={() => console.log('Edit transaction:', transaction)}
+                        >
+                          ✏️
+                        </button>
+                        <button 
+                          className="action-btn delete-btn"
+                          title="Delete"
+                          onClick={() => console.log('Delete transaction:', transaction)}
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </td> */}
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

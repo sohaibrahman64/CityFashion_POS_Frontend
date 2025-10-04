@@ -57,3 +57,4 @@ export const GET_TAX_RATES = "api/tax-rates/getAllActiveTaxRates";
 export const GET_TAX_RATES_LABELS = "api/tax-rates/getAllActiveTaxRateLabels";
 export const CREATE_SALES_TRANSACTION = "api/sales-transactions/create";
 export const GET_SALES_TOTALS = "api/sales-transactions/totals";
+export const GET_SALES_REPORTS = "api/sales-transactions/report";
