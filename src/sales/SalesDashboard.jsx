@@ -1,6 +1,6 @@
 import "./SalesDashboard.css";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { BASE_URL, GET_SALES_TOTALS, GET_SALES_REPORTS } from "../Constants";
 
 const SalesDashboard = () => {
@@ -79,6 +79,12 @@ const SalesDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Transaction actions menu state
+  const [showTransactionActionsMenu, setShowTransactionActionsMenu] =
+    useState(false);
+  const [activeTransactionId, setActiveTransactionId] = useState(null);
+  const transactionActionsRef = useRef(null);
+
   // Check if device is mobile
   useEffect(() => {
     const checkMobile = () => {
@@ -127,7 +133,7 @@ const SalesDashboard = () => {
   const fetchSalesReports = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       let url = `${BASE_URL}/${GET_SALES_REPORTS}`;
 
@@ -144,7 +150,7 @@ const SalesDashboard = () => {
 
       const data = await response.json();
       console.log("Sales Reports Response: ", data);
-      
+
       // Assuming the API returns data in data.data or data array format
       const transactions = data.data || data || [];
       setSalesTransactions(transactions);
@@ -164,6 +170,24 @@ const SalesDashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterType, fromDate, toDate]);
 
+  // Handle clicks outside transaction actions menu to close it
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        transactionActionsRef.current &&
+        !transactionActionsRef.current.contains(event.target)
+      ) {
+        setShowTransactionActionsMenu(false);
+        setActiveTransactionId(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const getDateRange = (filter) => {
     if (filter === "Custom") {
       return { from: fromDate, to: toDate };
@@ -180,22 +204,32 @@ const SalesDashboard = () => {
     switch (filter) {
       case "This Month":
         return "vs last month";
-      
+
       case "Last Month":
         const lastMonthStart = new Date(currentYear, currentMonth - 2, 1);
         const monthNames = [
-          "January", "February", "March", "April", "May", "June",
-          "July", "August", "September", "October", "November", "December"
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
         ];
         const previousMonthName = monthNames[lastMonthStart.getMonth()];
         return `vs ${previousMonthName}`;
-      
+
       case "This Year":
         return "vs last year";
-      
+
       case "This Quarter":
         return "vs last quarter";
-      
+
       default:
         return "vs last month";
     }
@@ -211,6 +245,112 @@ const SalesDashboard = () => {
       setFromDate("");
       setToDate("");
     }
+  };
+
+  // Handle transaction actions click
+  const handleTransactionActionsClick = (transactionId, event) => {
+    event.stopPropagation();
+    setActiveTransactionId(transactionId);
+    setShowTransactionActionsMenu(true);
+  };
+
+  // Handle transaction action selection
+  const handleTransactionAction = (action, transactionId) => {
+    console.log(`${action} action for transaction:`, transactionId);
+
+    // Find the transaction data
+    const transaction = salesTransactions.find(
+      (t) => t.id === transactionId
+    );
+
+    switch (action) {
+      case "view_edit":
+        if (transaction) {
+          console.log("View/Edit transaction:", transaction);
+          // TODO: Navigate to edit page or open edit modal
+        }
+        break;
+      case "convert_to_return":
+        if (transaction) {
+          console.log("Convert To Return transaction:", transaction);
+          // TODO: Implement convert to return functionality
+          // This might open a modal or navigate to a return creation page
+        }
+        break;
+      case "preview_delivery_challan":
+        if (transaction) {
+          console.log("Preview Delivery Challan for transaction:", transaction);
+          // TODO: Implement delivery challan preview functionality
+          // This might open a preview modal or navigate to a delivery challan page
+        }
+        break;
+      case "cancel_invoice":
+        if (transaction) {
+          console.log("Cancel Invoice transaction:", transaction);
+          // Show cancellation confirmation
+          if (
+            window.confirm(
+              "Are you sure you want to cancel this invoice? This action cannot be undone."
+            )
+          ) {
+            // TODO: Implement cancel invoice API call
+            console.log("Cancelling invoice:", transactionId);
+          }
+        }
+        break;
+      case "delete":
+        // Show delete confirmation
+        if (
+          window.confirm(
+            "Are you sure you want to delete this transaction? This action cannot be undone."
+          )
+        ) {
+          console.log("Delete transaction:", transactionId);
+          // TODO: Implement delete API call
+        }
+        break;
+      case "duplicate":
+        if (transaction) {
+          console.log("Duplicate transaction:", transaction);
+          // TODO: Implement duplicate functionality
+          // This might navigate to a new sale form with pre-filled data
+        }
+        break;
+      case "open_pdf":
+        if (transaction) {
+          console.log("Open PDF for transaction:", transaction);
+          // TODO: Implement PDF opening functionality
+          // This might open the invoice PDF in a new tab or download it
+        }
+        break;
+      case "preview":
+        if (transaction) {
+          console.log("Preview transaction:", transaction);
+          // TODO: Implement preview functionality
+          // This might open a preview modal or navigate to a preview page
+        }
+        break;
+      case "print":
+        if (transaction) {
+          console.log("Print transaction:", transaction);
+          // TODO: Implement print functionality
+          // This might trigger browser print dialog or open print preview
+        }
+        break;
+      case "view_history":
+        if (transaction) {
+          console.log("View History for transaction:", transaction);
+          // TODO: Implement view history functionality
+          // This might navigate to a history page or open a history modal
+        }
+        break;
+      default:
+        console.log("Unknown action:", action);
+    }
+
+    // Close the menu
+    setShowTransactionActionsMenu(false);
+    setActiveTransactionId(null);
   };
 
   // Show mobile message if on mobile device
@@ -300,10 +440,11 @@ const SalesDashboard = () => {
             </span>
           </div>
           <div className="percentage-group">
-            <div 
+            <div
               className="sales-percentage-box"
               style={{
-                backgroundColor: salesData.percentageChange < 0 ? "#ed2040" : "transparent",
+                backgroundColor:
+                  salesData.percentageChange < 0 ? "#ed2040" : "transparent",
               }}
             >
               <span
@@ -325,7 +466,9 @@ const SalesDashboard = () => {
                 {salesData.percentageChange < 0 ? "↓" : "↑"}
               </span>
             </div>
-            <span className="vs-last-month">{getComparisonText(filterType)}</span>
+            <span className="vs-last-month">
+              {getComparisonText(filterType)}
+            </span>
           </div>
           <div className="payment-summary">
             <span className="received-label">Received:</span>
@@ -444,56 +587,179 @@ const SalesDashboard = () => {
                 salesTransactions.map((transaction, index) => (
                   <tr key={transaction.id || index} className="transaction-row">
                     <td>
-                      {transaction.date ? 
-                        new Date(transaction.date).toLocaleDateString('en-IN') : 
-                        '-'
-                      }
-                    </td>
-                    <td>{transaction.invoiceNumber || transaction.invoiceNo || '-'}</td>
-                    <td>{transaction.customerName || transaction.partyName || '-'}</td>
-                    <td>{transaction.transactionType || transaction.transaction || 'Sale'}</td>
-                    <td>{transaction.paymentType || transaction.paymentMode || '-'}</td>
-                    <td>
-                      ₹ {transaction.netAmount ? 
-                        transaction.netAmount.toLocaleString('en-IN', {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        }) : '0.00'
-                      }
+                      {transaction.date
+                        ? new Date(transaction.date).toLocaleDateString("en-IN")
+                        : "-"}
                     </td>
                     <td>
-                      ₹ {transaction.balanceAmount ? 
-                        transaction.balanceAmount.toLocaleString('en-IN', {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        }) : '0.00'
-                      }
+                      {transaction.invoiceNumber ||
+                        transaction.invoiceNo ||
+                        "-"}
                     </td>
-                    {/* <td>
-                      <div className="action-buttons">
-                        <button 
-                          className="action-btn view-btn"
-                          title="View Details"
-                          onClick={() => console.log('View transaction:', transaction)}
+                    <td>
+                      {transaction.customerName || transaction.partyName || "-"}
+                    </td>
+                    <td>
+                      {transaction.transactionType ||
+                        transaction.transaction ||
+                        "Sale"}
+                    </td>
+                    <td>
+                      {transaction.paymentType ||
+                        transaction.paymentMode ||
+                        "-"}
+                    </td>
+                    <td>
+                      ₹{" "}
+                      {transaction.netAmount
+                        ? transaction.netAmount.toLocaleString("en-IN", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        : "0.00"}
+                    </td>
+                    <td>
+                      ₹{" "}
+                      {transaction.balanceAmount
+                        ? transaction.balanceAmount.toLocaleString("en-IN", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        : "0.00"}
+                    </td>
+                    <td>
+                      <div className="transaction-actions">
+                        <div
+                          className="transaction-three-dots"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleTransactionActionsClick(transaction.id, e);
+                          }}
                         >
-                          👁️
-                        </button>
-                        <button 
-                          className="action-btn edit-btn"
-                          title="Edit"
-                          onClick={() => console.log('Edit transaction:', transaction)}
-                        >
-                          ✏️
-                        </button>
-                        <button 
-                          className="action-btn delete-btn"
-                          title="Delete"
-                          onClick={() => console.log('Delete transaction:', transaction)}
-                        >
-                          🗑️
-                        </button>
+                          ⋮
+                        </div>
+
+                        {/* Transaction Actions Menu - positioned relative to this transaction */}
+                        {showTransactionActionsMenu &&
+                          activeTransactionId === transaction.id && (
+                            <div
+                              className="transaction-actions-menu"
+                              ref={transactionActionsRef}
+                            >
+                               <div
+                                 className="transaction-action-item"
+                                 onClick={() =>
+                                   handleTransactionAction(
+                                     "view_edit",
+                                     transaction.id
+                                   )
+                                 }
+                               >
+                                 View/Edit
+                               </div>
+                               <div
+                                 className="transaction-action-item"
+                                 onClick={() =>
+                                   handleTransactionAction(
+                                     "convert_to_return",
+                                     transaction.id
+                                   )
+                                 }
+                               >
+                                 Convert To Return
+                               </div>
+                               <div
+                                 className="transaction-action-item"
+                                 onClick={() =>
+                                   handleTransactionAction(
+                                     "preview_delivery_challan",
+                                     transaction.id
+                                   )
+                                 }
+                               >
+                                 Preview Delivery Challan
+                               </div>
+                               <div
+                                 className="transaction-action-item"
+                                 onClick={() =>
+                                   handleTransactionAction(
+                                     "cancel_invoice",
+                                     transaction.id
+                                   )
+                                 }
+                               >
+                                 Cancel Invoice
+                               </div>
+                               <div
+                                 className="transaction-action-item"
+                                 onClick={() =>
+                                   handleTransactionAction(
+                                     "delete",
+                                     transaction.id
+                                   )
+                                 }
+                               >
+                                 Delete
+                               </div>
+                               <div
+                                 className="transaction-action-item"
+                                 onClick={() =>
+                                   handleTransactionAction(
+                                     "duplicate",
+                                     transaction.id
+                                   )
+                                 }
+                               >
+                                 Duplicate
+                               </div>
+                               <div
+                                 className="transaction-action-item"
+                                 onClick={() =>
+                                   handleTransactionAction(
+                                     "open_pdf",
+                                     transaction.id
+                                   )
+                                 }
+                               >
+                                 Open PDF
+                               </div>
+                               <div
+                                 className="transaction-action-item"
+                                 onClick={() =>
+                                   handleTransactionAction(
+                                     "preview",
+                                     transaction.id
+                                   )
+                                 }
+                               >
+                                 Preview
+                               </div>
+                               <div
+                                 className="transaction-action-item"
+                                 onClick={() =>
+                                   handleTransactionAction(
+                                     "print",
+                                     transaction.id
+                                   )
+                                 }
+                               >
+                                 Print
+                               </div>
+                               <div
+                                 className="transaction-action-item"
+                                 onClick={() =>
+                                   handleTransactionAction(
+                                     "view_history",
+                                     transaction.id
+                                   )
+                                 }
+                               >
+                                 View History
+                               </div>
+                            </div>
+                          )}
                       </div>
-                    </td> */}
+                    </td>
                   </tr>
                 ))
               )}

@@ -462,6 +462,78 @@
   background-color: #f8f9fa;
 }
 
+.transaction-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  position: relative;
+}
+
+.transaction-three-dots {
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 18px;
+  color: #666;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.transaction-three-dots:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.transaction-actions-menu {
+  position: fixed;
+  top: 60%;
+  right: 120px;
+  transform: translateY(-50%);
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 180px;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease-in-out;
+  white-space: nowrap;
+}
+
+.transaction-action-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+}
+
+.transaction-action-item:last-child {
+  border-bottom: none;
+}
+
+.transaction-action-item:hover {
+  background-color: #f8f9fa;
+  color: #007bff;
+}
+
+.transaction-action-item:active {
+  background-color: #e9ecef;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
  /* Desktop Only - Hide on Mobile */
  @media (max-width: 768px) {
    .sales-dashboard-container {
