@@ -114,7 +114,7 @@ const NewSalesNew = () => {
     document.addEventListener("mousedown", handleClickOutside);
     window.addEventListener("scroll", updateDropdownPosition);
     window.addEventListener("resize", updateDropdownPosition);
-    
+
     // Also listen for scroll events on any scrollable containers
     document.addEventListener("scroll", updateDropdownPosition, true);
 
@@ -411,6 +411,7 @@ Thank you for your business!`;
           customerPhone: customerPhone,
           items: itemInputs,
           receivedAmount: receivedAmount,
+          subtotalAmount: calculateSubTotal(),
           totalAmount: calculateSubTotal(),
           balanceAmount: calculateSubTotal() - parseFloat(receivedAmount || 0),
           discountAmount: itemInputs
@@ -424,6 +425,8 @@ Thank you for your business!`;
                   100,
               0
             ),
+          totalTaxAmount: calculateTotalTaxAmount(),
+          taxableAmount: calculateTaxableAmount(),
           isFullyReceived: isFullyReceived,
         }),
       });
@@ -588,12 +591,18 @@ Thank you for your business!`;
       console.log("validItemsForPayload", validItemsForPayload);
       console.log("costOfGoodsSold", costOfGoodsSold);
 
+      const totalQuantity = validItemsForPayload.reduce(
+        (sum, item) => sum + parseFloat(item.quantity || 0),
+        0
+      );
+
       const payload = {
         invoiceId: invoiceData.invoiceId || null,
         invoiceNumber: invoiceData.invoiceNumber || invoiceNumber,
         customerName: customerName,
         customerPhone: customerPhone,
         totalAmount: calculateSubTotal(),
+        taxAmount: invoiceData.totalTaxAmount || 0.0,
         netAmount: calculateSubTotal(),
         receivedAmount: parseFloat(receivedAmount || 0),
         balanceAmount: calculateSubTotal() - parseFloat(receivedAmount || 0),
@@ -609,6 +618,7 @@ Thank you for your business!`;
             0
           ),
         itemCount: validItemsForPayload.length,
+        totalQuantity: totalQuantity,
         items: validItemsForPayload,
         costOfGoodsSold: costOfGoodsSold,
         createdBy: "SYSTEM",
@@ -952,7 +962,7 @@ Thank you for your business!`;
   const handleTaxRateChange = (index, value) => {
     const newItemInputs = [...itemInputs];
     newItemInputs[index].taxRateId = value;
-
+    newItemInputs[index].taxRate = value;
     // Get the selected tax rate by array index
     const selectedTaxRate = taxRates[parseInt(value)];
     if (selectedTaxRate) {
@@ -963,6 +973,8 @@ Thank you for your business!`;
       const subtotal = price * quantity;
       const taxAmount = (subtotal * rate) / 100;
       newItemInputs[index].taxAmount = taxAmount.toFixed(2);
+      newItemInputs[index].taxPercent = rate.toFixed(2);
+      newItemInputs[index].taxRate = rate.toFixed(2);
     }
 
     setItemInputs(newItemInputs);
@@ -1025,6 +1037,7 @@ Thank you for your business!`;
           price: updatedPrice.toFixed(2),
           total: calculatedTotal.toFixed(2),
           taxAmount: calculatedTaxAmount,
+          taxPercent: item.taxPercent,
         };
       }
       return item;
@@ -1107,6 +1120,30 @@ Thank you for your business!`;
       (sum, item) => sum + parseFloat(item.total || 0),
       0
     );
+  };
+
+  // Calculate total tax amount from all items
+  const calculateTotalTaxAmount = () => {
+    return itemInputs
+      .filter((item) => item.itemName.trim() !== "")
+      .reduce((sum, item) => {
+        const taxAmount = parseFloat(item.taxAmount || 0);
+        return sum + taxAmount;
+      }, 0);
+  };
+
+  // Calculate taxable amount (total before tax)
+  const calculateTaxableAmount = () => {
+    return itemInputs
+      .filter((item) => item.itemName.trim() !== "")
+      .reduce((sum, item) => {
+        const quantity = parseFloat(item.quantity || 0);
+        const price = parseFloat(item.price || 0);
+        const discountAmount = parseFloat(item.discountAmount || 0);
+        const subtotal = quantity * price;
+        const afterDiscount = subtotal - discountAmount;
+        return sum + afterDiscount;
+      }, 0);
   };
 
   const handleFullyReceivedChange = (checked) => {
@@ -1412,7 +1449,8 @@ Thank you for your business!`;
                             setTimeout(() => {
                               const inputElement = e.target;
                               if (inputElement && suggestionsRef.current) {
-                                const rect = inputElement.getBoundingClientRect();
+                                const rect =
+                                  inputElement.getBoundingClientRect();
                                 const element = suggestionsRef.current;
                                 element.style.position = "fixed";
                                 element.style.top = `${rect.bottom + 2}px`;
