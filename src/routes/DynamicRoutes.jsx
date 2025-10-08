@@ -35,6 +35,7 @@ import SuppliersList from "../suppliers/SuppliersList";
 import BarcodeGenerator from "../settings/BarcodeGenerator";
 import ProductTransactions from "../product/ProductTransactions";
 import SalesDashboard from "../sales/SalesDashboard";
+import NewSalesInvoicePreview from "../sales/NewSalesInvoicePreview";
 
 const routeComponentMap = {
   "/dashboard": <Dashboard />,
@@ -47,6 +48,7 @@ const routeComponentMap = {
   "/invoices/all": <AllInvoices />,
   "/invoices/share": <ShareViaWhatsApp />,
   "/invoice/print": <PrintDownloadInvoice />,
+  "/sales/preview": <NewSalesInvoicePreview />,
   "/purchase/add": <AddPurchase />,
   "/purchase/history": <PurchaseHistory />,
   "/expenses/add": <AddExpenses />,
@@ -98,6 +100,8 @@ const DynamicRoutes = ({ menuData }) => {
   return (
     <Routes>
       {renderRoutes(menuData)}
+      {/* Always-available routes independent of menu configuration */}
+      {/* <Route path="/sales/preview" element={<NewSalesInvoicePreview />} /> */}
       <Route path="*" element={<h3>404 - Page Not Found</h3>} />
     </Routes>
   );

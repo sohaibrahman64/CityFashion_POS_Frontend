@@ -1373,6 +1373,14 @@
   margin-top: 2px;
 }
 
+.gst-percentage {
+  color: #666;
+  font-size: 9px;
+  margin-left: 0;
+  display: block;
+  margin-top: 2px;
+}
+
 .invoice-bottom-section {
   display: flex;
   justify-content: space-between;
@@ -1450,4 +1458,80 @@
   font-size: 18px;
   font-weight: 700;
   color: #333;
+}
+
+/* Tax Summary Styles */
+.no-padding-cell {
+  padding: 0 !important;
+}
+
+.tax-summary-wrapper {
+  background-color: #f8f9fa;
+  padding: 12px;
+  border-top: 1px solid #ddd;
+}
+
+.tax-summary-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.tax-summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.tax-summary-table th,
+.tax-summary-table td {
+  border: 1px solid #ddd;
+  padding: 4px 6px;
+  text-align: left;
+  background-color: #f8f9fa;
+}
+
+.tax-summary-table th {
+  background-color: #e9ecef;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.ts-col-hsn {
+  width: 80px;
+}
+
+.ts-col-taxable {
+  width: 100px;
+}
+
+.ts-col-cgst,
+.ts-col-sgst {
+  width: 60px;
+}
+
+.ts-col-total {
+  width: 80px;
+}
+
+.ts-col-rate {
+  width: 40px;
+}
+
+.ts-col-amt {
+  width: 60px;
+}
+
+.ta-right {
+  text-align: right;
+}
+
+.ta-center {
+  text-align: center;
+}
+
+.tax-summary-table .total-row td {
+  font-weight: 600;
+  background-color: #e9ecef;
 }

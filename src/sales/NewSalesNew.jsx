@@ -15,9 +15,11 @@ import "./NewSalesNew.css";
 import Toast from "../components/Toast";
 import html2pdf from "html2pdf.js";
 import CustomerSelect from "./CustomerSelect";
+import { useNavigate as useRouterNavigate } from "react-router-dom";
 
 const NewSalesNew = () => {
   const navigate = useNavigate();
+  const routerNavigate = useRouterNavigate();
   const [isMobile, setIsMobile] = useState(false);
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -475,6 +477,8 @@ Thank you for your business!`;
         // Generate and download PDF after successful invoice creation
         // await generateAndDownloadPDF();
 
+        // Navigate to invoice preview page
+        routerNavigate("/sales/preview", { state: { invoice: data } });
         // Add any additional logic here, like redirecting to the invoice page
       } else {
         console.error("Failed to create invoice");
@@ -871,6 +875,7 @@ Thank you for your business!`;
       productId: product.id,
       hsnCode: product.hsn,
       taxRateId: taxRateId,
+      taxPercent: product.purchasePriceTaxes?.taxRate?.rate || 0,
       taxAmount: calculatedTaxAmount,
       isProductWithTax: isProductWithTax, // Track if product includes tax
     };
@@ -1132,9 +1137,9 @@ Thank you for your business!`;
       }, 0);
   };
 
-  // Calculate taxable amount (total before tax)
+  // Calculate taxable amount (total price amount minus total tax amount)
   const calculateTaxableAmount = () => {
-    return itemInputs
+    const totalPriceAmount = itemInputs
       .filter((item) => item.itemName.trim() !== "")
       .reduce((sum, item) => {
         const quantity = parseFloat(item.quantity || 0);
@@ -1144,6 +1149,10 @@ Thank you for your business!`;
         const afterDiscount = subtotal - discountAmount;
         return sum + afterDiscount;
       }, 0);
+
+    const totalTaxAmount = calculateTotalTaxAmount();
+
+    return totalPriceAmount - totalTaxAmount;
   };
 
   const handleFullyReceivedChange = (checked) => {
@@ -1751,10 +1760,10 @@ Thank you for your business!`;
                       <tr>
                         <th>#</th>
                         <th>Item Name</th>
-                        <th>HSN Code</th>
                         <th>Qty</th>
                         <th>Price/Unit</th>
                         <th>Discount</th>
+                        <th>GST</th>
                         <th>Amount</th>
                       </tr>
                     </thead>
@@ -1765,7 +1774,6 @@ Thank you for your business!`;
                           <tr key={item.id} className="item-preview-row">
                             <td>{index + 1}</td>
                             <td>{item.itemName}</td>
-                            <td>{item.hsnCode || "N/A"}</td>
                             <td>{item.quantity || "0"}</td>
                             <td>
                               ₹{" "}
@@ -1790,6 +1798,17 @@ Thank you for your business!`;
                             <td>
                               ₹{" "}
                               {formatNumberWithCommas(
+                                parseFloat(item.taxAmount || 0).toFixed(2)
+                              )}
+                              <span className="gst-percentage">
+                                (
+                                {item.taxPercent ? `${item.taxPercent}%` : "0%"}
+                                )
+                              </span>
+                            </td>
+                            <td>
+                              ₹{" "}
+                              {formatNumberWithCommas(
                                 parseFloat(item.total || 0).toFixed(2)
                               )}
                             </td>
@@ -1797,7 +1816,7 @@ Thank you for your business!`;
                         ))}
                       {/* Total Row */}
                       <tr className="total-row">
-                        <td colSpan="3">
+                        <td colSpan="2">
                           <strong>Total</strong>
                         </td>
                         <td>
@@ -1835,12 +1854,169 @@ Thank you for your business!`;
                           <strong>
                             ₹{" "}
                             {formatNumberWithCommas(
+                              itemInputs
+                                .filter((item) => item.itemName.trim() !== "")
+                                .reduce(
+                                  (sum, item) =>
+                                    sum + parseFloat(item.taxAmount || 0),
+                                  0
+                                )
+                                .toFixed(2)
+                            )}
+                          </strong>
+                        </td>
+                        <td>
+                          <strong>
+                            ₹{" "}
+                            {formatNumberWithCommas(
                               calculateSubTotal().toFixed(2)
                             )}
                           </strong>
                         </td>
                       </tr>
                     </tbody>
+                    <tfoot>
+                      <tr>
+                        <td colSpan="7" className="no-padding-cell">
+                          <div className="tax-summary-wrapper">
+                            <div className="tax-summary-title">Tax Summary:</div>
+                            <table className="tax-summary-table">
+                              <thead>
+                                <tr>
+                                  <th rowSpan="2" className="ts-col-hsn">
+                                    HSN/ SAC
+                                  </th>
+                                  <th rowSpan="2" className="ts-col-taxable">
+                                    Taxable amount (₹)
+                                  </th>
+                                  <th colSpan="2" className="ts-col-cgst">
+                                    CGST
+                                  </th>
+                                  <th colSpan="2" className="ts-col-sgst">
+                                    SGST
+                                  </th>
+                                  <th rowSpan="2" className="ts-col-total">
+                                    Total Tax (₹)
+                                  </th>
+                                </tr>
+                                <tr>
+                                  <th className="ts-col-rate">Rate (%)</th>
+                                  <th className="ts-col-amt">Amt (₹)</th>
+                                  <th className="ts-col-rate">Rate (%)</th>
+                                  <th className="ts-col-amt">Amt (₹)</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {(() => {
+                                  // Group items by tax rate
+                                  const validItems = itemInputs.filter(
+                                    (item) => item.itemName.trim() !== ""
+                                  );
+                                  
+                                  const taxGroups = {};
+                                  validItems.forEach((item) => {
+                                    const taxPercent = parseFloat(item.taxPercent || 0);
+                                    const taxAmount = parseFloat(item.taxAmount || 0);
+                                    const quantity = parseFloat(item.quantity || 0);
+                                    const price = parseFloat(item.price || 0);
+                                    const discountAmount = parseFloat(item.discountAmount || 0);
+                                    const subtotal = quantity * price;
+                                    const afterDiscount = subtotal - discountAmount;
+                                    const taxableAmount = afterDiscount - taxAmount;
+                                    
+                                    if (!taxGroups[taxPercent]) {
+                                      taxGroups[taxPercent] = {
+                                        taxPercent: taxPercent,
+                                        taxableAmount: 0,
+                                        totalTax: 0,
+                                      };
+                                    }
+                                    
+                                    taxGroups[taxPercent].taxableAmount += taxableAmount;
+                                    taxGroups[taxPercent].totalTax += taxAmount;
+                                  });
+                                  
+                                  // Convert to array and sort by tax percent
+                                  const taxGroupsArray = Object.values(taxGroups).sort(
+                                    (a, b) => a.taxPercent - b.taxPercent
+                                  );
+                                  
+                                  // Calculate totals
+                                  const grandTotalTaxable = taxGroupsArray.reduce(
+                                    (sum, group) => sum + group.taxableAmount,
+                                    0
+                                  );
+                                  const grandTotalTax = taxGroupsArray.reduce(
+                                    (sum, group) => sum + group.totalTax,
+                                    0
+                                  );
+                                  
+                                  return (
+                                    <>
+                                      {taxGroupsArray.map((group, index) => {
+                                        const cgstRate = (group.taxPercent / 2).toFixed(2);
+                                        const sgstRate = (group.taxPercent / 2).toFixed(2);
+                                        const cgstAmount = (group.totalTax / 2).toFixed(2);
+                                        const sgstAmount = (group.totalTax / 2).toFixed(2);
+                                        
+                                        return (
+                                          <tr key={index}>
+                                            <td></td>
+                                            <td className="ta-right">
+                                              {formatNumberWithCommas(
+                                                group.taxableAmount.toFixed(2)
+                                              )}
+                                            </td>
+                                            <td className="ta-center">{cgstRate}</td>
+                                            <td className="ta-right">
+                                              {formatNumberWithCommas(cgstAmount)}
+                                            </td>
+                                            <td className="ta-center">{sgstRate}</td>
+                                            <td className="ta-right">
+                                              {formatNumberWithCommas(sgstAmount)}
+                                            </td>
+                                            <td className="ta-right">
+                                              {formatNumberWithCommas(
+                                                group.totalTax.toFixed(2)
+                                              )}
+                                            </td>
+                                          </tr>
+                                        );
+                                      })}
+                                      <tr className="total-row">
+                                        <td className="ta-center">TOTAL</td>
+                                        <td className="ta-right">
+                                          {formatNumberWithCommas(
+                                            grandTotalTaxable.toFixed(2)
+                                          )}
+                                        </td>
+                                        <td className="ta-center">&nbsp;</td>
+                                        <td className="ta-right">
+                                          {formatNumberWithCommas(
+                                            (grandTotalTax / 2).toFixed(2)
+                                          )}
+                                        </td>
+                                        <td className="ta-center">&nbsp;</td>
+                                        <td className="ta-right">
+                                          {formatNumberWithCommas(
+                                            (grandTotalTax / 2).toFixed(2)
+                                          )}
+                                        </td>
+                                        <td className="ta-right">
+                                          {formatNumberWithCommas(
+                                            grandTotalTax.toFixed(2)
+                                          )}
+                                        </td>
+                                      </tr>
+                                    </>
+                                  );
+                                })()}
+                              </tbody>
+                            </table>
+                          </div>
+                        </td>
+                      </tr>
+                    </tfoot>
                   </table>
                 </div>
               )}
@@ -1930,7 +2106,7 @@ Thank you for your business!`;
 
             <div className="action-buttons">
               <button className="save-new-btn" onClick={handleSaveNew}>
-                Save & New
+                Save & Preview Invoice
               </button>
               <div className="action-icons">
                 <button
