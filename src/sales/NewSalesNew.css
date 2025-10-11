@@ -147,7 +147,7 @@
 .items-table-new-sales th,
 .items-table-new-sales td {
   padding: 4px;
-  text-align: center;
+  text-align: left;
   border-right: 1px solid #ddd;
   font-size: 10px;
   vertical-align: middle;
@@ -1507,7 +1507,8 @@
 }
 
 .ts-col-cgst,
-.ts-col-sgst {
+.ts-col-sgst,
+.ts-col-igst {
   width: 60px;
 }
 

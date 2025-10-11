@@ -43,12 +43,12 @@ const routeComponentMap = {
   "/sales/new": <NewSalesNew />,
   "/sales/history": <PastSales />,
   "/products/add": <AddNewProductNew />,
-  "/products/transactions": <ProductTransactions />,
+  "/products": <ProductTransactions />,
   "/products/import": <BulkImportProducts />,
   "/invoices/all": <AllInvoices />,
   "/invoices/share": <ShareViaWhatsApp />,
   "/invoice/print": <PrintDownloadInvoice />,
-  "/sales/preview": <NewSalesInvoicePreview />,
+  /* "/sales/preview": <NewSalesInvoicePreview />, */
   "/purchase/add": <AddPurchase />,
   "/purchase/history": <PurchaseHistory />,
   "/expenses/add": <AddExpenses />,
@@ -101,7 +101,7 @@ const DynamicRoutes = ({ menuData }) => {
     <Routes>
       {renderRoutes(menuData)}
       {/* Always-available routes independent of menu configuration */}
-      {/* <Route path="/sales/preview" element={<NewSalesInvoicePreview />} /> */}
+      <Route path="/sales/preview" element={<NewSalesInvoicePreview />} />
       <Route path="*" element={<h3>404 - Page Not Found</h3>} />
     </Routes>
   );

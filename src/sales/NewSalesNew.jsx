@@ -15,6 +15,7 @@ import "./NewSalesNew.css";
 import Toast from "../components/Toast";
 import html2pdf from "html2pdf.js";
 import CustomerSelect from "./CustomerSelect";
+import ItemsDropdown from "../product/ItemsDropdown";
 import { useNavigate as useRouterNavigate } from "react-router-dom";
 
 const NewSalesNew = () => {
@@ -63,7 +64,6 @@ const NewSalesNew = () => {
   const [logoImage, setLogoImage] = useState(null);
   const [logoPreview, setLogoPreview] = useState(null);
 
-  const suggestionsRef = useRef(null);
   const searchTimeoutRef = useRef(null);
   const invoicePreviewRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -81,52 +81,30 @@ const NewSalesNew = () => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Close suggestions when clicking outside and update position on scroll/resize
+  // Close suggestions when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        suggestionsRef.current &&
-        !suggestionsRef.current.contains(event.target)
-      ) {
+      // Check if click is outside the ItemsDropdown component
+      const dropdownContainers = document.querySelectorAll('.items-dropdown-container');
+      let isOutside = true;
+      
+      dropdownContainers.forEach((container) => {
+        if (container.contains(event.target)) {
+          isOutside = false;
+        }
+      });
+
+      if (isOutside) {
         setShowSuggestions(false);
       }
     };
 
-    const updateDropdownPosition = () => {
-      // Update dropdown position when scrolling or resizing
-      if (
-        showSuggestions &&
-        activeRowIndex !== null &&
-        suggestionsRef.current
-      ) {
-        const activeInput = document.querySelector(
-          `input[data-row-index="${activeRowIndex}"]`
-        );
-        if (activeInput && suggestionsRef.current) {
-          const rect = activeInput.getBoundingClientRect();
-          const element = suggestionsRef.current;
-          element.style.position = "fixed";
-          element.style.top = `${rect.bottom + 2}px`;
-          element.style.left = `${rect.left}px`;
-          element.style.zIndex = "1000";
-        }
-      }
-    };
-
     document.addEventListener("mousedown", handleClickOutside);
-    window.addEventListener("scroll", updateDropdownPosition);
-    window.addEventListener("resize", updateDropdownPosition);
-
-    // Also listen for scroll events on any scrollable containers
-    document.addEventListener("scroll", updateDropdownPosition, true);
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
-      window.removeEventListener("scroll", updateDropdownPosition);
-      window.removeEventListener("resize", updateDropdownPosition);
-      document.removeEventListener("scroll", updateDropdownPosition, true);
     };
-  }, [showSuggestions, activeRowIndex]);
+  }, []);
 
   // Fetch tax rates on component mount
   useEffect(() => {
@@ -696,24 +674,13 @@ Thank you for your business!`;
 
     // Set this row as active and update search term
     setActiveRowIndex(index);
-    setSuggestions([]);
-    setShowSuggestions(false);
     setSearchTerm(value);
+  };
 
-    // Position the dropdown below the specific input field
-    setTimeout(() => {
-      const activeInput = document.querySelector(
-        `input[data-row-index="${index}"]`
-      );
-      if (activeInput && suggestionsRef.current) {
-        const rect = activeInput.getBoundingClientRect();
-        const element = suggestionsRef.current;
-        element.style.position = "fixed";
-        element.style.top = `${rect.bottom + 2}px`;
-        element.style.left = `${rect.left}px`;
-        element.style.zIndex = "1000";
-      }
-    }, 0);
+  const handleItemDropdownFocus = (index, event) => {
+    setActiveRowIndex(index);
+    // Fetch all products when input is focused
+    fetchAllProducts();
   };
 
   const handleProductSelect = (product, index) => {
@@ -862,6 +829,10 @@ Thank you for your business!`;
       calculatedTaxAmount = ((afterDiscount * taxRate) / 100).toFixed(2);
     }
 
+    // Check if the selected tax is IGST
+    const selectedTaxRate = taxRateId !== null ? taxRates[parseInt(taxRateId)] : null;
+    const isIGST = selectedTaxRate?.label?.toUpperCase().includes('IGST') || false;
+
     itemInputs[index] = {
       ...itemInputs[index],
       itemName: product.name,
@@ -878,6 +849,7 @@ Thank you for your business!`;
       taxPercent: product.purchasePriceTaxes?.taxRate?.rate || 0,
       taxAmount: calculatedTaxAmount,
       isProductWithTax: isProductWithTax, // Track if product includes tax
+      isIGST: isIGST, // Track if tax is IGST
     };
     setItemInputs(itemInputs);
     setSelectedProduct(product);
@@ -972,6 +944,7 @@ Thank you for your business!`;
     const selectedTaxRate = taxRates[parseInt(value)];
     if (selectedTaxRate) {
       const rate = selectedTaxRate.rate || 0;
+      const isIGST = selectedTaxRate.label?.toUpperCase().includes('IGST') || false;
 
       const price = parseFloat(newItemInputs[index].price) || 0;
       const quantity = parseFloat(newItemInputs[index].quantity) || 0;
@@ -980,6 +953,7 @@ Thank you for your business!`;
       newItemInputs[index].taxAmount = taxAmount.toFixed(2);
       newItemInputs[index].taxPercent = rate.toFixed(2);
       newItemInputs[index].taxRate = rate.toFixed(2);
+      newItemInputs[index].isIGST = isIGST;
     }
 
     setItemInputs(newItemInputs);
@@ -1444,86 +1418,17 @@ Thank you for your business!`;
                         )}
                       </td>
                       <td className="cell item-name-cell">
-                        <input
-                          type="text"
-                          placeholder="Enter Item"
+                        <ItemsDropdown
                           value={item.itemName}
-                          data-row-index={index}
-                          onChange={(e) => {
-                            handleItemNameChange(index, e.target.value);
-                          }}
-                          onFocus={(e) => {
-                            setActiveRowIndex(index);
-                            // Position the dropdown below the specific input field
-                            setTimeout(() => {
-                              const inputElement = e.target;
-                              if (inputElement && suggestionsRef.current) {
-                                const rect =
-                                  inputElement.getBoundingClientRect();
-                                const element = suggestionsRef.current;
-                                element.style.position = "fixed";
-                                element.style.top = `${rect.bottom + 2}px`;
-                                element.style.left = `${rect.left}px`;
-                                element.style.zIndex = "1000";
-                              }
-                            }, 0);
-                          }}
+                          onChange={(value) => handleItemNameChange(index, value)}
+                          onProductSelect={handleProductSelect}
+                          rowIndex={index}
+                          suggestions={suggestions}
+                          onFocus={handleItemDropdownFocus}
+                          onSearchChange={(value) => setSearchTerm(value)}
+                          showSuggestions={showSuggestions && activeRowIndex === index}
+                          placeholder="Enter Item"
                         />
-                        {showSuggestions && activeRowIndex === index && (
-                          <div
-                            className="suggestions-dropdown"
-                            ref={suggestionsRef}
-                          >
-                            <table className="suggestions-table">
-                              <thead>
-                                <tr>
-                                  <th>Add Item +</th>
-                                  <th>SALE PRICE</th>
-                                  <th>PURCHASE PRICE</th>
-                                  <th>STOCK</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {suggestions.length > 0 ? (
-                                  suggestions.map((product) => (
-                                    <tr
-                                      key={product.id}
-                                      className="suggestion-item"
-                                      onClick={() =>
-                                        handleProductSelect(product, index)
-                                      }
-                                    >
-                                      <td className="product-info">
-                                        {/* <div className="product-name"> */}
-                                        {product.productName || product.name} (
-                                        {product.productCode || product.code})
-                                        {/* </div> */}
-                                      </td>
-                                      {/* <div className="product-code"> */}
-                                      <td className="sale-price">
-                                        ₹{product.pricing?.salePrice || "0.00"}
-                                      </td>
-                                      <td className="purchase-price">
-                                        ₹
-                                        {product.pricing?.purchasePrice ||
-                                          "0.00"}
-                                      </td>
-                                      <td className="stock">
-                                        {product.stock?.openingQuantity || "0"}
-                                      </td>
-                                    </tr>
-                                  ))
-                                ) : (
-                                  <tr>
-                                    <td colSpan="4" className="no-suggestions">
-                                      No products found
-                                    </td>
-                                  </tr>
-                                )}
-                              </tbody>
-                            </table>
-                          </div>
-                        )}
                       </td>
                       <td className="cell">
                         <input
@@ -1672,65 +1577,6 @@ Thank you for your business!`;
         {/* Right Column - Invoice Preview */}
         <div className="right-column">
           <div className="invoice-preview" ref={invoicePreviewRef}>
-            <div className="invoice-header">
-              <div className="company-info">
-                {isEditingCompanyName ? (
-                  <input
-                    type="text"
-                    value={tempCompanyName}
-                    onChange={(e) => setTempCompanyName(e.target.value)}
-                    onKeyPress={handleCompanyNameKeyPress}
-                    onBlur={handleCompanyNameBlur}
-                    className="company-name-input"
-                    autoFocus
-                  />
-                ) : (
-                  <h3 onClick={handleCompanyNameClick}>{companyName}</h3>
-                )}
-                {isEditingCompanyPhone ? (
-                  <input
-                    type="text"
-                    value={tempCompanyPhone}
-                    onChange={(e) => setTempCompanyPhone(e.target.value)}
-                    onKeyPress={handleCompanyPhoneKeyPress}
-                    onBlur={handleCompanyPhoneBlur}
-                    className="company-phone-input"
-                    autoFocus
-                  />
-                ) : (
-                  <p onClick={handleCompanyPhoneClick}>{companyPhone}</p>
-                )}
-              </div>
-              <div className="logo-placeholder" onClick={handleLogoClick}>
-                {logoPreview ? (
-                  <img
-                    src={logoPreview}
-                    alt="Company Logo"
-                    className="logo-image"
-                  />
-                ) : (
-                  <>
-                    <span className="logo-text">LOGO</span>
-                    <div className="logo-upload-overlay">
-                      <div className="upload-content">
-                        <span className="camera-icon">📷</span>
-                        <span className="upload-text">Upload Image</span>
-                      </div>
-                    </div>
-                  </>
-                )}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  style={{ display: "none" }}
-                />
-              </div>
-            </div>
-
-            <div className="header-separator"></div>
-
             <h2 className="invoice-title">Tax Invoice</h2>
 
             <div className="invoice-details">
@@ -1882,33 +1728,61 @@ Thank you for your business!`;
                             <div className="tax-summary-title">Tax Summary:</div>
                             <table className="tax-summary-table">
                               <thead>
-                                <tr>
-                                  <th rowSpan="2" className="ts-col-hsn">
-                                    HSN/ SAC
-                                  </th>
-                                  <th rowSpan="2" className="ts-col-taxable">
-                                    Taxable amount (₹)
-                                  </th>
-                                  <th colSpan="2" className="ts-col-cgst">
-                                    CGST
-                                  </th>
-                                  <th colSpan="2" className="ts-col-sgst">
-                                    SGST
-                                  </th>
-                                  <th rowSpan="2" className="ts-col-total">
-                                    Total Tax (₹)
-                                  </th>
-                                </tr>
-                                <tr>
-                                  <th className="ts-col-rate">Rate (%)</th>
-                                  <th className="ts-col-amt">Amt (₹)</th>
-                                  <th className="ts-col-rate">Rate (%)</th>
-                                  <th className="ts-col-amt">Amt (₹)</th>
-                                </tr>
+                                {(() => {
+                                  // Check if any item has IGST
+                                  const hasIGST = itemInputs
+                                    .filter((item) => item.itemName.trim() !== "")
+                                    .some((item) => item.isIGST);
+
+                                  return (
+                                    <>
+                                      <tr>
+                                        <th rowSpan="2" className="ts-col-hsn">
+                                          HSN/ SAC
+                                        </th>
+                                        <th rowSpan="2" className="ts-col-taxable">
+                                          Taxable amount (₹)
+                                        </th>
+                                        {hasIGST ? (
+                                          <th colSpan="2" className="ts-col-igst">
+                                            IGST
+                                          </th>
+                                        ) : (
+                                          <>
+                                            <th colSpan="2" className="ts-col-cgst">
+                                              CGST
+                                            </th>
+                                            <th colSpan="2" className="ts-col-sgst">
+                                              SGST
+                                            </th>
+                                          </>
+                                        )}
+                                        <th rowSpan="2" className="ts-col-total">
+                                          Total Tax (₹)
+                                        </th>
+                                      </tr>
+                                      <tr>
+                                        {hasIGST ? (
+                                          <>
+                                            <th className="ts-col-rate">Rate (%)</th>
+                                            <th className="ts-col-amt">Amt (₹)</th>
+                                          </>
+                                        ) : (
+                                          <>
+                                            <th className="ts-col-rate">Rate (%)</th>
+                                            <th className="ts-col-amt">Amt (₹)</th>
+                                            <th className="ts-col-rate">Rate (%)</th>
+                                            <th className="ts-col-amt">Amt (₹)</th>
+                                          </>
+                                        )}
+                                      </tr>
+                                    </>
+                                  );
+                                })()}
                               </thead>
                               <tbody>
                                 {(() => {
-                                  // Group items by tax rate
+                                  // Group items by tax rate and type (IGST vs CGST/SGST)
                                   const validItems = itemInputs.filter(
                                     (item) => item.itemName.trim() !== ""
                                   );
@@ -1923,17 +1797,22 @@ Thank you for your business!`;
                                     const subtotal = quantity * price;
                                     const afterDiscount = subtotal - discountAmount;
                                     const taxableAmount = afterDiscount - taxAmount;
+                                    const isIGST = item.isIGST || false;
                                     
-                                    if (!taxGroups[taxPercent]) {
-                                      taxGroups[taxPercent] = {
+                                    // Create unique key combining tax rate and tax type
+                                    const groupKey = `${taxPercent}_${isIGST ? 'IGST' : 'GST'}`;
+                                    
+                                    if (!taxGroups[groupKey]) {
+                                      taxGroups[groupKey] = {
                                         taxPercent: taxPercent,
                                         taxableAmount: 0,
                                         totalTax: 0,
+                                        isIGST: isIGST,
                                       };
                                     }
                                     
-                                    taxGroups[taxPercent].taxableAmount += taxableAmount;
-                                    taxGroups[taxPercent].totalTax += taxAmount;
+                                    taxGroups[groupKey].taxableAmount += taxableAmount;
+                                    taxGroups[groupKey].totalTax += taxAmount;
                                   });
                                   
                                   // Convert to array and sort by tax percent
@@ -1951,37 +1830,66 @@ Thank you for your business!`;
                                     0
                                   );
                                   
+                                  // Check if any item has IGST
+                                  const hasIGST = taxGroupsArray.some(group => group.isIGST);
+                                  
                                   return (
                                     <>
                                       {taxGroupsArray.map((group, index) => {
-                                        const cgstRate = (group.taxPercent / 2).toFixed(2);
-                                        const sgstRate = (group.taxPercent / 2).toFixed(2);
-                                        const cgstAmount = (group.totalTax / 2).toFixed(2);
-                                        const sgstAmount = (group.totalTax / 2).toFixed(2);
-                                        
-                                        return (
-                                          <tr key={index}>
-                                            <td></td>
-                                            <td className="ta-right">
-                                              {formatNumberWithCommas(
-                                                group.taxableAmount.toFixed(2)
-                                              )}
-                                            </td>
-                                            <td className="ta-center">{cgstRate}</td>
-                                            <td className="ta-right">
-                                              {formatNumberWithCommas(cgstAmount)}
-                                            </td>
-                                            <td className="ta-center">{sgstRate}</td>
-                                            <td className="ta-right">
-                                              {formatNumberWithCommas(sgstAmount)}
-                                            </td>
-                                            <td className="ta-right">
-                                              {formatNumberWithCommas(
-                                                group.totalTax.toFixed(2)
-                                              )}
-                                            </td>
-                                          </tr>
-                                        );
+                                        if (group.isIGST) {
+                                          // IGST row - single column for IGST
+                                          return (
+                                            <tr key={index}>
+                                              <td></td>
+                                              <td className="ta-right">
+                                                {formatNumberWithCommas(
+                                                  group.taxableAmount.toFixed(2)
+                                                )}
+                                              </td>
+                                              <td className="ta-center">{group.taxPercent.toFixed(2)}</td>
+                                              <td className="ta-right">
+                                                {formatNumberWithCommas(
+                                                  group.totalTax.toFixed(2)
+                                                )}
+                                              </td>
+                                              <td className="ta-right">
+                                                {formatNumberWithCommas(
+                                                  group.totalTax.toFixed(2)
+                                                )}
+                                              </td>
+                                            </tr>
+                                          );
+                                        } else {
+                                          // CGST/SGST row - split columns
+                                          const cgstRate = (group.taxPercent / 2).toFixed(2);
+                                          const sgstRate = (group.taxPercent / 2).toFixed(2);
+                                          const cgstAmount = (group.totalTax / 2).toFixed(2);
+                                          const sgstAmount = (group.totalTax / 2).toFixed(2);
+                                          
+                                          return (
+                                            <tr key={index}>
+                                              <td></td>
+                                              <td className="ta-right">
+                                                {formatNumberWithCommas(
+                                                  group.taxableAmount.toFixed(2)
+                                                )}
+                                              </td>
+                                              <td className="ta-center">{cgstRate}</td>
+                                              <td className="ta-right">
+                                                {formatNumberWithCommas(cgstAmount)}
+                                              </td>
+                                              <td className="ta-center">{sgstRate}</td>
+                                              <td className="ta-right">
+                                                {formatNumberWithCommas(sgstAmount)}
+                                              </td>
+                                              <td className="ta-right">
+                                                {formatNumberWithCommas(
+                                                  group.totalTax.toFixed(2)
+                                                )}
+                                              </td>
+                                            </tr>
+                                          );
+                                        }
                                       })}
                                       <tr className="total-row">
                                         <td className="ta-center">TOTAL</td>
@@ -1990,18 +1898,31 @@ Thank you for your business!`;
                                             grandTotalTaxable.toFixed(2)
                                           )}
                                         </td>
-                                        <td className="ta-center">&nbsp;</td>
-                                        <td className="ta-right">
-                                          {formatNumberWithCommas(
-                                            (grandTotalTax / 2).toFixed(2)
-                                          )}
-                                        </td>
-                                        <td className="ta-center">&nbsp;</td>
-                                        <td className="ta-right">
-                                          {formatNumberWithCommas(
-                                            (grandTotalTax / 2).toFixed(2)
-                                          )}
-                                        </td>
+                                        {hasIGST ? (
+                                          <>
+                                            <td className="ta-center">&nbsp;</td>
+                                            <td className="ta-right">
+                                              {formatNumberWithCommas(
+                                                grandTotalTax.toFixed(2)
+                                              )}
+                                            </td>
+                                          </>
+                                        ) : (
+                                          <>
+                                            <td className="ta-center">&nbsp;</td>
+                                            <td className="ta-right">
+                                              {formatNumberWithCommas(
+                                                (grandTotalTax / 2).toFixed(2)
+                                              )}
+                                            </td>
+                                            <td className="ta-center">&nbsp;</td>
+                                            <td className="ta-right">
+                                              {formatNumberWithCommas(
+                                                (grandTotalTax / 2).toFixed(2)
+                                              )}
+                                            </td>
+                                          </>
+                                        )}
                                         <td className="ta-right">
                                           {formatNumberWithCommas(
                                             grandTotalTax.toFixed(2)
