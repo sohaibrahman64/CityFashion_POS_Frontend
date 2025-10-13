@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import "./Sidebar.css";
 import { BASE_URL, MENU, GET_ALL_ACTIVE_MENUS } from "../Constants";
 import {
+  FaHome,
   FaChartLine,
   FaBoxOpen,
   FaFileInvoice,
@@ -17,7 +18,38 @@ import {
   FaPlus,
   FaMinus,
   FaFileInvoiceDollar,
+  FaHandHoldingUsd,
+  FaBarcode,
+  FaFileContract,
+  FaBuilding,
+  FaUserPlus,
+  FaFileImport, 
+  FaListAlt,
+  FaRupeeSign,
+  FaDesktop,
+  FaListUl,
+  FaInbox,
+  FaJediOrder,
+  FaReceipt,
+  FaCreditCard,
+  FaDollarSign,
+  FaHandshake,
+  FaPersonBooth,
+  FaServicestack,
+  FaProductHunt,
+  FaShoppingBasket,
+  FaPercent,
+  FaMoneyBillWave
 } from "react-icons/fa";
+import Home from "../home/Home";
+import SalesDashboard from "../sales/SalesDashboard";
+import ItemsDashboard from "../items/ItemsDashboard";
+import BarcodeGenerator from "../settings/BarcodeGenerator";
+import ReportsDashboard from "../reports/ReportsDashboard";
+import MyBusiness from "../settings/MyBusiness";
+import Logout from "../login/LogoutPage";
+import ItemCategoriesDashboard from "../items/ItemCategoriesDashboard";
+import EstimateQuotationDashboard from "../sales/EstimateQuotationDashboard";
 
 const iconMap = {
   Dashboard: <FaChartLine />,
@@ -35,7 +67,38 @@ const iconMap = {
   Logout: <FaSignOutAlt />,
 };
 
-const Sidebar = ({ roleId }) => {
+const iconMapNew = {
+  Home: <FaHome />,
+  Parties: <FaUsers />,
+  SalesDashboard: <FaRupeeSign />,
+  NewSalesNew: <FaFileInvoice />,
+  NewSalesPOS: <FaDesktop />,
+  EstimateQuotationDashboard: <FaListUl />,
+  ProformaInvoiceDashboard: <FaInbox />,
+  PaymentInDashboard: <FaDollarSign />,
+  SalesOrderDashboard: <FaJediOrder />,
+  DeliveryChallanDashboard: <FaReceipt />,
+  SalesReturnDashboard: <FaCreditCard />,
+  ItemsDashboard: <FaBoxOpen />,
+  PurchaseDashboard: <FaHandHoldingUsd />,
+  ExpensesDashboard: <FaMoneyBill />,
+  PaymentOutDashboard: <FaDollarSign />,
+  BarcodeGenerator: <FaBarcode />,
+  ReportsDashboard: <FaFileContract />,
+  TransactionsReport: <FaHandshake />,
+  PartyReport: <FaPersonBooth />,
+  GSTReport: <FaServicestack />,
+  ItemsReport: <FaShoppingBasket />,
+  TaxReport: <FaPercent />,
+  ExpensesReport: <FaMoneyBillWave />,
+  SalesPurchaseOrderReport: <FaFileContract />,
+  BulkImportItems: <FaFileImport />,
+  ItemCategoriesDashboard: <FaListAlt />,
+  MyBusiness: <FaBuilding />,
+  Logout: <FaSignOutAlt />,
+};
+
+const Sidebar = ({ roleId, onMenuItemClick }) => {
   const [menuItems, setMenuItems] = useState([]);
   const [expandedItems, setExpandedItems] = useState(new Set());
   const [error, setError] = useState(null);
@@ -115,7 +178,7 @@ const Sidebar = ({ roleId }) => {
           onClick={() => handleMenuItemClick(item)}
           style={{ cursor: "pointer" }}
         >
-          {iconMap[item.name] || <FaFileInvoiceDollar />}
+          {iconMapNew[item.filename] || <FaFileInvoiceDollar />}
           <span className="menu-text">{item.name}</span>
           {item.children?.length > 0 && (
             <span className="menu-arrow">

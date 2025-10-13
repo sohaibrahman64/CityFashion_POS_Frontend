@@ -5,7 +5,7 @@ import Sidebar from "./sidebar/Sidebar";
 import LoginPage from "./login/LoginPage";
 import "./App.css";
 import axios from "axios";
-import { BASE_URL, MENU } from "./Constants";
+import { BASE_URL, MENU, GET_ALL_ACTIVE_MENUS } from "./Constants";
 import DynamicRoutes from "./routes/DynamicRoutes";
 
 const PrivateRoute = ({ children, isAuthenticated }) => {
@@ -24,21 +24,40 @@ const App = () => {
     }
   }, []);
 
+  // useEffect(() => {
+  //   const roleId = localStorage.getItem("roleId") || 1;
+  //   //if (isAuthenticated && roleId) {
+  //   const fetchMenu = async () => {
+  //     try {
+  //       const response = await axios.get(`${BASE_URL}/${MENU}`, {
+  //         params: { roleId }
+  //       });
+  //       if (response.data) {
+  //         setMenuData(response.data);
+  //         setError(null);
+  //         // Set the first menu item as selected by default
+  //         if (response.data.length > 0) {
+  //           setSelectedMenuItem(response.data[0]);
+  //         }
+  //       }
+  //     } catch (err) {
+  //       console.error("Failed to fetch menu:", err);
+  //       setError("Failed to load menu. Please try again later.");
+  //       setMenuData([]);
+  //     }
+  //   };
+  //   fetchMenu();
+  //   //}
+  // }, [localStorage.getItem('roleId')]);
+
   useEffect(() => {
-    const roleId = localStorage.getItem("roleId") || 1;
-    //if (isAuthenticated && roleId) {
     const fetchMenu = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/${MENU}`, {
-          params: { roleId }
-        });
-        if (response.data) {
-          setMenuData(response.data);
+        const response = await fetch(`${BASE_URL}/${GET_ALL_ACTIVE_MENUS}`);
+        if (response.ok) {
+          const data = await response.json();
+          setMenuData(data);
           setError(null);
-          // Set the first menu item as selected by default
-          if (response.data.length > 0) {
-            setSelectedMenuItem(response.data[0]);
-          }
         }
       } catch (err) {
         console.error("Failed to fetch menu:", err);
@@ -47,8 +66,7 @@ const App = () => {
       }
     };
     fetchMenu();
-    //}
-  }, [localStorage.getItem('roleId')]);
+  }, []);
 
   const handleMenuItemClick = (item) => {
     setSelectedMenuItem(item);
@@ -72,7 +90,7 @@ const App = () => {
           element={
             <PrivateRoute isAuthenticated={isAuthenticated}>
               <div className="app-layout">
-                <Sidebar roleId={localStorage.getItem("roleId") || 1} />
+                <Sidebar roleId={localStorage.getItem("roleId") || 1} onMenuItemClick={handleMenuItemClick} />
                 <main className="main-content">
                   <DynamicRoutes menuData={menuData} />
                 </main>

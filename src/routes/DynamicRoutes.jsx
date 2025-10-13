@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+import Home from "../home/Home";
 import Dashboard from "../dashboard/Dashboard";
 import NewSalesNew from "../sales/NewSalesNew";
 import NewSales from "../sales/NewSales";
@@ -7,6 +8,7 @@ import PastSales from "../sales/PastSales";
 import AddNewProductNew from "../product/AddNewProductNew";
 import ProductList from "../product/ProductList";
 import BulkImportProducts from "../product/BulkImport";
+import BulkImportItems from "../items/BulkImportItems";
 import AllInvoices from "../invoices/AllInvoices";
 import ShareViaWhatsApp from "../invoices/ShareViaWhatsApp";
 import PrintDownloadInvoice from "../invoices/PrintDownloadInvoice";
@@ -37,14 +39,13 @@ import ProductTransactions from "../product/ProductTransactions";
 import SalesDashboard from "../sales/SalesDashboard";
 import NewSalesInvoicePreview from "../sales/NewSalesInvoicePreview";
 import Parties from "../parties/Parties";
-import Items from "../items/Items";
+import ItemsDashboard from "../items/ItemsDashboard";
 import PurchaseDashboard from "../purchase/PurchaseDashboard";
 import ReportsDashboard from "../reports/ReportsDashboard";
 import MyBusiness from "../settings/MyBusiness";
 import Logout from "../login/LogoutPage";
 import AddParty from "../parties/AddParty";
 import AddItem from "../items/AddItem";
-import BulkImportItems from "../items/BulkImportItems";
 import NewSalesPOS from "../sales/NewSalesPOS";
 import ExpensesDashboard from "../expenses/ExpensesDashboard";
 import PaymentOutDashboard from "../purchase/PaymentOutDashboard";
@@ -108,9 +109,9 @@ const routeComponentMap = {
 };
 
 const routeComponentMapNew = {
-  "/home": <Dashboard />,
+  "/home": <Home />,
   "/parties": <Parties />,
-  "/items": <Items />,
+  "/items": <ItemsDashboard />,
   "/sales": <SalesDashboard />,
   "/purchase": <PurchaseDashboard />,
   "/barcodegen": <BarcodeGenerator />,
@@ -210,6 +211,7 @@ const DynamicRoutes = ({ menuData }) => {
       <Route path="/sales/proforma/add" element={<AddProformaInvoice />} />
       <Route path="/sales/return/add" element={<AddSalesReturn />} />
       <Route path="/sales/order/add" element={<AddSalesOrder />} />
+      <Route path="/parties/add" element={<AddParty />} />
 
       <Route path="*" element={<h3>404 - Page Not Found</h3>} />
     </Routes>
