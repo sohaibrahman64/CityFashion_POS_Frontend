@@ -50,6 +50,7 @@ import MyBusiness from "../settings/MyBusiness";
 import Logout from "../login/LogoutPage";
 import ItemCategoriesDashboard from "../items/ItemCategoriesDashboard";
 import EstimateQuotationDashboard from "../sales/EstimateQuotationDashboard";
+import PartiesDashboard from "../parties/PartiesDashboard";
 
 const iconMap = {
   Dashboard: <FaChartLine />,
@@ -69,7 +70,7 @@ const iconMap = {
 
 const iconMapNew = {
   Home: <FaHome />,
-  Parties: <FaUsers />,
+  PartiesDashboard: <FaUsers />,
   SalesDashboard: <FaRupeeSign />,
   NewSalesNew: <FaFileInvoice />,
   NewSalesPOS: <FaDesktop />,

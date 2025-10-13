@@ -38,7 +38,7 @@ import BarcodeGenerator from "../settings/BarcodeGenerator";
 import ProductTransactions from "../product/ProductTransactions";
 import SalesDashboard from "../sales/SalesDashboard";
 import NewSalesInvoicePreview from "../sales/NewSalesInvoicePreview";
-import Parties from "../parties/Parties";
+import Parties from "../parties/PartiesDashboard";
 import ItemsDashboard from "../items/ItemsDashboard";
 import PurchaseDashboard from "../purchase/PurchaseDashboard";
 import ReportsDashboard from "../reports/ReportsDashboard";
@@ -70,6 +70,7 @@ import AddEstimateQuotation from "../sales/AddEstimateQuotation";
 import AddProformaInvoice from "../sales/AddProformaInvoice";
 import AddSalesReturn from "../sales/AddSalesReturn";
 import AddSalesOrder from "../sales/AddSalesOrder";
+import PartiesDashboard from "../parties/PartiesDashboard";
 
 const routeComponentMap = {
   "/dashboard": <Dashboard />,
@@ -110,7 +111,7 @@ const routeComponentMap = {
 
 const routeComponentMapNew = {
   "/home": <Home />,
-  "/parties": <Parties />,
+  "/parties": <PartiesDashboard />,
   "/items": <ItemsDashboard />,
   "/sales": <SalesDashboard />,
   "/purchase": <PurchaseDashboard />,

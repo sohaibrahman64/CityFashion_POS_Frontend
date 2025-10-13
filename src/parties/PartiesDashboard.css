@@ -1,0 +1,389 @@
+.parties-dashboard-container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+/* Header Section */
+.parties-dashboard-header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.parties-dashboard-header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.parties-dashboard-label {
+  font-size: 18px;
+  font-weight: 600;
+  color: #3f4155;
+}
+
+.parties-dashboard-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.parties-dashboard-add-party-btn {
+    padding: 8px 16px;
+  background-color: #4a90e2;
+  color: white;
+    border: none;
+  border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+.parties-dashboard-add-party-btn:hover {
+  background-color: #357abd;
+}
+
+.parties-dashboard-add-party-btn:active {
+  transform: scale(0.98);
+}
+
+/* Two Column Layout */
+.parties-dashboard-content {
+  display: flex;
+  gap: 20px;
+  height: calc(100vh - 120px);
+}
+
+/* Left Column - Party List */
+.parties-list-column {
+  width: 25%;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.parties-search-bar {
+  padding: 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.parties-search-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.parties-search-input:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+}
+
+.parties-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+}
+
+.party-name-header {
+  flex: 1;
+}
+
+.amount-header {
+  flex: 1;
+  text-align: right;
+}
+
+.filter-icon {
+  font-size: 10px;
+  color: #999;
+  cursor: pointer;
+}
+
+.parties-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.party-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  position: relative;
+}
+
+.party-row:hover {
+  background-color: #f8f9fa;
+}
+
+.party-row.selected {
+  background-color: #e3f2fd;
+}
+
+.party-name {
+  flex: 1;
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+.party-amount {
+  flex: 1;
+  text-align: right;
+  font-size: 14px;
+  color: #29c080;
+  font-weight: 500;
+}
+
+.party-actions {
+  margin-left: 10px;
+  position: relative;
+}
+
+.party-three-dots {
+  font-size: 20px;
+  color: #999;
+  cursor: pointer;
+  padding: 0 5px;
+  user-select: none;
+}
+
+.party-three-dots:hover {
+  color: #666;
+}
+
+/* Party Actions Menu */
+.party-actions-menu {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 150px;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease-in-out;
+  white-space: nowrap;
+}
+
+.party-action-item {
+  padding: 10px 15px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.party-action-item:hover {
+  background-color: #f5f5f5;
+}
+
+.party-action-item:first-child {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Right Column - Party Details and Transactions */
+.party-details-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Party Details Section */
+.party-details-section {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.party-name-header-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.party-detail-name {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.edit-icon {
+  font-size: 16px;
+  color: #999;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.edit-icon:hover {
+  color: #4a90e2;
+}
+
+.party-contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.contact-row {
+  display: flex;
+  gap: 10px;
+}
+
+.contact-label {
+  min-width: 120px;
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.contact-value {
+  flex: 1;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Transactions Section */
+.party-transactions-section {
+  flex: 1;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.transactions-title {
+  margin: 0 0 15px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.transactions-table-wrapper {
+  flex: 1;
+  overflow: auto;
+}
+
+.party-transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.party-transactions-table thead {
+  position: sticky;
+  top: 0;
+  background-color: #f8f9fa;
+  z-index: 10;
+}
+
+.party-transactions-table th {
+  padding: 12px 15px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  border-bottom: 2px solid #e0e0e0;
+  background-color: #f8f9fa;
+}
+
+.party-transactions-table td {
+  padding: 12px 15px;
+  font-size: 14px;
+  color: #333;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.party-transactions-table tbody tr {
+  transition: background-color 0.2s;
+}
+
+.party-transactions-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.table-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.transaction-dots {
+  font-size: 18px;
+  color: #999;
+  cursor: pointer;
+  text-align: center;
+}
+
+.transaction-dots:hover {
+  color: #666;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateY(0);
+  }
+}
+
+/* Scrollbar Styling */
+.parties-list::-webkit-scrollbar,
+.transactions-table-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.parties-list::-webkit-scrollbar-track,
+.transactions-table-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.parties-list::-webkit-scrollbar-thumb,
+.transactions-table-wrapper::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.parties-list::-webkit-scrollbar-thumb:hover,
+.transactions-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #555;
+  }

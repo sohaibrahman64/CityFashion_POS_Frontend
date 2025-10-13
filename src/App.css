@@ -82,12 +82,15 @@ body {
 }
 
 .menu-label:hover {
-  background-color: #223355;
+  /* background-color: #223355; */
+  background-color: #ffffff;
+  color: #0a69b9;
 }
 
 .menu-label.active {
-  background-color: #223355;
-  color: white;
+  /*  background-color: #223355; */
+  background-color: #ffffff;
+  color: #0a69b9;
 }
 
 .icon {
