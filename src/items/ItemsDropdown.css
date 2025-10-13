@@ -1,0 +1,106 @@
+.items-dropdown-container {
+  position: relative;
+  width: 100%;
+}
+
+.items-dropdown-input {
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.items-dropdown-input:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+}
+
+.suggestions-dropdown {
+  position: fixed;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+  min-width: 500px;
+}
+
+.suggestions-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.suggestions-table thead {
+  position: sticky;
+  top: 0;
+  background: #f8f9fa;
+  z-index: 1;
+}
+
+.suggestions-table th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  border-bottom: 2px solid #ddd;
+}
+
+.suggestions-table tbody tr {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.suggestions-table tbody tr:hover {
+  background-color: #f0f7ff;
+}
+
+.suggestions-table td {
+  padding: 8px 12px;
+  font-size: 13px;
+  border-bottom: 1px solid #eee;
+}
+
+.product-info {
+  font-weight: 500;
+  color: #333;
+}
+
+.sale-price,
+.purchase-price,
+.stock {
+  text-align: right;
+  color: #666;
+}
+
+.no-suggestions {
+  text-align: center;
+  padding: 16px;
+  color: #999;
+  font-style: italic;
+}
+
+/* Scrollbar styling */
+.suggestions-dropdown::-webkit-scrollbar {
+  width: 8px;
+}
+
+.suggestions-dropdown::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.suggestions-dropdown::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.suggestions-dropdown::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+

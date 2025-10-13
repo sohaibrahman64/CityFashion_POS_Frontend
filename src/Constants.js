@@ -1,6 +1,7 @@
 export const BASE_URL = "http://localhost:8080";
 export const LOGIN = "api/auth/login";
 export const MENU = "api/menu/getMenuByRole";
+export const GET_ALL_ACTIVE_MENUS = "api/menu/getAllActiveMenus";
 export const GET_ALL_CATEGORIES = "api/categories/getAllCategories";
 export const ADD_CATEGORY = "api/categories/addCategory";
 export const DELETE_CATEGORY = "api/categories/deleteCategory";
