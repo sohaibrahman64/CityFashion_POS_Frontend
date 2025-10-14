@@ -1,14 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./AddParty.css";
+import { BASE_URL, GET_ACTIVE_STATES, GET_ACTIVE_GST_TYPES } from "../Constants";
 
 const AddParty = ({ onClose }) => {
   const [activeTab, setActiveTab] = useState("gst");
+  const [states, setStates] = useState([]);
+  const [gstTypes, setGstTypes] = useState([]);
   const [formData, setFormData] = useState({
     partyName: "Monish",
     gstin: "",
     phoneNumber: "9923536215",
-    gstType: "Unregistered/Consumer",
-    state: "Maharashtra",
+    gstType: "",
+    state: "",
     emailId: "sohaib.rahman64@gmail.com",
     billingAddress: "XYZ ABC",
     shippingAddress: "",
@@ -19,28 +22,41 @@ const AddParty = ({ onClose }) => {
     paymentType: "toPay",
     creditLimitType: "noLimit",
     customLimit: "",
-    // Additional Fields
-    additionalField1: { enabled: false, name: "", type: "text" },
-    additionalField2: { enabled: false, name: "", type: "text" },
-    additionalField3: { enabled: false, name: "", type: "text" },
-    additionalField4: { enabled: false, name: "", type: "date" },
   });
+
+  useEffect(() => {
+    // Fetch States
+    fetch(`${BASE_URL}/${GET_ACTIVE_STATES}`)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data)
+        setStates(data);
+        // Set default state if data exists
+        if (data && data.length > 0) {
+          setFormData((prev) => ({ ...prev, state: data[0].state }));
+        }
+      })
+      .catch((error) => console.error("Error fetching states:", error));
+
+    // Fetch GST Types
+    fetch(`${BASE_URL}/${GET_ACTIVE_GST_TYPES}`)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data)
+        setGstTypes(data);
+        // Set default GST type if data exists
+        if (data && data.length > 0) {
+          setFormData((prev) => ({ ...prev, gstType: data[0].gstType }));
+        }
+      })
+      .catch((error) => console.error("Error fetching GST types:", error));
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-    }));
-  };
-
-  const handleAdditionalFieldChange = (fieldNumber, field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [`additionalField${fieldNumber}`]: {
-        ...prev[`additionalField${fieldNumber}`],
-        [field]: value,
-      },
     }));
   };
 
@@ -57,8 +73,8 @@ const AddParty = ({ onClose }) => {
       partyName: "",
       gstin: "",
       phoneNumber: "",
-      gstType: "Unregistered/Consumer",
-      state: "Maharashtra",
+      gstType: gstTypes.length > 0 ? gstTypes[0].name : "",
+      state: states.length > 0 ? states[0].name : "",
       emailId: "",
       billingAddress: "",
       shippingAddress: "",
@@ -68,10 +84,6 @@ const AddParty = ({ onClose }) => {
       paymentType: "toPay",
       creditLimitType: "noLimit",
       customLimit: "",
-      additionalField1: { enabled: false, name: "", type: "text" },
-      additionalField2: { enabled: false, name: "", type: "text" },
-      additionalField3: { enabled: false, name: "", type: "text" },
-      additionalField4: { enabled: false, name: "", type: "date" },
     });
   };
 
@@ -186,15 +198,6 @@ const AddParty = ({ onClose }) => {
               Credit & Balance
               <span className="add-party-badge-new">New</span>
             </button>
-            <button
-              type="button"
-              className={`add-party-tab-button ${
-                activeTab === "additional" ? "active" : ""
-              }`}
-              onClick={() => setActiveTab("additional")}
-            >
-              Additional Fields
-            </button>
           </div>
 
           {/* Tab Content */}
@@ -211,11 +214,11 @@ const AddParty = ({ onClose }) => {
                         value={formData.gstType}
                         onChange={handleInputChange}
                       >
-                        <option value="Unregistered/Consumer">
-                          Unregistered/Consumer
-                        </option>
-                        <option value="Registered">Registered</option>
-                        <option value="Composition">Composition</option>
+                        {gstTypes.map((gstType) => (
+                          <option key={gstType.id} value={gstType.gstType}>
+                            {gstType.gstType}
+                          </option>
+                        ))}
                       </select>
                     </div>
 
@@ -227,11 +230,11 @@ const AddParty = ({ onClose }) => {
                         value={formData.state}
                         onChange={handleInputChange}
                       >
-                        <option value="Maharashtra">Maharashtra</option>
-                        <option value="Gujarat">Gujarat</option>
-                        <option value="Karnataka">Karnataka</option>
-                        <option value="Tamil Nadu">Tamil Nadu</option>
-                        <option value="Delhi">Delhi</option>
+                        {states.map((state) => (
+                          <option key={state.id} value={state.state}>
+                            {state.state}
+                          </option>
+                        ))}
                       </select>
                     </div>
 
@@ -400,97 +403,7 @@ const AddParty = ({ onClose }) => {
 
             {activeTab === "additional" && (
               <div className="add-party-additional-fields-content">
-                <div className="add-party-additional-fields-form">
-                  {/* Additional Field 1 */}
-                  <div className="add-party-additional-field-row">
-                    <input
-                      type="checkbox"
-                      checked={formData.additionalField1.enabled}
-                      onChange={(e) =>
-                        handleAdditionalFieldChange(1, "enabled", e.target.checked)
-                      }
-                      className="add-party-additional-checkbox"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Additional Field 1 Name"
-                      value={formData.additionalField1.name}
-                      onChange={(e) =>
-                        handleAdditionalFieldChange(1, "name", e.target.value)
-                      }
-                      className="add-party-additional-input"
-                    />
-                  </div>
-
-                  {/* Additional Field 2 */}
-                  <div className="add-party-additional-field-row">
-                    <input
-                      type="checkbox"
-                      checked={formData.additionalField2.enabled}
-                      onChange={(e) =>
-                        handleAdditionalFieldChange(2, "enabled", e.target.checked)
-                      }
-                      className="add-party-additional-checkbox"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Additional Field 2 Name"
-                      value={formData.additionalField2.name}
-                      onChange={(e) =>
-                        handleAdditionalFieldChange(2, "name", e.target.value)
-                      }
-                      className="add-party-additional-input"
-                    />
-                  </div>
-
-                  {/* Additional Field 3 */}
-                  <div className="add-party-additional-field-row">
-                    <input
-                      type="checkbox"
-                      checked={formData.additionalField3.enabled}
-                      onChange={(e) =>
-                        handleAdditionalFieldChange(3, "enabled", e.target.checked)
-                      }
-                      className="add-party-additional-checkbox"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Additional Field 3 Name"
-                      value={formData.additionalField3.name}
-                      onChange={(e) =>
-                        handleAdditionalFieldChange(3, "name", e.target.value)
-                      }
-                      className="add-party-additional-input"
-                    />
-                  </div>
-
-                  {/* Additional Field 4 */}
-                  <div className="add-party-additional-field-row">
-                    <input
-                      type="checkbox"
-                      checked={formData.additionalField4.enabled}
-                      onChange={(e) =>
-                        handleAdditionalFieldChange(4, "enabled", e.target.checked)
-                      }
-                      className="add-party-additional-checkbox"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Additional Field 4 Name"
-                      value={formData.additionalField4.name}
-                      onChange={(e) =>
-                        handleAdditionalFieldChange(4, "name", e.target.value)
-                      }
-                      className="add-party-additional-input"
-                    />
-                    <div className="add-party-date-picker-wrapper">
-                      <input
-                        type="date"
-                        className="add-party-date-picker"
-                      />
-                    </div>
-                  </div>
-                </div>
+                <p>Additional Fields content will go here...</p>
               </div>
             )}
           </div>

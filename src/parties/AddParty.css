@@ -372,65 +372,10 @@
 
 .add-party-additional-fields-content {
   min-height: 200px;
-}
-
-.add-party-additional-fields-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.add-party-additional-field-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-
-.add-party-additional-checkbox {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-  accent-color: #3b82f6;
-}
-
-.add-party-additional-input {
-  flex: 1;
-  padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 14px;
-  font-family: inherit;
-  transition: all 0.2s;
-  background-color: white;
-}
-
-.add-party-additional-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.add-party-date-picker-wrapper {
-  display: flex;
-  align-items: center;
-}
-
-.add-party-date-picker {
-  padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 14px;
-  font-family: inherit;
-  transition: all 0.2s;
-  background-color: white;
-  cursor: pointer;
-  min-width: 120px;
-}
-
-.add-party-date-picker:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  justify-content: center;
+  color: #9ca3af;
 }
 
 /* Footer */
@@ -497,19 +442,6 @@
   .add-party-radio-group {
     flex-direction: column;
     gap: 8px;
-  }
-
-  .add-party-additional-field-row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .add-party-date-picker-wrapper {
-    width: 100%;
-  }
-
-  .add-party-date-picker {
-    width: 100%;
   }
 
   .add-party-tab-navigation {
