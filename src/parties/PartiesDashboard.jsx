@@ -1,5 +1,6 @@
 import "./PartiesDashboard.css";
 import { useState, useRef, useEffect } from "react";
+import AddParty from "./AddParty";
 
 const PartiesDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -8,6 +9,7 @@ const PartiesDashboard = () => {
   const [filteredParties, setFilteredParties] = useState([]);
   const [showPartyActionsMenu, setShowPartyActionsMenu] = useState(false);
   const [activePartyId, setActivePartyId] = useState(null);
+  const [showAddPartyModal, setShowAddPartyModal] = useState(false);
   const partyActionsRef = useRef(null);
 
   // Sample data - replace with actual API call
@@ -82,7 +84,10 @@ const PartiesDashboard = () => {
           <span className="parties-dashboard-label">Parties</span>
         </div>
         <div className="parties-dashboard-header-right">
-          <button className="parties-dashboard-add-party-btn">
+          <button 
+            className="parties-dashboard-add-party-btn"
+            onClick={() => setShowAddPartyModal(true)}
+          >
             + Add Party
           </button>
         </div>
@@ -243,6 +248,11 @@ const PartiesDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Add Party Modal */}
+      {showAddPartyModal && (
+        <AddParty onClose={() => setShowAddPartyModal(false)} />
+      )}
     </div>
   );
 };

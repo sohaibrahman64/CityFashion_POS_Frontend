@@ -37,19 +37,18 @@
 }
 
 .parties-dashboard-add-party-btn {
-    padding: 8px 16px;
-  background-color: #4a90e2;
-  color: white;
-    border: none;
-  border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-  font-weight: 500;
-  transition: background-color 0.3s, transform 0.1s;
+  padding: 8px 16px;
+  background-color: #0a69b9;
+  color: #fff;
+  border: none;
+  border-radius: 9999px; /* fully rounded sides */
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .parties-dashboard-add-party-btn:hover {
-  background-color: #357abd;
+    background-color: #085a98;
 }
 
 .parties-dashboard-add-party-btn:active {
@@ -386,4 +385,4 @@
 .parties-list::-webkit-scrollbar-thumb:hover,
 .transactions-table-wrapper::-webkit-scrollbar-thumb:hover {
   background: #555;
-  }
+}
