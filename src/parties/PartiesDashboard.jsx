@@ -1,6 +1,7 @@
 import "./PartiesDashboard.css";
 import { useState, useRef, useEffect } from "react";
 import AddParty from "./AddParty";
+import { BASE_URL, GET_ALL_PARTIES } from "../Constants";
 
 const PartiesDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -10,22 +11,29 @@ const PartiesDashboard = () => {
   const [showPartyActionsMenu, setShowPartyActionsMenu] = useState(false);
   const [activePartyId, setActivePartyId] = useState(null);
   const [showAddPartyModal, setShowAddPartyModal] = useState(false);
+  const [editParty, setEditParty] = useState(null);
   const partyActionsRef = useRef(null);
 
-  // Sample data - replace with actual API call
-  const sampleParties = [
-    { id: 1, name: "Shadab", amount: 0.00 },
-    { id: 2, name: "Shree Krishna Garments", amount: 0.00 },
-    { id: 3, name: "Sameer", amount: 0.00 },
-    { id: 4, name: "Arjun Singh", amount: 0.00 },
-  ];
+  // Fetch parties from backend
+  const fetchParties = async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/${GET_ALL_PARTIES}`);
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : [];
+      setParties(list);
+      setFilteredParties(list);
+      if (list.length > 0) {
+        setSelectedPartyId(list[0].id);
+      }
+    } catch (e) {
+      console.error("Failed to load parties", e);
+      setParties([]);
+      setFilteredParties([]);
+    }
+  };
 
   useEffect(() => {
-    setParties(sampleParties);
-    setFilteredParties(sampleParties);
-    if (sampleParties.length > 0) {
-      setSelectedPartyId(sampleParties[0].id);
-    }
+    fetchParties();
   }, []);
 
   // Filter parties when search term changes
@@ -84,7 +92,7 @@ const PartiesDashboard = () => {
           <span className="parties-dashboard-label">Parties</span>
         </div>
         <div className="parties-dashboard-header-right">
-          <button 
+          <button
             className="parties-dashboard-add-party-btn"
             onClick={() => setShowAddPartyModal(true)}
           >
@@ -125,9 +133,11 @@ const PartiesDashboard = () => {
                 }`}
                 onClick={() => handlePartyClick(party.id)}
               >
-                <div className="party-name">{party.name}</div>
+                <div className="party-name">
+                  {party.partyName || party.name}
+                </div>
                 <div className="party-amount">
-                  ₹ {party.amount.toFixed(2)}
+                  ₹ {(party.openingBalance ?? 0).toFixed(2)}
                 </div>
                 <div className="party-actions">
                   <div
@@ -169,19 +179,34 @@ const PartiesDashboard = () => {
           <div className="party-details-section">
             <div className="party-name-header-row">
               <h3 className="party-detail-name">
-                {selectedParty?.name || "Select a Party"}
+                {selectedParty?.partyName ||
+                  selectedParty?.name ||
+                  "Select a Party"}
               </h3>
-              <span className="edit-icon">✏️</span>
+              <button
+                className="party-detail-edit-icon"
+                title="Edit Party"
+                onClick={() => {
+                  if (selectedParty) {
+                    setEditParty(selectedParty);
+                    setShowAddPartyModal(true);
+                  }
+                }}
+              >
+                ✏️
+              </button>
             </div>
             <div className="party-contact-info">
               <div className="contact-row">
                 <span className="contact-label">Phone Number</span>
-                <span className="contact-value">8389253518</span>
+                <span className="contact-value">
+                  {selectedParty?.phoneNumber || "-"}
+                </span>
               </div>
               <div className="contact-row">
                 <span className="contact-label">Billing Address</span>
                 <span className="contact-value">
-                  Blk. No. 528/1055, Opp. Shubhlaxmi Apt. Ulhasnagar - 421004
+                  {selectedParty?.billingAddress || "-"}
                 </span>
               </div>
             </div>
@@ -249,9 +274,16 @@ const PartiesDashboard = () => {
         </div>
       </div>
 
-      {/* Add Party Modal */}
+      {/* Add/Edit Party Modal */}
       {showAddPartyModal && (
-        <AddParty onClose={() => setShowAddPartyModal(false)} />
+        <AddParty
+          onClose={() => {
+            setShowAddPartyModal(false);
+            setEditParty(null);
+          }}
+          initialParty={editParty}
+          onSuccess={fetchParties}
+        />
       )}
     </div>
   );

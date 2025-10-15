@@ -16,13 +16,13 @@ select option {
   background-color: #fff;
 }
 
-button {
+/* button {
   background-color: #1a2954;
   color: #fff;
   padding: 10px;
   border: none;
   cursor: pointer;
-}
+} */
 
 .button-group {
   display: flex;

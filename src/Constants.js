@@ -61,3 +61,6 @@ export const GET_SALES_TOTALS = "api/sales-transactions/totals";
 export const GET_SALES_REPORTS = "api/sales-transactions/report";
 export const GET_ACTIVE_STATES = "api/states/active";
 export const GET_ACTIVE_GST_TYPES = "api/gst-types/active";
+export const CREATE_PARTY = "api/parties/create";
+export const GET_ALL_PARTIES = "api/parties/getAll";
+export const UPDATE_PARTY = "api/parties/update";

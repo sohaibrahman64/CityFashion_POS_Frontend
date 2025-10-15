@@ -1,3 +1,20 @@
+/* Edit icon styling - icon only, no background/border */
+.party-detail-edit-icon {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  line-height: 1;
+  color: inherit;
+}
+
+.party-detail-edit-icon:focus {
+  outline: none;
+}
+
+.party-detail-edit-icon:hover {
+  color: #111827;
+}
 .parties-dashboard-container {
   width: 100%;
   min-height: 100vh;
@@ -239,14 +256,14 @@
   color: #333;
 }
 
-.edit-icon {
+.party-detail-edit-icon {
   font-size: 16px;
-  color: #999;
+  /* color: #999; */
   cursor: pointer;
-  transition: color 0.2s;
+  /* transition: color 0.2s; */
 }
 
-.edit-icon:hover {
+.party-detail-edit-icon:hover {
   color: #4a90e2;
 }
 

@@ -407,8 +407,34 @@
   border: 1px solid #3b82f6;
 }
 
+.add-party-btn-close {
+  background-color: #6b7280;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.add-party-btn-close:hover {
+  background-color: #4b5563;
+}
+
+.add-party-btn-close:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .add-party-btn-save-new:hover {
   background-color: #eff6ff;
+}
+
+.add-party-btn-save-new:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .add-party-btn-save {
@@ -418,6 +444,11 @@
 
 .add-party-btn-save:hover {
   background-color: #2563eb;
+}
+
+.add-party-btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Responsive Design */
