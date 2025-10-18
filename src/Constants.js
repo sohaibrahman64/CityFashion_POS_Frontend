@@ -64,3 +64,5 @@ export const GET_ACTIVE_GST_TYPES = "api/gst-types/active";
 export const CREATE_PARTY = "api/parties/create";
 export const GET_ALL_PARTIES = "api/parties/getAll";
 export const UPDATE_PARTY = "api/parties/update";
+export const CREATE_PARTY_TRANSACTION = "api/party-transactions/createTransaction";
+export const GET_PARTIES_REPORT = "api/party-transactions/report";

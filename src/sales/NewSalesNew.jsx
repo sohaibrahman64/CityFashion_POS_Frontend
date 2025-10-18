@@ -10,11 +10,12 @@ import {
   GET_TAX_RATES,
   GET_TAX_RATES_LABELS,
   CREATE_SALES_TRANSACTION,
+  CREATE_PARTY_TRANSACTION,
 } from "../Constants";
 import "./NewSalesNew.css";
 import Toast from "../components/Toast";
 import html2pdf from "html2pdf.js";
-import CustomerSelect from "./CustomerSelect";
+import PartiesDropdown from "../parties/PartiesDropdown";
 import ItemsDropdown from "../product/ItemsDropdown";
 import { useNavigate as useRouterNavigate } from "react-router-dom";
 
@@ -24,6 +25,7 @@ const NewSalesNew = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [customerId, setCustomerId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -85,9 +87,11 @@ const NewSalesNew = () => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       // Check if click is outside the ItemsDropdown component
-      const dropdownContainers = document.querySelectorAll('.items-dropdown-container');
+      const dropdownContainers = document.querySelectorAll(
+        ".items-dropdown-container"
+      );
       let isOutside = true;
-      
+
       dropdownContainers.forEach((container) => {
         if (container.contains(event.target)) {
           isOutside = false;
@@ -157,9 +161,10 @@ const NewSalesNew = () => {
     }
   }, [activeRowIndex]);
 
-  const handleCustomerSelect = (customer) => {
-    setCustomerName(customer?.name || "");
-    setCustomerPhone(customer?.phone || "");
+  const handlePartySelect = (party) => {
+    setCustomerName(party?.partyName || party?.name || "");
+    setCustomerPhone(party?.phoneNumber || "");
+    setCustomerId(party?.id ?? null);
   };
 
   // Fetch invoice number when component mounts
@@ -387,6 +392,7 @@ Thank you for your business!`;
         },
 
         body: JSON.stringify({
+          customerId: customerId,
           customerName: customerName,
           customerPhone: customerPhone,
           items: itemInputs,
@@ -423,9 +429,13 @@ Thank you for your business!`;
         // Also create sales transaction
         await createSalesTransaction(data);
 
+        // Also create party transaction
+        await createPartyTransaction(data);
+
         // Clear all form fields after successful invoice creation
         setCustomerName("");
         setCustomerPhone("");
+        setCustomerId(null);
         setReceivedAmount("");
         setIsFullyReceived(false);
         setItemInputs([
@@ -583,6 +593,7 @@ Thank you for your business!`;
         invoiceNumber: invoiceData.invoiceNumber || invoiceNumber,
         customerName: customerName,
         customerPhone: customerPhone,
+        customerId: customerId,
         totalAmount: calculateSubTotal(),
         taxAmount: invoiceData.totalTaxAmount || 0.0,
         netAmount: calculateSubTotal(),
@@ -625,6 +636,56 @@ Thank you for your business!`;
       }
     } catch (err) {
       console.error("Error creating sales transaction:", err);
+    }
+  };
+
+  const createPartyTransaction = async (invoiceData) => {
+    try {
+      const partyTotal = calculateSubTotal();
+      const partyBalance = partyTotal - parseFloat(receivedAmount || 0);
+      
+      // Determine status based on party balance
+      let status = "UNPAID";
+      if (partyBalance <= 0) {
+        status = "COMPLETED";
+      } else if (partyBalance < partyTotal) {
+        status = "PARTIAL";
+      }
+
+      const payload = {
+        partyId: customerId,
+        partyName: customerName,
+        partyPhone: customerPhone,
+        invoiceId: invoiceData.invoiceId || null,
+        invoiceNumber: invoiceData.invoiceNumber || invoiceNumber,
+        partyTotal: partyTotal,
+        partyBalance: partyBalance,
+        transactionType: "SALE",
+        referenceId: invoiceData.invoiceId || null,
+        referenceType: "SALES_INVOICE",
+        referenceNumber: invoiceNumber,
+        description: `Sale of ${itemInputs.length} items to ${customerName}`,
+        transactionDate: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        date: new Date().toISOString(),
+        createdBy: "SYSTEM",
+        updatedBy: "SYSTEM",
+        status: status,
+      };
+
+      const response = await fetch(`${BASE_URL}/${CREATE_PARTY_TRANSACTION}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const txt = await response.text();
+        console.error("Failed to create party transaction", txt);
+      }
+    } catch (err) {
+      console.error("Error creating party transaction:", err);
     }
   };
 
@@ -830,8 +891,10 @@ Thank you for your business!`;
     }
 
     // Check if the selected tax is IGST
-    const selectedTaxRate = taxRateId !== null ? taxRates[parseInt(taxRateId)] : null;
-    const isIGST = selectedTaxRate?.label?.toUpperCase().includes('IGST') || false;
+    const selectedTaxRate =
+      taxRateId !== null ? taxRates[parseInt(taxRateId)] : null;
+    const isIGST =
+      selectedTaxRate?.label?.toUpperCase().includes("IGST") || false;
 
     itemInputs[index] = {
       ...itemInputs[index],
@@ -944,7 +1007,8 @@ Thank you for your business!`;
     const selectedTaxRate = taxRates[parseInt(value)];
     if (selectedTaxRate) {
       const rate = selectedTaxRate.rate || 0;
-      const isIGST = selectedTaxRate.label?.toUpperCase().includes('IGST') || false;
+      const isIGST =
+        selectedTaxRate.label?.toUpperCase().includes("IGST") || false;
 
       const price = parseFloat(newItemInputs[index].price) || 0;
       const quantity = parseFloat(newItemInputs[index].quantity) || 0;
@@ -1343,7 +1407,7 @@ Thank you for your business!`;
             <div className="customer-fields">
               <div className="input-group">
                 <label htmlFor="customerName">Customer Name*</label>
-                <CustomerSelect onCustomerSelect={handleCustomerSelect} />
+                <PartiesDropdown onPartySelect={handlePartySelect} />
               </div>
               <div className="input-group">
                 <label htmlFor="customerPhone">Customer Phone Number</label>
@@ -1420,13 +1484,17 @@ Thank you for your business!`;
                       <td className="cell item-name-cell">
                         <ItemsDropdown
                           value={item.itemName}
-                          onChange={(value) => handleItemNameChange(index, value)}
+                          onChange={(value) =>
+                            handleItemNameChange(index, value)
+                          }
                           onProductSelect={handleProductSelect}
                           rowIndex={index}
                           suggestions={suggestions}
                           onFocus={handleItemDropdownFocus}
                           onSearchChange={(value) => setSearchTerm(value)}
-                          showSuggestions={showSuggestions && activeRowIndex === index}
+                          showSuggestions={
+                            showSuggestions && activeRowIndex === index
+                          }
                           placeholder="Enter Item"
                         />
                       </td>
@@ -1725,13 +1793,17 @@ Thank you for your business!`;
                       <tr>
                         <td colSpan="7" className="no-padding-cell">
                           <div className="tax-summary-wrapper">
-                            <div className="tax-summary-title">Tax Summary:</div>
+                            <div className="tax-summary-title">
+                              Tax Summary:
+                            </div>
                             <table className="tax-summary-table">
                               <thead>
                                 {(() => {
                                   // Check if any item has IGST
                                   const hasIGST = itemInputs
-                                    .filter((item) => item.itemName.trim() !== "")
+                                    .filter(
+                                      (item) => item.itemName.trim() !== ""
+                                    )
                                     .some((item) => item.isIGST);
 
                                   return (
@@ -1740,39 +1812,66 @@ Thank you for your business!`;
                                         <th rowSpan="2" className="ts-col-hsn">
                                           HSN/ SAC
                                         </th>
-                                        <th rowSpan="2" className="ts-col-taxable">
+                                        <th
+                                          rowSpan="2"
+                                          className="ts-col-taxable"
+                                        >
                                           Taxable amount (₹)
                                         </th>
                                         {hasIGST ? (
-                                          <th colSpan="2" className="ts-col-igst">
+                                          <th
+                                            colSpan="2"
+                                            className="ts-col-igst"
+                                          >
                                             IGST
                                           </th>
                                         ) : (
                                           <>
-                                            <th colSpan="2" className="ts-col-cgst">
+                                            <th
+                                              colSpan="2"
+                                              className="ts-col-cgst"
+                                            >
                                               CGST
                                             </th>
-                                            <th colSpan="2" className="ts-col-sgst">
+                                            <th
+                                              colSpan="2"
+                                              className="ts-col-sgst"
+                                            >
                                               SGST
                                             </th>
                                           </>
                                         )}
-                                        <th rowSpan="2" className="ts-col-total">
+                                        <th
+                                          rowSpan="2"
+                                          className="ts-col-total"
+                                        >
                                           Total Tax (₹)
                                         </th>
                                       </tr>
                                       <tr>
                                         {hasIGST ? (
                                           <>
-                                            <th className="ts-col-rate">Rate (%)</th>
-                                            <th className="ts-col-amt">Amt (₹)</th>
+                                            <th className="ts-col-rate">
+                                              Rate (%)
+                                            </th>
+                                            <th className="ts-col-amt">
+                                              Amt (₹)
+                                            </th>
                                           </>
                                         ) : (
                                           <>
-                                            <th className="ts-col-rate">Rate (%)</th>
-                                            <th className="ts-col-amt">Amt (₹)</th>
-                                            <th className="ts-col-rate">Rate (%)</th>
-                                            <th className="ts-col-amt">Amt (₹)</th>
+                                            <th className="ts-col-rate">
+                                              Rate (%)
+                                            </th>
+                                            <th className="ts-col-amt">
+                                              Amt (₹)
+                                            </th>
+                                            <th className="ts-col-rate">
+                                              Rate (%)
+                                            </th>
+                                            <th className="ts-col-amt">
+                                              Amt (₹)
+                                            </th>
                                           </>
                                         )}
                                       </tr>
@@ -1786,22 +1885,34 @@ Thank you for your business!`;
                                   const validItems = itemInputs.filter(
                                     (item) => item.itemName.trim() !== ""
                                   );
-                                  
+
                                   const taxGroups = {};
                                   validItems.forEach((item) => {
-                                    const taxPercent = parseFloat(item.taxPercent || 0);
-                                    const taxAmount = parseFloat(item.taxAmount || 0);
-                                    const quantity = parseFloat(item.quantity || 0);
+                                    const taxPercent = parseFloat(
+                                      item.taxPercent || 0
+                                    );
+                                    const taxAmount = parseFloat(
+                                      item.taxAmount || 0
+                                    );
+                                    const quantity = parseFloat(
+                                      item.quantity || 0
+                                    );
                                     const price = parseFloat(item.price || 0);
-                                    const discountAmount = parseFloat(item.discountAmount || 0);
+                                    const discountAmount = parseFloat(
+                                      item.discountAmount || 0
+                                    );
                                     const subtotal = quantity * price;
-                                    const afterDiscount = subtotal - discountAmount;
-                                    const taxableAmount = afterDiscount - taxAmount;
+                                    const afterDiscount =
+                                      subtotal - discountAmount;
+                                    const taxableAmount =
+                                      afterDiscount - taxAmount;
                                     const isIGST = item.isIGST || false;
-                                    
+
                                     // Create unique key combining tax rate and tax type
-                                    const groupKey = `${taxPercent}_${isIGST ? 'IGST' : 'GST'}`;
-                                    
+                                    const groupKey = `${taxPercent}_${
+                                      isIGST ? "IGST" : "GST"
+                                    }`;
+
                                     if (!taxGroups[groupKey]) {
                                       taxGroups[groupKey] = {
                                         taxPercent: taxPercent,
@@ -1810,29 +1921,33 @@ Thank you for your business!`;
                                         isIGST: isIGST,
                                       };
                                     }
-                                    
-                                    taxGroups[groupKey].taxableAmount += taxableAmount;
+
+                                    taxGroups[groupKey].taxableAmount +=
+                                      taxableAmount;
                                     taxGroups[groupKey].totalTax += taxAmount;
                                   });
-                                  
+
                                   // Convert to array and sort by tax percent
-                                  const taxGroupsArray = Object.values(taxGroups).sort(
-                                    (a, b) => a.taxPercent - b.taxPercent
-                                  );
-                                  
+                                  const taxGroupsArray = Object.values(
+                                    taxGroups
+                                  ).sort((a, b) => a.taxPercent - b.taxPercent);
+
                                   // Calculate totals
-                                  const grandTotalTaxable = taxGroupsArray.reduce(
-                                    (sum, group) => sum + group.taxableAmount,
-                                    0
-                                  );
+                                  const grandTotalTaxable =
+                                    taxGroupsArray.reduce(
+                                      (sum, group) => sum + group.taxableAmount,
+                                      0
+                                    );
                                   const grandTotalTax = taxGroupsArray.reduce(
                                     (sum, group) => sum + group.totalTax,
                                     0
                                   );
-                                  
+
                                   // Check if any item has IGST
-                                  const hasIGST = taxGroupsArray.some(group => group.isIGST);
-                                  
+                                  const hasIGST = taxGroupsArray.some(
+                                    (group) => group.isIGST
+                                  );
+
                                   return (
                                     <>
                                       {taxGroupsArray.map((group, index) => {
@@ -1846,7 +1961,9 @@ Thank you for your business!`;
                                                   group.taxableAmount.toFixed(2)
                                                 )}
                                               </td>
-                                              <td className="ta-center">{group.taxPercent.toFixed(2)}</td>
+                                              <td className="ta-center">
+                                                {group.taxPercent.toFixed(2)}
+                                              </td>
                                               <td className="ta-right">
                                                 {formatNumberWithCommas(
                                                   group.totalTax.toFixed(2)
@@ -1861,11 +1978,19 @@ Thank you for your business!`;
                                           );
                                         } else {
                                           // CGST/SGST row - split columns
-                                          const cgstRate = (group.taxPercent / 2).toFixed(2);
-                                          const sgstRate = (group.taxPercent / 2).toFixed(2);
-                                          const cgstAmount = (group.totalTax / 2).toFixed(2);
-                                          const sgstAmount = (group.totalTax / 2).toFixed(2);
-                                          
+                                          const cgstRate = (
+                                            group.taxPercent / 2
+                                          ).toFixed(2);
+                                          const sgstRate = (
+                                            group.taxPercent / 2
+                                          ).toFixed(2);
+                                          const cgstAmount = (
+                                            group.totalTax / 2
+                                          ).toFixed(2);
+                                          const sgstAmount = (
+                                            group.totalTax / 2
+                                          ).toFixed(2);
+
                                           return (
                                             <tr key={index}>
                                               <td></td>
@@ -1874,13 +1999,21 @@ Thank you for your business!`;
                                                   group.taxableAmount.toFixed(2)
                                                 )}
                                               </td>
-                                              <td className="ta-center">{cgstRate}</td>
-                                              <td className="ta-right">
-                                                {formatNumberWithCommas(cgstAmount)}
+                                              <td className="ta-center">
+                                                {cgstRate}
                                               </td>
-                                              <td className="ta-center">{sgstRate}</td>
                                               <td className="ta-right">
-                                                {formatNumberWithCommas(sgstAmount)}
+                                                {formatNumberWithCommas(
+                                                  cgstAmount
+                                                )}
+                                              </td>
+                                              <td className="ta-center">
+                                                {sgstRate}
+                                              </td>
+                                              <td className="ta-right">
+                                                {formatNumberWithCommas(
+                                                  sgstAmount
+                                                )}
                                               </td>
                                               <td className="ta-right">
                                                 {formatNumberWithCommas(
@@ -1900,7 +2033,9 @@ Thank you for your business!`;
                                         </td>
                                         {hasIGST ? (
                                           <>
-                                            <td className="ta-center">&nbsp;</td>
+                                            <td className="ta-center">
+                                              &nbsp;
+                                            </td>
                                             <td className="ta-right">
                                               {formatNumberWithCommas(
                                                 grandTotalTax.toFixed(2)
@@ -1909,13 +2044,17 @@ Thank you for your business!`;
                                           </>
                                         ) : (
                                           <>
-                                            <td className="ta-center">&nbsp;</td>
+                                            <td className="ta-center">
+                                              &nbsp;
+                                            </td>
                                             <td className="ta-right">
                                               {formatNumberWithCommas(
                                                 (grandTotalTax / 2).toFixed(2)
                                               )}
                                             </td>
-                                            <td className="ta-center">&nbsp;</td>
+                                            <td className="ta-center">
+                                              &nbsp;
+                                            </td>
                                             <td className="ta-right">
                                               {formatNumberWithCommas(
                                                 (grandTotalTax / 2).toFixed(2)
@@ -1932,7 +2071,7 @@ Thank you for your business!`;
                                     </>
                                   );
                                 })()}
-                    </tbody>
+                              </tbody>
                             </table>
                           </div>
                         </td>

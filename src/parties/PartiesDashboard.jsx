@@ -1,7 +1,7 @@
 import "./PartiesDashboard.css";
 import { useState, useRef, useEffect } from "react";
 import AddParty from "./AddParty";
-import { BASE_URL, GET_ALL_PARTIES } from "../Constants";
+import { BASE_URL, GET_ALL_PARTIES, GET_PARTIES_REPORT } from "../Constants";
 
 const PartiesDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -12,6 +12,7 @@ const PartiesDashboard = () => {
   const [activePartyId, setActivePartyId] = useState(null);
   const [showAddPartyModal, setShowAddPartyModal] = useState(false);
   const [editParty, setEditParty] = useState(null);
+  const [partyReports, setPartyReports] = useState([]);
   const partyActionsRef = useRef(null);
 
   // Fetch parties from backend
@@ -24,6 +25,8 @@ const PartiesDashboard = () => {
       setFilteredParties(list);
       if (list.length > 0) {
         setSelectedPartyId(list[0].id);
+        // Fetch reports for the first party immediately
+        fetchPartiesReport(list[0].id);
       }
     } catch (e) {
       console.error("Failed to load parties", e);
@@ -31,6 +34,33 @@ const PartiesDashboard = () => {
       setFilteredParties([]);
     }
   };
+
+  // Fetch parties reports from backend
+  const fetchPartiesReport = async (partyId) => {
+    if (!partyId) return;
+    try {
+      const response = await fetch(`${BASE_URL}/${GET_PARTIES_REPORT}?partyId=${partyId}`);
+      const data = await response.json();
+      setPartyReports(data ? data : []);
+    } catch (error) {
+      console.error("Error fetching parties report:", error);
+      setPartyReports([]);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    try {
+      if (!dateString) return "-";
+      const date = new Date(dateString);
+      const day = date.getDate().toString().padStart(2, "0");
+      const month = (date.getMonth() + 1).toString().padStart(2, "0");
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "-";
+    }
+  };  
 
   useEffect(() => {
     fetchParties();
@@ -42,9 +72,11 @@ const PartiesDashboard = () => {
       setFilteredParties(parties);
     } else {
       const filtered = parties.filter((party) =>
-        party.name.toLowerCase().includes(searchTerm.toLowerCase())
+        party.partyName.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredParties(filtered);
+      setSelectedPartyId(filtered[0].id);
+      fetchPartiesReport(filtered[0].id);
     }
   }, [searchTerm, parties]);
 
@@ -68,6 +100,8 @@ const PartiesDashboard = () => {
 
   const handlePartyClick = (partyId) => {
     setSelectedPartyId(partyId);
+    fetchPartiesReport(partyId);
+
   };
 
   const handlePartyActionsClick = (partyId, event) => {
@@ -227,7 +261,7 @@ const PartiesDashboard = () => {
                     </th>
                     <th>
                       <div className="table-header">
-                        <span>Number</span>
+                        <span>Invoice No.</span>
                         <span className="filter-icon">🔽</span>
                       </div>
                     </th>
@@ -257,16 +291,15 @@ const PartiesDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>PoS Sale</td>
-                    <td>INV-2</td>
-                    <td>17/08/2025</td>
-                    <td>₹ 1,943.00</td>
-                    <td>₹ 0.00</td>
-                    <td>
-                      <div className="transaction-dots">⋮</div>
-                    </td>
-                  </tr>
+                  {partyReports.map((report) => (
+                    <tr key={report.id}>
+                      <td>{report.transactionType}</td>
+                      <td>{report.invoiceNumber}</td>
+                      <td>{formatDate(report.date)}</td>
+                      <td>₹ {report.partyTotal?.toFixed(2) ?? 0}</td>
+                      <td>₹ {report.partyBalance?.toFixed(2) ?? 0}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
