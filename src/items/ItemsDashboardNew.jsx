@@ -9,6 +9,7 @@ import {
   STOCK_ADJUSTMENT,
 } from "../Constants";
 import axios from "axios";
+import Toast from "../components/Toast";
 
 const ItemsDashboardNew = () => {
   const navigate = useNavigate();
@@ -48,6 +49,19 @@ const ItemsDashboardNew = () => {
   const [showProductActionsMenu, setShowProductActionsMenu] = useState(false);
   const [activeProductId, setActiveProductId] = useState(null);
   const productActionsRef = useRef(null);
+
+  // Toast state
+  const [toasts, setToasts] = useState([]);
+
+  // Toast management functions
+  const addToast = (message, type = 'success', duration = 5000) => {
+    const id = Date.now() + Math.random();
+    setToasts(prev => [...prev, { id, message, type, duration }]);
+  };
+
+  const removeToast = (id) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
 
   // Add this function to load real transactions
   const loadProductTransactions = async (productId) => {
@@ -244,10 +258,10 @@ const ItemsDashboardNew = () => {
             }
 
             // Show success message
-            alert("Product deleted successfully!");
+            addToast("Product deleted successfully!", "success");
           } catch (error) {
             console.error("Error deleting product:", error);
-            alert("Failed to delete product. Please try again.");
+            addToast("Failed to delete product. Please try again.", "error");
           }
         }
         break;
@@ -380,8 +394,9 @@ const ItemsDashboardNew = () => {
     try {
       // Validate required fields
       if (!selectedProductId || !totalQuantity || !atPrice) {
-        alert(
-          "Please fill in all required fields (Product, Quantity, and Price)"
+        addToast(
+          "Please fill in all required fields (Product, Quantity, and Price)",
+          "error"
         );
         return;
       }
@@ -409,7 +424,7 @@ const ItemsDashboardNew = () => {
         console.log("Stock adjustment saved successfully:", response.data);
 
         // Show success message
-        alert("Stock adjustment saved successfully!");
+        addToast("Stock adjustment saved successfully!", "success");
 
         // Close modal and reset form
         setShowAdjustModal(false);
@@ -511,15 +526,16 @@ const ItemsDashboardNew = () => {
 
       // Show error message to user
       if (error.response) {
-        alert(
+        addToast(
           `Error: ${
             error.response.data.message || "Failed to save stock adjustment"
-          }`
+          }`,
+          "error"
         );
       } else if (error.request) {
-        alert("Error: No response from server. Please check your connection.");
+        addToast("Error: No response from server. Please check your connection.", "error");
       } else {
-        alert(`Error: ${error.message}`);
+        addToast(`Error: ${error.message}`, "error");
       }
     }
   };
@@ -534,8 +550,13 @@ const ItemsDashboardNew = () => {
         <div className="items-dashboard-header-right">
           <button
             className="items-dashboard-add-item-btn"
+            onClick={() =>
+              navigate("/products/add", {
+                state: { fromComponent: "ProductTransactions" },
+              })
+            }
           >
-            Adjust Item
+            + Add Item
           </button>
         </div>
       </div>
@@ -572,9 +593,7 @@ const ItemsDashboardNew = () => {
                 }`}
                 onClick={() => handleProductRowClick(product.id)}
               >
-                <div className="item-name">
-                  {product.name}
-                </div>
+                <div className="item-name">{product.name}</div>
                 <div className="item-quantity">
                   {product.stock?.openingQuantity || 0}
                 </div>
@@ -594,13 +613,17 @@ const ItemsDashboardNew = () => {
                     <div className="item-actions-menu" ref={productActionsRef}>
                       <div
                         className="item-action-item"
-                        onClick={() => handleProductAction("view_edit", product.id)}
+                        onClick={() =>
+                          handleProductAction("view_edit", product.id)
+                        }
                       >
                         View/Edit
                       </div>
                       <div
                         className="item-action-item"
-                        onClick={() => handleProductAction("delete", product.id)}
+                        onClick={() =>
+                          handleProductAction("delete", product.id)
+                        }
                       >
                         Delete
                       </div>
@@ -620,52 +643,144 @@ const ItemsDashboardNew = () => {
               <div className="item-details-section">
                 <div className="item-name-header-row">
                   <h3 className="item-detail-name">
-                    {products.find(p => p.id === selectedProductId)?.name?.toUpperCase() || 'SELECT A PRODUCT'}
+                    {products
+                      .find((p) => p.id === selectedProductId)
+                      ?.name?.toUpperCase() || "SELECT A PRODUCT"}
                   </h3>
-                  <button
-                    className="item-detail-edit-icon"
-                    title="Edit Product"
-                    onClick={() => {
-                      const product = products.find(p => p.id === selectedProductId);
-                      if (product) {
-                        localStorage.setItem("editProductData", JSON.stringify(product));
-                        navigate("/products/add", {
-                          state: { fromComponent: "ProductTransactions" },
-                        });
-                      }
-                    }}
+                  <div className="item-detail-actions">
+                    <button
+                      className="item-detail-edit-icon"
+                      title="Edit Product"
+                      onClick={() => {
+                        const product = products.find(
+                          (p) => p.id === selectedProductId
+                        );
+                        if (product) {
+                          localStorage.setItem(
+                            "editProductData",
+                            JSON.stringify(product)
+                          );
+                          navigate("/products/add", {
+                            state: { fromComponent: "ProductTransactions" },
+                          });
+                        }
+                      }}
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      className="item-detail-adjust-btn"
+                      title="Adjust Item"
+                      onClick={() => setShowAdjustModal(true)}
+                    >
+                      Adjust Item
+                    </button>
+                  </div>
+                </div>
+                <div className="sale-price-info">
+                  SALE PRICE:{" "}
+                  <span
+                    className={
+                      selectedProductId
+                        ? (filteredProducts.find((p) => p.id === selectedProductId)
+                            ?.pricing?.salePrice || 0) > 0
+                          ? "value-positive"
+                          : "value-zero"
+                        : "value-zero"
+                    }
                   >
-                    ✏️
-                  </button>
+                    ₹{" "}
+                    {selectedProductId
+                      ? filteredProducts.find((p) => p.id === selectedProductId)
+                          ?.pricing?.salePrice || "0"
+                      : "0"}
+                  </span>{" "}
+                  ({selectedProductId
+                  ? filteredProducts.find((p) => p.id === selectedProductId)
+                      ?.pricing?.salePriceType === "WITH_TAX"
+                    ? "incl"
+                    : "excl"
+                  : "excl"}
+                )
                 </div>
-                <div className="item-pricing-info">
-                  <div className="price-row">
-                    <span className="price-label">SALE PRICE:</span>
-                    <span className="price-value">
-                      ₹ {products.find(p => p.id === selectedProductId)?.salePrice || '0.00'} (excl)
-                    </span>
-                  </div>
-                  <div className="price-row">
-                    <span className="price-label">PURCHASE PRICE:</span>
-                    <span className="price-value">
-                      ₹ {products.find(p => p.id === selectedProductId)?.purchasePriceTaxes?.purchasePrice || '0.00'} (incl)
-                    </span>
-                  </div>
+                <div className="purchase-price-info">
+                  PURCHASE PRICE:{" "}
+                  <span
+                    className={
+                      selectedProductId
+                        ? (filteredProducts.find((p) => p.id === selectedProductId)
+                            ?.purchasePriceTaxes?.purchasePrice || 0) > 0
+                          ? "value-positive"
+                          : "value-zero"
+                        : "value-zero"
+                    }
+                  >
+                    ₹{" "}
+                    {selectedProductId
+                      ? filteredProducts.find((p) => p.id === selectedProductId)
+                          ?.purchasePriceTaxes?.purchasePrice || "0"
+                      : "0"}
+                  </span>{" "}
+                  (incl)
                 </div>
-                <div className="item-stock-info">
-                  <div className="stock-row">
-                    <span className="stock-label">STOCK QUANTITY:</span>
-                    <span className="stock-value">
-                      {products.find(p => p.id === selectedProductId)?.stock?.openingQuantity || 0}
-                    </span>
-                  </div>
-                  <div className="stock-row">
-                    <span className="stock-label">STOCK VALUE:</span>
-                    <span className="stock-value green">
-                      ₹ {((products.find(p => p.id === selectedProductId)?.stock?.openingQuantity || 0) * 
-                          (products.find(p => p.id === selectedProductId)?.purchasePriceTaxes?.purchasePrice || 0)).toFixed(2)}
-                    </span>
-                  </div>
+                <div className="stock-quantity-info">
+                  STOCK QUANTITY:{" "}
+                  <span
+                    className={
+                      selectedProductId
+                        ? (filteredProducts.find((p) => p.id === selectedProductId)
+                            ?.stock?.openingQuantity || 0) > 0
+                          ? "value-positive"
+                          : "value-zero"
+                        : "value-zero"
+                    }
+                  >
+                    {selectedProductId
+                      ? filteredProducts.find((p) => p.id === selectedProductId)?.stock
+                          ?.openingQuantity || "0"
+                      : "0"}
+                  </span>
+                </div>
+                <div className="stock-value-info">
+                  STOCK VALUE:{" "}
+                  <span
+                    className={
+                      selectedProductId
+                        ? (() => {
+                            const product = filteredProducts.find(
+                              (p) => p.id === selectedProductId
+                            );
+                            if (product) {
+                              const purchasePrice =
+                                product.purchasePriceTaxes?.purchasePrice || 0;
+                              const openingQuantity =
+                                product.stock?.openingQuantity || 0;
+                              return purchasePrice * openingQuantity > 0
+                                ? "value-positive"
+                                : "value-zero";
+                            }
+                            return "value-zero";
+                          })()
+                        : "value-zero"
+                    }
+                  >
+                    ₹{" "}
+                    {selectedProductId
+                      ? (() => {
+                          const product = products.find(
+                            (p) => p.id === selectedProductId
+                          );
+                          if (product) {
+                            const purchasePrice =
+                              product.purchasePriceTaxes?.purchasePrice || 0;
+                            const openingQuantity =
+                              product.stock?.openingQuantity || 0;
+                            return (purchasePrice * openingQuantity).toFixed(2);
+                          }
+                          return "0.00";
+                        })()
+                      : "0.00"}
+                  </span>
                 </div>
               </div>
 
@@ -681,7 +796,9 @@ const ItemsDashboardNew = () => {
                         placeholder="Search transactions..."
                         className="transactions-search-input"
                         value={transactionsSearchTerm}
-                        onChange={(e) => setTransactionsSearchTerm(e.target.value)}
+                        onChange={(e) =>
+                          setTransactionsSearchTerm(e.target.value)
+                        }
                       />
                     </div>
                     <button className="export-btn">
@@ -734,28 +851,37 @@ const ItemsDashboardNew = () => {
                         </tr>
                       ) : transactions.length > 0 ? (
                         transactions.map((transaction, index) => (
-                          <tr key={transaction.id || index} className={`transaction-row ${index === 1 ? 'highlighted' : ''}`}>
+                          <tr
+                            key={transaction.id || index}
+                            className={`transaction-row ${
+                              index === 1 ? "highlighted" : ""
+                            }`}
+                          >
                             <td className="transaction-type">
-                              <span className={`status-dot ${getStatusDotClass(transaction.transactionType)}`}></span>
-                              {transaction.transactionType || 'Sale'}
+                              <span
+                                className={`status-dot ${getStatusDotClass(
+                                  transaction.transactionType
+                                )}`}
+                              ></span>
+                              {transaction.transactionType || "Sale"}
                             </td>
                             <td className="transaction-invoice">
-                              {transaction.invoiceNumber || ''}
+                              {transaction.invoiceNumber || ""}
                             </td>
                             <td className="transaction-name">
-                              {transaction.customerName || 'Opening Stock'}
+                              {transaction.customerName || "Opening Stock"}
                             </td>
                             <td className="transaction-date">
                               {formatDate(transaction.createdAt)}
                             </td>
                             <td className="transaction-quantity">
-                              {transaction.quantity || '0'}
+                              {transaction.quantity || "0"}
                             </td>
                             <td className="transaction-price">
-                              ₹ {transaction.price || '0.00'}
+                              ₹ {transaction.price || "0.00"}
                             </td>
                             <td className="transaction-status">
-                              {transaction.status || ''}
+                              {transaction.status || ""}
                             </td>
                             <td className="transaction-actions">
                               <span className="more-icon">⋮</span>
@@ -776,6 +902,125 @@ const ItemsDashboardNew = () => {
             </>
           )}
         </div>
+      </div>
+
+      {/* Adjust Item Modal */}
+      {showAdjustModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowAdjustModal(false)}
+        >
+          <div className="adjust-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="header-left">
+                <h3>Adjust Item</h3>
+                <div className="stock-toggle-container">
+                  <span className="toggle-label">Add Stock</span>
+                  <label className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      className="toggle-input"
+                      checked={stockMode === "reduce"}
+                      onChange={(e) =>
+                        setStockMode(e.target.checked ? "reduce" : "add")
+                      }
+                    />
+                    <span className="toggle-label-element"></span>
+                  </label>
+                  <span className="toggle-label">Reduce Stock</span>
+                </div>
+              </div>
+              <button
+                className="modal-close-btn"
+                onClick={() => setShowAdjustModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="item-info-section">
+              <div className="item-name-section">
+                <div className="item-label">Item Name</div>
+                <div className="item-value">
+                  {selectedProductId
+                    ? filteredProducts.find((p) => p.id === selectedProductId)
+                        ?.name || "No Product Selected"
+                    : "No Product Selected"}
+                </div>
+              </div>
+              <div className="adjustment-date-section">
+                <label className="date-label">Adjustment Date</label>
+                <input
+                  type="date"
+                  className="date-picker"
+                  value={adjustmentDate}
+                  onChange={(e) => setAdjustmentDate(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="modal-content">
+              <div className="input-row">
+                <div className="total-qty-section">
+                  <label className="total-qty-label">Total Qty</label>
+                  <input
+                    type="number"
+                    className="total-qty-input"
+                    placeholder="Enter quantity"
+                    value={totalQuantity}
+                    onChange={(e) => setTotalQuantity(e.target.value)}
+                  />
+                </div>
+                <div className="unit-section">
+                  <label className="unit-label">Unit</label>
+                  <div className="unit-value">
+                    {selectedProductId
+                      ? filteredProducts.find((p) => p.id === selectedProductId)
+                          ?.unit?.label || "N/A"
+                      : "N/A"}
+                  </div>
+                </div>
+                <div className="at-price-section">
+                  <label className="at-price-label">At Price</label>
+                  <input
+                    type="number"
+                    className="at-price-input"
+                    placeholder="Enter price"
+                    value={atPrice}
+                    onChange={(e) => setAtPrice(e.target.value)}
+                    step="0.01"
+                  />
+                </div>
+                <div className="description-section">
+                  <label className="description-label">Description</label>
+                  <input
+                    type="text"
+                    className="description-input"
+                    placeholder="Enter description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="save-button-container">
+                <button className="save-button" onClick={handleSaveAdjustment}>
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Container */}
+      <div className="toast-container">
+        {toasts.map((toast) => (
+          <Toast
+            key={toast.id}
+            message={toast.message}
+            type={toast.type}
+            duration={toast.duration}
+            onClose={() => removeToast(toast.id)}
+          />
+        ))}
       </div>
     </div>
   );

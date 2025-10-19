@@ -530,10 +530,7 @@ const ItemsDashboard = () => {
         <div className="items-dashboard-header-left">
           <span className="items-dashboard-label">Items</span>
           <div className="items-dashboard-header-right">
-            <button
-              className="items-dashboard-add-item-btn">
-              + Add Item
-            </button>
+            <button className="items-dashboard-add-item-btn">+ Add Item</button>
           </div>
         </div>
       </div>

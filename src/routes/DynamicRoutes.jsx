@@ -40,6 +40,7 @@ import SalesDashboard from "../sales/SalesDashboard";
 import NewSalesInvoicePreview from "../sales/NewSalesInvoicePreview";
 import Parties from "../parties/PartiesDashboard";
 import ItemsDashboardNew from "../items/ItemsDashboardNew";
+import ItemsDashboard from "../items/ItemsDashboard";
 import PurchaseDashboard from "../purchase/PurchaseDashboard";
 import ReportsDashboard from "../reports/ReportsDashboard";
 import MyBusiness from "../settings/MyBusiness";
@@ -112,7 +113,8 @@ const routeComponentMap = {
 const routeComponentMapNew = {
   "/home": <Home />,
   "/parties": <PartiesDashboard />,
-  "/items": <ItemsDashboardNew />,
+  "/items": <ItemsDashboard />,
+  "/items/dashboard": <ItemsDashboardNew />,
   "/sales": <SalesDashboard />,
   "/purchase": <PurchaseDashboard />,
   "/barcodegen": <BarcodeGenerator />,
