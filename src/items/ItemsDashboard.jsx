@@ -526,8 +526,17 @@ const ItemsDashboard = () => {
 
   return (
     <div className="product-transactions-container">
-      <h2>Product Transactions</h2>
-
+      <div className="items-dashboard-header-section">
+        <div className="items-dashboard-header-left">
+          <span className="items-dashboard-label">Items</span>
+          <div className="items-dashboard-header-right">
+            <button
+              className="items-dashboard-add-item-btn">
+              + Add Item
+            </button>
+          </div>
+        </div>
+      </div>
       <div className="transactions-layout">
         {/* First div - Left side, 20% width, full height */}
         <div className="left-panel">
