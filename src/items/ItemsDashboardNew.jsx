@@ -548,16 +548,39 @@ const ItemsDashboardNew = () => {
           <span className="items-dashboard-label">Items</span>
         </div>
         <div className="items-dashboard-header-right">
-          <button
-            className="items-dashboard-add-item-btn"
-            onClick={() =>
-              navigate("/products/add", {
-                state: { fromComponent: "ProductTransactions" },
-              })
-            }
-          >
-            + Add Item
-          </button>
+          <div className="add-item-container">
+            <button
+              className="add-item-btn-product-transactions"
+              onClick={() =>
+                navigate("/products/add", {
+                  state: { fromComponent: "ProductTransactions" },
+                })
+              }
+            >
+              Add Item
+            </button>
+            <button
+              className="dropdown-arrow-btn"
+              onClick={() => setShowImportDropdown(!showImportDropdown)}
+            >
+              <span className="dropdown-arrow">▼</span>
+
+              {/* Import dropdown menu */}
+              {showImportDropdown && (
+                <div
+                  className="import-dropdown-menu"
+                  ref={importDropdownRef}
+                >
+                  <div
+                    className="dropdown-item"
+                    onClick={() => handleImportBulk()}
+                  >
+                    Import Products in Bulk
+                  </div>
+                </div>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
