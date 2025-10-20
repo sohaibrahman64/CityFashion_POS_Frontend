@@ -113,8 +113,8 @@ const routeComponentMap = {
 const routeComponentMapNew = {
   "/home": <Home />,
   "/parties": <PartiesDashboard />,
-  "/items": <ItemsDashboard />,
-  "/items/dashboard": <ItemsDashboardNew />,
+  "/items": <ItemsDashboardNew />,
+  "/items/dashboard": <ItemsDashboard />,
   "/sales": <SalesDashboard />,
   "/purchase": <PurchaseDashboard />,
   "/barcodegen": <BarcodeGenerator />,
@@ -208,6 +208,7 @@ const DynamicRoutes = ({ menuData }) => {
       <Route path="/purchase/expenses/add" element={<AddExpenses />} />
       <Route path="/sales/paymentin/add" element={<AddPaymentIn />} />
       <Route path="/sales/deliverychallan/add" element={<AddDeliveryChallan />} />
+      <Route path="/items/add" element={<AddItem />} />
       <Route path="/items/categories/add" element={<AddItemCategory />} />
       <Route path="/purchase/paymentout/add" element={<AddPaymentOut />} />
       <Route path="/sales/estimate/add" element={<AddEstimateQuotation />} />

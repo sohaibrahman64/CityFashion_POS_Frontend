@@ -548,31 +548,31 @@ const ItemsDashboardNew = () => {
           <span className="items-dashboard-label">Items</span>
         </div>
         <div className="items-dashboard-header-right">
-          <div className="add-item-container">
+          <div className="items-dashboard-add-item-container">
             <button
-              className="add-item-btn-product-transactions"
+              className="items-dashboard-add-item-btn"
               onClick={() =>
-                navigate("/products/add", {
-                  state: { fromComponent: "ProductTransactions" },
+                navigate("/items/add", {
+                  state: { fromComponent: "ItemDashboardNew" },
                 })
               }
             >
-              Add Item
+              + Add Item
             </button>
             <button
-              className="dropdown-arrow-btn"
+              className="items-dashboard-dropdown-arrow-btn"
               onClick={() => setShowImportDropdown(!showImportDropdown)}
             >
-              <span className="dropdown-arrow">▼</span>
+              <span className="items-dashboard-dropdown-arrow">▼</span>
 
               {/* Import dropdown menu */}
               {showImportDropdown && (
                 <div
-                  className="import-dropdown-menu"
+                  className="items-dashboard-import-dropdown-menu"
                   ref={importDropdownRef}
                 >
                   <div
-                    className="dropdown-item"
+                    className="items-dashboard-dropdown-item"
                     onClick={() => handleImportBulk()}
                   >
                     Import Products in Bulk
@@ -611,13 +611,13 @@ const ItemsDashboardNew = () => {
             {filteredProducts.map((product) => (
               <div
                 key={product.id}
-                className={`item-row ${
+                className={`items-dashboard-item-row ${
                   selectedProductId === product.id ? "selected" : ""
                 }`}
                 onClick={() => handleProductRowClick(product.id)}
               >
-                <div className="item-name">{product.name}</div>
-                <div className="item-quantity">
+                <div className="items-dashboard-item-name">{product.name}</div>
+                <div className="items-dashboard-item-quantity">
                   {product.stock?.openingQuantity || 0}
                 </div>
                 <div className="item-actions">

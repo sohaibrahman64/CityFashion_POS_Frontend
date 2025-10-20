@@ -106,7 +106,7 @@
   overflow-y: auto;
 }
 
-.item-row {
+.items-dashboard-item-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -117,22 +117,22 @@
   position: relative;
 }
 
-.item-row:hover {
+.items-dashboard-item-row:hover {
   background-color: #f8f9fa;
 }
 
-.item-row.selected {
+.items-dashboard-item-row.selected {
   background-color: #e3f2fd;
 }
 
-.item-name {
+.items-dashboard-item-name {
   flex: 1;
   font-size: 14px;
   color: #333;
   font-weight: 500;
 }
 
-.item-quantity {
+.items-dashboard-item-quantity {
   flex: 1;
   text-align: right;
   font-size: 14px;
@@ -962,8 +962,8 @@
 }
 
 /* Add Item Button */
-.add-item-btn-product-transactions {
-  background-color: #007bff;
+.items-dashboard-add-item-btn {
+  background-color: #0a69b9;
   color: white;
   border: none;
   padding: 8px 20px;
@@ -972,22 +972,22 @@
   font-size: 14px;
   font-weight: 500;
   transition: background-color 0.2s;
-  border-right: 1px solid #0056b3; /* Border between buttons */
+  border-right: 1px solid #0a69b9; /* Border between buttons */
 }
 
-.add-item-btn-product-transactions:hover {
-  background-color: #0056b3;
+.items-dashboard-add-item-btn:hover {
+  background-color: #085a98;
 }
 
 /* Add Item container */
-.add-item-container {
+.items-dashboard-add-item-container {
   display: flex;
   align-items: center;
 }
 
 /* Dropdown arrow button */
-.dropdown-arrow-btn {
-  background-color: #007bff;
+.items-dashboard-dropdown-arrow-btn {
+  background-color: #0a69b9;
   color: white;
   border: none;
   padding: 10px 8px;
@@ -1003,18 +1003,18 @@
   min-width: 32px;
 }
 
-.dropdown-arrow-btn:hover {
-  background-color: #0056b3;
+.items-dashboard-dropdown-arrow-btn:hover {
+  background-color: #085a98;
 }
 
-.dropdown-arrow {
+.items-dashboard-dropdown-arrow {
   font-size: 12px;
   color: white;
   line-height: 1;
 }
 
 /* Import dropdown menu */
-.import-dropdown-menu {
+.items-dashboard-import-dropdown-menu {
   position: absolute;
   top: 100%;
   right: 0;
@@ -1027,18 +1027,18 @@
   margin-top: 2px;
 }
 
-.dropdown-item {
+.items-dashboard-dropdown-item {
   padding: 10px 15px;
   cursor: pointer;
   border-bottom: 1px solid #f0f0f0;
   transition: background-color 0.2s;
-  color: #0a69b9;
+  color: #085a98;
 }
 
-.dropdown-item:last-child {
+.items-dashboard-dropdown-item:last-child {
   border-bottom: none;
 }
 
-.dropdown-item:hover {
+.items-dashboard-dropdown-item:hover {
   background-color: #f8f9fa;
 }
