@@ -148,6 +148,7 @@ const routeComponentMapNew = {
   "/reports/items": <ItemsReport />,
   "/reports/expenses": <ExpensesReport />,
   "/reports/orders": <SalesPurchaseOrderReport />,
+  "/items/products": <AddNewProductNew />,
 };
 
 const renderRoutes = (menuItems = []) => {

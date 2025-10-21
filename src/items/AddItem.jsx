@@ -21,12 +21,27 @@ const AddItem = () => {
     purchasePriceTaxMode: "without_tax",
     // Taxes
     taxRate: "3", // percent only for now
+    // Stock
+    openingQuantity: "",
+    atPrice: "",
+    asOfDate: "21/07/2025",
+    minStockToMaintain: "",
+    location: "",
   });
   const [errors, setErrors] = useState({});
 
   const handleNumberChange = (key, value) => {
     const sanitized = value.replace(/[^0-9.]/g, "");
     setFormData({ ...formData, [key]: sanitized });
+  };
+
+  const generateItemCode = () => {
+    const randomNumber = Math.floor(10000000000 + Math.random() * 90000000000);
+    setFormData({ ...formData, itemCode: randomNumber.toString() });
+  };
+
+  const clearItemCode = () => {
+    setFormData({ ...formData, itemCode: "" });
   };
 
   const validateForm = () => {
@@ -69,39 +84,8 @@ const AddItem = () => {
       <div className="add-items-header-section">
         <div className="add-items-header-left">
           <span className="add-items-label">Add Item</span>
-          <div className="product-service-toggle">
-            <button
-              className={`toggle-btn ${
-                productType === "product" ? "active" : ""
-              }`}
-              onClick={() => setProductType("product")}
-            >
-              Product
-            </button>
-            <button
-              className={`toggle-btn ${
-                productType === "service" ? "active" : ""
-              }`}
-              onClick={() => setProductType("service")}
-            >
-              Service
-            </button>
-          </div>
         </div>
         <div className="add-items-header-right">
-          <button className="settings-icon">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <circle cx="12" cy="12" r="3"></circle>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-            </svg>
-          </button>
           <button className="close-icon">
             <svg
               width="20"
@@ -207,13 +191,43 @@ const AddItem = () => {
             </div>
             <div className="add-item-form-group">
               <label>Item Code</label>
-              <input
-                type="text"
-                value={formData.itemCode}
-                onChange={(e) =>
-                  setFormData({ ...formData, itemCode: e.target.value })
-                }
-              />
+              <div className="add-item-input-with-button">
+                <input
+                  type="text"
+                  value={formData.itemCode}
+                  onChange={(e) =>
+                    setFormData({ ...formData, itemCode: e.target.value })
+                  }
+                />
+                {formData.itemCode ? (
+                  <button 
+                    type="button"
+                    className="add-item-clear-btn"
+                    onClick={clearItemCode}
+                    title="Clear"
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
+                ) : (
+                  <button 
+                    type="button"
+                    className="add-item-assign-btn"
+                    onClick={generateItemCode}
+                  >
+                    Assign
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -345,29 +359,88 @@ const AddItem = () => {
             )}
 
             {activeTab === "stock" && (
-              <div className="stock-section">Stock settings coming soon…</div>
+              <div className="stock-section">
+                <div className="stock-form-container">
+                  <div className="stock-form-row">
+                    <div className="stock-form-group">
+                      <div className="stock-input-with-button">
+                        <input
+                          type="text"
+                          placeholder="Opening Quantity"
+                          value={formData.openingQuantity}
+                          onChange={(e) =>
+                            handleNumberChange("openingQuantity", e.target.value)
+                          }
+                        />
+                        <button className="stock-batch-btn">Batch</button>
+                      </div>
+                    </div>
+                    <div className="stock-form-group">
+                      <input
+                        type="text"
+                        placeholder="At Price"
+                        value={formData.atPrice}
+                        onChange={(e) =>
+                          handleNumberChange("atPrice", e.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="stock-form-group">
+                      <label className="stock-date-label">As Of Date</label>
+                      <div className="stock-date-input">
+                        <input
+                          type="text"
+                          value={formData.asOfDate}
+                          onChange={(e) =>
+                            setFormData({ ...formData, asOfDate: e.target.value })
+                          }
+                        />
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          className="calendar-icon"
+                        >
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="16" y1="2" x2="16" y2="6"></line>
+                          <line x1="8" y1="2" x2="8" y2="6"></line>
+                          <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="stock-form-row">
+                    <div className="stock-form-group">
+                      <input
+                        type="text"
+                        placeholder="Min Stock To Maintain"
+                        value={formData.minStockToMaintain}
+                        onChange={(e) =>
+                          handleNumberChange("minStockToMaintain", e.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="stock-form-group">
+                      <input
+                        type="text"
+                        placeholder="Location"
+                        value={formData.location}
+                        onChange={(e) =>
+                          setFormData({ ...formData, location: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </div>
-
-        {/* <div className="action-buttons">
-          <button className="save-new-btn" onClick={() => { if (validateForm()) console.log("Save & New", formData); }}>Save & New</button>
-          <button className="save-btn" onClick={onSave}>Save</button>
-        </div> */}
       </div>
-      {/* <div className="action-buttons">
-        <button
-          className="save-new-btn"
-          onClick={() => {
-            if (validateForm()) console.log("Save & New", formData);
-          }}
-        >
-          Save & New
-        </button>
-        <button className="save-btn" onClick={onSave}>
-          Save
-        </button>
-      </div> */}
       <div className="add-items-footer-section">
         <div className="add-items-footer-left">
           <button
