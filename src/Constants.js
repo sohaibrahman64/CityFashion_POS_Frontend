@@ -66,3 +66,6 @@ export const GET_ALL_PARTIES = "api/parties/getAll";
 export const UPDATE_PARTY = "api/parties/update";
 export const CREATE_PARTY_TRANSACTION = "api/party-transactions/createTransaction";
 export const GET_PARTIES_REPORT = "api/party-transactions/report";
+export const GET_ALL_TAX_TYPES = "api/tax-types/all";
+export const GET_ALL_DISCOUNT_TYPES = "api/discount-types/all";
+export const GET_ALL_UNITS = "api/units/getAllUnits";

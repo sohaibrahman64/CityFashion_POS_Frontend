@@ -1,34 +1,79 @@
 import "./AddItem.css";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import * as XLSX from 'xlsx';
+import { BASE_URL, GET_ALL_TAX_TYPES, GET_ALL_DISCOUNT_TYPES, GET_ALL_UNITS, GET_TAX_RATES, SAVE_PRODUCT_NEW } from '../Constants';
+import CategoriesDropdown from './CategoriesDropdown';
+import Toast from '../components/Toast';
 
 const AddItem = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("pricing");
   const [productType, setProductType] = useState("product");
   const [formData, setFormData] = useState({
-    itemName: 'Black T-Shirt 32"',
-    itemHSN: "6207",
-    selectedUnit: "PCS",
-    category: "T-Shirts",
-    itemCode: "38628046468",
+    itemName: "",
+    itemHSN: "",
+    selectedUnit: "",
+    category: "",
+    itemCode: "",
     // Pricing
-    salePrice: "400",
-    salePriceTaxMode: "without_tax", // without_tax | inclusive | exclusive
-    discountOnSale: "10",
-    discountType: "amount", // amount | percent
-    purchasePrice: "350",
-    purchasePriceTaxMode: "without_tax",
+    salePrice: "",
+    salePriceTaxMode: "", // without_tax | inclusive | exclusive
+    discountOnSale: "",
+    discountType: "", // amount | percent
+    purchasePrice: "",
+    purchasePriceTaxMode: "",
     // Taxes
-    taxRate: "3", // percent only for now
+    taxRate: "", // percent only for now
     // Stock
     openingQuantity: "",
     atPrice: "",
-    asOfDate: "21/07/2025",
+    asOfDate: "",
     minStockToMaintain: "",
     location: "",
   });
   const [errors, setErrors] = useState({});
+  
+  // HSN Modal state
+  const [showHSNModal, setShowHSNModal] = useState(false);
+  const [hsnCodes, setHsnCodes] = useState([]);
+  const [filteredHsnCodes, setFilteredHsnCodes] = useState([]);
+  const [hsnSearchTerm, setHsnSearchTerm] = useState('');
+  const [hsnLoading, setHsnLoading] = useState(false);
+  
+  // API data state
+  const [taxTypes, setTaxTypes] = useState([]);
+  const [discountTypes, setDiscountTypes] = useState([]);
+  const [taxRates, setTaxRates] = useState([]);
+  const [loadingTaxTypes, setLoadingTaxTypes] = useState(false);
+  const [loadingDiscountTypes, setLoadingDiscountTypes] = useState(false);
+  const [loadingTaxRates, setLoadingTaxRates] = useState(false);
+  
+  // Unit Modal state
+  const [showUnitModal, setShowUnitModal] = useState(false);
+  const [units, setUnits] = useState([]);
+  const [loadingUnits, setLoadingUnits] = useState(false);
+  const [selectedBaseUnit, setSelectedBaseUnit] = useState('');
+  const [selectedSecondaryUnit, setSelectedSecondaryUnit] = useState('');
+  
+  // Category state
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  // Image upload state
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const fileInputRef = useRef(null);
+
+  // Toast state
+  const [toast, setToast] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchTaxTypes();
+    fetchDiscountTypes();
+    fetchTaxRates();
+  }, []);
 
   const handleNumberChange = (key, value) => {
     const sanitized = value.replace(/[^0-9.]/g, "");
@@ -42,6 +87,271 @@ const AddItem = () => {
 
   const clearItemCode = () => {
     setFormData({ ...formData, itemCode: "" });
+  };
+
+  // Fetch tax types from API
+  const fetchTaxTypes = async () => {
+    setLoadingTaxTypes(true);
+    try {
+      const response = await fetch(`${BASE_URL}/${GET_ALL_TAX_TYPES}`);
+      if (response.ok) {
+        const data = await response.json();
+        setTaxTypes(data);
+      } else {
+        console.error("Failed to fetch tax types");
+      }
+    } catch (error) {
+      console.error("Error fetching tax types:", error);
+    } finally {
+      setLoadingTaxTypes(false);
+    }
+  };
+
+  // Fetch discount types from API
+  const fetchDiscountTypes = async () => {
+    setLoadingDiscountTypes(true);
+    try {
+      const response = await fetch(`${BASE_URL}/${GET_ALL_DISCOUNT_TYPES}`);
+      if (response.ok) {
+        const data = await response.json();
+        setDiscountTypes(data);
+      } else {
+        console.error("Failed to fetch discount types");
+      }
+    } catch (error) {
+      console.error("Error fetching discount types:", error);
+    } finally {
+      setLoadingDiscountTypes(false);
+    }
+  };
+
+  // Fetch tax rates from API
+  const fetchTaxRates = async () => {
+    setLoadingTaxRates(true);
+    try {
+      const response = await fetch(`${BASE_URL}/${GET_TAX_RATES}`);
+      if (response.ok) {
+        const data = await response.json();
+        setTaxRates(data);
+      } else {
+        console.error("Failed to fetch tax rates");
+      }
+    } catch (error) {
+      console.error("Error fetching tax rates:", error);
+    } finally {
+      setLoadingTaxRates(false);
+    }
+  };
+
+  // Fetch units from API
+  const fetchUnits = async () => {
+    setLoadingUnits(true);
+    try {
+      const response = await fetch(`${BASE_URL}/${GET_ALL_UNITS}`);
+      if (response.ok) {
+        const data = await response.json();
+        setUnits(data);
+      } else {
+        console.error("Failed to fetch units");
+      }
+    } catch (error) {
+      console.error("Error fetching units:", error);
+    } finally {
+      setLoadingUnits(false);
+    }
+  };
+
+  // Load HSN codes from Excel file
+  const loadHSNCodes = async () => {
+    setHsnLoading(true);
+    try {
+      const response = await fetch('/GST_HSN_CODES.xlsx');
+      const arrayBuffer = await response.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      
+      let allCodes = [];
+      
+      // Read all sheets except the first one (header)
+      workbook.SheetNames.forEach((sheetName, index) => {
+        if (index > 0) { // Skip first sheet (header)
+          const worksheet = workbook.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+          
+          // Skip header row and process data
+          jsonData.slice(1).forEach(row => {
+            // Check if we have at least 3 columns (SL NO, HS Code, Description)
+            if (row.length >= 3) {
+              // Ignore SL NO (index 0), read HS Code (index 1) and Description (index 2)
+              const hsCode = row[1];
+              const description = row[2];
+              
+              if (hsCode && description) { // Check if both HS Code and Description exist
+                allCodes.push({
+                  code: hsCode.toString(),
+                  description: description.toString()
+                });
+              }
+            }
+          });
+        }
+      });
+      
+      setHsnCodes(allCodes);
+      setFilteredHsnCodes(allCodes);
+      return allCodes; // Return the codes for chaining
+    } catch (error) {
+      console.error('Error loading HSN codes:', error);
+      alert('Error loading HSN codes. Please check if the file exists.');
+      return []; // Return empty array on error
+    } finally {
+      setHsnLoading(false);
+    }
+  };
+
+  // Handle HSN search
+  const handleSearchHSN = () => {
+    setShowHSNModal(true);
+    
+    // Pre-populate search with Item Name if it exists
+    if (formData.itemName.trim()) {
+      setHsnSearchTerm(formData.itemName.trim());
+      // Load codes and filter immediately
+      if (hsnCodes.length === 0) {
+        loadHSNCodes().then(() => {
+          // Filter after codes are loaded
+          filterHSNCodes(formData.itemName.trim());
+        });
+      } else {
+        // Filter immediately if codes are already loaded
+        filterHSNCodes(formData.itemName.trim());
+      }
+    } else {
+      // Clear search term if no item name
+      setHsnSearchTerm('');
+      if (hsnCodes.length === 0) {
+        loadHSNCodes();
+      } else {
+        setFilteredHsnCodes(hsnCodes);
+      }
+    }
+  };
+
+  // Filter HSN codes based on search term
+  const filterHSNCodes = (searchTerm) => {
+    setHsnSearchTerm(searchTerm);
+    if (!searchTerm.trim()) {
+      setFilteredHsnCodes(hsnCodes);
+    } else {
+      // Extract meaningful keywords from the search term
+      const keywords = extractKeywords(searchTerm);
+      
+      const filtered = hsnCodes.filter(code => {
+        const codeText = code.code.toLowerCase();
+        const descriptionText = code.description.toLowerCase();
+        
+        // Check if any keyword matches in code or description
+        return keywords.some(keyword => 
+          codeText.includes(keyword.toLowerCase()) ||
+          descriptionText.includes(keyword.toLowerCase())
+        );
+      });
+      
+      setFilteredHsnCodes(filtered);
+    }
+  };
+
+  // Extract meaningful keywords from item name
+  const extractKeywords = (itemName) => {
+    // Remove common words and numbers, keep meaningful product terms
+    const commonWords = ['red', 'blue', 'green', 'black', 'white', 'yellow', 'pink', 'purple', 'orange', 'brown', 'gray', 'grey'];
+    const sizeWords = ['small', 'medium', 'large', 'xl', 'xxl', 'xs', 's', 'm', 'l'];
+    const numberPattern = /\d+/g;
+    
+    let keywords = itemName.toLowerCase()
+      .split(/\s+/)
+      .filter(word => {
+        // Remove common color words
+        if (commonWords.includes(word)) return false;
+        // Remove size words
+        if (sizeWords.includes(word)) return false;
+        // Remove pure numbers
+        if (numberPattern.test(word) && word.length <= 3) return false;
+        // Keep words with at least 2 characters
+        return word.length >= 2;
+      });
+    
+    // If no meaningful keywords found, use the original search term
+    if (keywords.length === 0) {
+      keywords = [itemName.toLowerCase()];
+    }
+    
+    return keywords;
+  };
+
+  // Select HSN code
+  const selectHSNCode = (code) => {
+    setFormData({ ...formData, itemHSN: code.code });
+    setShowHSNModal(false);
+    setHsnSearchTerm('');
+  };
+
+  // Close HSN modal
+  const closeHSNModal = () => {
+    setShowHSNModal(false);
+    setHsnSearchTerm('');
+  };
+
+  // Handle unit selection modal
+  const handleSelectUnit = () => {
+    setShowUnitModal(true);
+    if (units.length === 0) {
+      fetchUnits();
+    }
+  };
+
+  // Close unit modal
+  const closeUnitModal = () => {
+    setShowUnitModal(false);
+    setSelectedBaseUnit('');
+    setSelectedSecondaryUnit('');
+  };
+
+  // Confirm unit selection
+  const confirmUnitSelection = () => {
+    if (selectedBaseUnit) {
+      setFormData({ ...formData, selectedUnit: selectedBaseUnit });
+      setShowUnitModal(false);
+      setSelectedBaseUnit('');
+      setSelectedSecondaryUnit('');
+    }
+  };
+
+  // Handle category selection
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category);
+    setFormData({ ...formData, category: category.categoryName || category.name || "" });
+  };
+
+  // Handle image selection
+  const handleImageSelect = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  // Handle image change
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedImage(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const validateForm = () => {
@@ -73,10 +383,102 @@ const AddItem = () => {
     return price - d;
   };
 
-  const onSave = () => {
+  // Save product function
+  const saveProduct = async (isSaveAndNew = false) => {
     if (!validateForm()) return;
-    // integrate save later
-    console.log("Form submit", formData);
+    
+    setSaving(true);
+    try {
+      // Prepare form data for API
+      const productData = {
+        name: formData.itemName,
+        hsn: formData.itemHSN,
+        unit: formData.selectedUnit,
+        category: formData.category,
+        code: formData.itemCode,
+        pricing: {
+          salePrice: parseFloat(formData.salePrice) || 0,
+          salePriceType: formData.salePriceTaxMode,
+          discountAmount: parseFloat(formData.discountOnSale) || 0,
+          discountType: formData.discountType,
+        },
+        purchasePriceTaxes: {
+          purchasePrice: parseFloat(formData.purchasePrice) || 0,
+          purchasePriceType: formData.purchasePriceTaxMode,
+          taxRate: formData.taxRate
+            ? taxRates.find((rate) => rate.id == formData.taxRate)
+            : null,
+        },
+        stock: {
+          openingQuantity: parseInt(formData.openingQuantity) || 0,
+          atPrice: parseFloat(formData.atPrice) || 0,
+          asOfDate: formData.asOfDate,
+          minStock: parseInt(formData.minStockToMaintain) || 0,
+          location: formData.location.trim(),
+        },
+      };
+
+      const formData1 = new FormData();
+
+      // Only append image if it exists
+      if (selectedImage) {
+        formData1.append("imageFile", selectedImage);
+      }
+
+      formData1.append("item", new Blob([JSON.stringify(productData)], { type: "application/json" }));
+
+      const response = await fetch(`${BASE_URL}/${SAVE_PRODUCT_NEW}`,
+        formData1, 
+       {
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.ok) {
+        setToast({ message: "Item saved successfully!", type: "success" });
+      } else {
+        setToast({ message: "Failed to save item. Please try again.", type: "error" });
+      }
+
+      if (isSaveAndNew) {
+        // Reset form for new item
+        setFormData({
+          itemName: '',
+          itemHSN: '',
+          selectedUnit: '',
+          category: '',
+          itemCode: '',
+          salePrice: '',
+          salePriceTaxMode: '',
+          discountOnSale: '',
+          discountType: '',
+          purchasePrice: '',
+          purchasePriceTaxMode: '',
+          taxRate: '',
+          openingQuantity: '',
+          atPrice: '',
+          asOfDate: new Date().toISOString().split('T')[0],
+          minStock: '',
+          location: '',
+        });
+        setSelectedCategory(null);
+      } else {
+        // Navigate back to items list
+        setTimeout(() => {
+          navigate("/item");
+        }, 1500);
+      }
+    } catch (error) {
+      console.error("Error saving product:", error);
+      setToast({ 
+        message: "Failed to save product. Please try again.", 
+        type: "error" 
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -125,7 +527,11 @@ const AddItem = () => {
                     setFormData({ ...formData, itemHSN: e.target.value })
                   }
                 />
-                <button className="add-item-search-icon">
+                <button 
+                  className="add-item-search-icon"
+                  onClick={handleSearchHSN}
+                  type="button"
+                >
                   <svg
                     width="16"
                     height="16"
@@ -142,52 +548,74 @@ const AddItem = () => {
             </div>
             <div className="add-item-form-group">
               <label>Select Unit</label>
-              <button className="add-item-select-unit-btn">Select Unit</button>
-              <div className="add-item-selected-unit">PCS</div>
+              <button 
+                className="add-item-select-unit-btn"
+                onClick={handleSelectUnit}
+                type="button"
+              >
+                Select Unit
+              </button>
+              <div className="add-item-selected-unit">{formData.selectedUnit || "PCS"}</div>
             </div>
             <div className="add-item-form-group">
               <label>Add Item Image</label>
-              <button className="add-item-add-image-btn">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                  <circle cx="12" cy="13" r="4"></circle>
-                  <line x1="20" y1="4" x2="21" y2="3"></line>
-                </svg>
-                Add Item Image
-              </button>
+              <div className="add-item-image-upload-section">
+                {!imagePreview ? (
+                  <button className="add-item-add-image-btn" onClick={handleImageSelect}>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                      <circle cx="12" cy="13" r="4"></circle>
+                      <line x1="20" y1="4" x2="21" y2="3"></line>
+                    </svg>
+                    Add Item Image
+                  </button>
+                ) : (
+                  <div className="add-item-image-preview-container">
+                    <img
+                      src={imagePreview}
+                      alt="Item preview"
+                      className="add-item-image-preview"
+                    />
+                    <button
+                      className="add-item-remove-image-btn"
+                      onClick={() => {
+                        setSelectedImage(null);
+                        setImagePreview(null);
+                        if (fileInputRef.current) {
+                          fileInputRef.current.value = "";
+                        }
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
+                  accept="image/jpeg,image/jpg,image/png"
+                  style={{ display: "none" }}
+                />
+              </div>
             </div>
           </div>
 
           <div className="add-item-form-row">
             <div className="add-item-form-group">
               <label>Category</label>
-              <div className="add-item-dropdown-container">
-                <input
-                  type="text"
-                  value={formData.category}
-                  readOnly
-                  className="add-item-dropdown-input"
-                />
-                <button className="add-item-dropdown-arrow">
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <polyline points="6,9 12,15 18,9"></polyline>
-                  </svg>
-                </button>
-              </div>
+              <CategoriesDropdown 
+                onCategorySelect={handleCategorySelect}
+                selectedCategory={selectedCategory}
+                showAddCategory={true}
+              />
             </div>
             <div className="add-item-form-group">
               <label>Item Code</label>
@@ -254,13 +682,16 @@ const AddItem = () => {
                 <div className="sale-price-section">
                   <h3>Sale Price</h3>
                   <div className="price-input-group">
-                    <input
-                      type="text"
-                      value={formData.salePrice}
-                      onChange={(e) =>
-                        handleNumberChange("salePrice", e.target.value)
-                      }
-                    />
+                    <div className="currency-input-wrapper">
+                      <span className="currency-symbol">₹</span>
+                      <input
+                        type="text"
+                        value={formData.salePrice}
+                        onChange={(e) =>
+                          handleNumberChange("salePrice", e.target.value)
+                        }
+                      />
+                    </div>
                     <select
                       value={formData.salePriceTaxMode}
                       onChange={(e) =>
@@ -270,23 +701,30 @@ const AddItem = () => {
                         })
                       }
                       className="add-item-dropdown-input"
+                      disabled={loadingTaxTypes}
                     >
-                      <option value="without_tax">Without Tax</option>
-                      <option value="inclusive">Inclusive</option>
-                      <option value="exclusive">Exclusive</option>
+                      <option value="">{loadingTaxTypes ? "Loading..." : "Select Tax Type"}</option>
+                      {taxTypes.map((taxType, index) => (
+                        <option key={taxType.id || index} value={taxType.taxType || taxType.name}>
+                          {taxType.taxType || taxType.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
                   <div className="discount-section">
                     <label>Disc. On Sale Price</label>
                     <div className="discount-input-group">
-                      <input
-                        type="text"
-                        value={formData.discountOnSale}
-                        onChange={(e) =>
-                          handleNumberChange("discountOnSale", e.target.value)
-                        }
-                      />
+                      <div className="currency-input-wrapper">
+                        <span className="currency-symbol">₹</span>
+                        <input
+                          type="text"
+                          value={formData.discountOnSale}
+                          onChange={(e) =>
+                            handleNumberChange("discountOnSale", e.target.value)
+                          }
+                        />
+                      </div>
                       <select
                         value={formData.discountType}
                         onChange={(e) =>
@@ -296,9 +734,14 @@ const AddItem = () => {
                           })
                         }
                         className="add-item-dropdown-input"
+                        disabled={loadingDiscountTypes}
                       >
-                        <option value="amount">Amount</option>
-                        <option value="percent">Percent</option>
+                        <option value="">{loadingDiscountTypes ? "Loading..." : "Select Discount Type"}</option>
+                        {discountTypes.map((discountType, index) => (
+                          <option key={discountType.id || index} value={discountType.discountType || discountType.name}>
+                            {discountType.discountType || discountType.name}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>
@@ -313,13 +756,16 @@ const AddItem = () => {
                   <div className="purchase-price-group">
                     <label>Purchase Price</label>
                     <div className="price-input-group">
-                      <input
-                        type="text"
-                        value={formData.purchasePrice}
-                        onChange={(e) =>
-                          handleNumberChange("purchasePrice", e.target.value)
-                        }
-                      />
+                      <div className="currency-input-wrapper">
+                        <span className="currency-symbol">₹</span>
+                        <input
+                          type="text"
+                          value={formData.purchasePrice}
+                          onChange={(e) =>
+                            handleNumberChange("purchasePrice", e.target.value)
+                          }
+                        />
+                      </div>
                       <select
                         value={formData.purchasePriceTaxMode}
                         onChange={(e) =>
@@ -329,10 +775,14 @@ const AddItem = () => {
                           })
                         }
                         className="add-item-dropdown-input"
+                        disabled={loadingTaxTypes}
                       >
-                        <option value="without_tax">Without Tax</option>
-                        <option value="inclusive">Inclusive</option>
-                        <option value="exclusive">Exclusive</option>
+                        <option value="">{loadingTaxTypes ? "Loading..." : "Select Tax Type"}</option>
+                        {taxTypes.map((taxType, index) => (
+                          <option key={taxType.id || index} value={taxType.taxType || taxType.name}>
+                            {taxType.taxType || taxType.name}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>
@@ -345,13 +795,14 @@ const AddItem = () => {
                         handleNumberChange("taxRate", e.target.value)
                       }
                       className="add-item-dropdown-input"
+                      disabled={loadingTaxRates}
                     >
-                      <option value="0">GST@0%</option>
-                      <option value="3">GST@3%</option>
-                      <option value="5">GST@5%</option>
-                      <option value="12">GST@12%</option>
-                      <option value="18">GST@18%</option>
-                      <option value="28">GST@28%</option>
+                      <option value="">{loadingTaxRates ? "Loading..." : "Select Tax Rate"}</option>
+                      {taxRates.map((taxRate, index) => (
+                        <option key={taxRate.id || index} value={taxRate.id}>
+                          {taxRate.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -455,22 +906,205 @@ const AddItem = () => {
         <div className="add-items-footer-right">
           <button
             className="save-new-btn"
-            onClick={() => {
-              if (validateForm()) console.log("Save & New", formData);
-            }}
+            onClick={() => saveProduct(true)}
+            disabled={saving}
           >
-            Save & New
+            {saving ? "Saving..." : "Save & New"}
           </button>
           <button
             className="save-btn"
-            onClick={() => {
-              if (validateForm()) console.log("Save", formData);
-            }}
+            onClick={() => saveProduct(false)}
+            disabled={saving}
           >
-            Save
+            {saving ? "Saving..." : "Save"}
           </button>
         </div>
       </div>
+
+      {/* HSN Search Modal */}
+      {showHSNModal && (
+        <div className="hsn-modal-overlay" onClick={closeHSNModal}>
+          <div className="hsn-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="hsn-modal-header">
+              <div className="hsn-header-content">
+                <h2>Select HSN/SAC Code</h2>
+                <div className="hsn-search-container">
+                  <div className="hsn-search-input-wrapper">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      className="hsn-search-icon"
+                    >
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <path d="M21 21l-4.35-4.35"></path>
+                    </svg>
+                    <input
+                      type="text"
+                      value={hsnSearchTerm}
+                      onChange={(e) => filterHSNCodes(e.target.value)}
+                      placeholder="Search HSN codes or descriptions..."
+                      className="hsn-search-input"
+                    />
+                    {hsnSearchTerm && (
+                      <button 
+                        onClick={() => filterHSNCodes('')} 
+                        className="hsn-clear-search-btn"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <button className="hsn-modal-close" onClick={closeHSNModal}>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+
+            <div className="hsn-table-container">
+              <div className="hsn-table-header">
+                <div className="hsn-table-cell header">CODE</div>
+                <div className="hsn-table-cell header">DESCRIPTION</div>
+                <div className="hsn-table-cell header"></div>
+              </div>
+              
+              {hsnLoading ? (
+                <div className="hsn-loading">Loading HSN codes...</div>
+              ) : filteredHsnCodes.length === 0 ? (
+                <div className="hsn-no-results">No HSN codes found for "{hsnSearchTerm}".</div>
+              ) : (
+                <div className="hsn-table-body">
+                  {filteredHsnCodes.map((code, index) => (
+                    <div 
+                      key={index} 
+                      className="hsn-table-row"
+                      onClick={() => selectHSNCode(code)}
+                    >
+                      <div className="hsn-table-cell code-cell">{code.code}</div>
+                      <div className="hsn-table-cell description-cell">{code.description}</div>
+                      <div className="hsn-table-cell action-cell">
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          className="hsn-arrow-icon"
+                        >
+                          <polyline points="9,18 15,12 9,6"></polyline>
+                        </svg>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Unit Selection Modal */}
+      {showUnitModal && (
+        <div className="unit-modal-overlay" onClick={closeUnitModal}>
+          <div className="unit-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="unit-modal-header">
+              <h2>Select Unit</h2>
+              <button className="unit-modal-close" onClick={closeUnitModal}>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+
+            <div className="unit-modal-body">
+              <div className="unit-selection-group">
+                <div className="unit-combo-group">
+                  <label>BASE UNIT</label>
+                  <select
+                    value={selectedBaseUnit}
+                    onChange={(e) => setSelectedBaseUnit(e.target.value)}
+                    className="unit-select"
+                    disabled={loadingUnits}
+                  >
+                    <option value="">{loadingUnits ? "Loading..." : "Select Base Unit"}</option>
+                    {units.map((unit, index) => (
+                      <option key={unit.id || index} value={unit.unitName || unit.unitName}>
+                        {unit.label || unit.unitName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="unit-combo-group">
+                  <label>SECONDARY UNIT</label>
+                  <select
+                    value={selectedSecondaryUnit}
+                    onChange={(e) => setSelectedSecondaryUnit(e.target.value)}
+                    className="unit-select"
+                    disabled={loadingUnits}
+                  >
+                    <option value="">{loadingUnits ? "Loading..." : "Select Secondary Unit"}</option>
+                    {units.map((unit, index) => (
+                      <option key={unit.id || index} value={unit.unitName || unit.unitName}>
+                        {unit.label || unit.unitName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="unit-modal-footer">
+              <button 
+                className="unit-cancel-btn"
+                onClick={closeUnitModal}
+              >
+                Cancel
+              </button>
+              <button 
+                className="unit-confirm-btn"
+                onClick={confirmUnitSelection}
+                disabled={!selectedBaseUnit}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          duration={3000}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 };
