@@ -1,31 +1,34 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import html2pdf from "html2pdf.js";
+import { useEffect, useRef, useState } from "react";
+import {
+  useNavigate,
+  useNavigate as useRouterNavigate,
+} from "react-router-dom";
+import Toast from "../components/Toast";
 import {
   BASE_URL,
-  SEARCH_PRODUCTS_STARTS_WITH,
-  GET_ALL_PRODUCTS_NEW,
   CREATE_NEW_SALES_INVOICE,
-  GENERATE_INVOICE_NUMBER_NEW_SALES_INVOICE,
-  CREATE_PRODUCT_TRANSACTION,
-  GET_TAX_RATES,
-  GET_TAX_RATES_LABELS,
-  CREATE_SALES_TRANSACTION,
   CREATE_PARTY_TRANSACTION,
+  CREATE_SALES_TRANSACTION,
+  GENERATE_INVOICE_NUMBER_NEW_SALES_INVOICE,
+  GET_ALL_ITEMS,
+  GET_ALL_PRODUCTS_NEW,
+  GET_TAX_RATES,
+  SEARCH_PRODUCTS_STARTS_WITH,
+  CREATE_ITEM_TRANSACTION,
+  CREATE_PRODUCT_TRANSACTION,
 } from "../Constants";
-import "./NewSalesNew.css";
-import Toast from "../components/Toast";
-import html2pdf from "html2pdf.js";
 import PartiesDropdown from "../parties/PartiesDropdown";
 import ItemsDropdown from "../product/ItemsDropdown";
-import { useNavigate as useRouterNavigate } from "react-router-dom";
+import "./NewSalesNew.css";
 
 const NewSalesNew = () => {
   const navigate = useNavigate();
   const routerNavigate = useRouterNavigate();
   const [isMobile, setIsMobile] = useState(false);
-  const [customerName, setCustomerName] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
-  const [customerId, setCustomerId] = useState(null);
+  const [partyName, setPartyName] = useState("");
+  const [partyPhone, setPartyPhone] = useState("");
+  const [partyId, setPartyId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -44,7 +47,7 @@ const NewSalesNew = () => {
       discount: "",
       discountAmount: "", // New field for discount amount
       total: "0.00",
-      productId: null,
+      itemId: null,
       taxType: "With Tax", // New field for tax type
       taxRateId: null, // New field for selected tax rate ID
       taxAmount: "0.00", // New field for tax amount
@@ -157,14 +160,15 @@ const NewSalesNew = () => {
   // Fetch all products when activeRowIndex changes (on focus)
   useEffect(() => {
     if (activeRowIndex !== null) {
-      fetchAllProducts();
+      //fetchAllProducts();
+      fetchAllItems();
     }
   }, [activeRowIndex]);
 
   const handlePartySelect = (party) => {
-    setCustomerName(party?.partyName || party?.name || "");
-    setCustomerPhone(party?.phoneNumber || "");
-    setCustomerId(party?.id ?? null);
+    setPartyName(party?.partyName || party?.name || "");
+    setPartyPhone(party?.phoneNumber || "");
+    setPartyId(party?.id ?? null);
   };
 
   // Fetch invoice number when component mounts
@@ -176,7 +180,7 @@ const NewSalesNew = () => {
     try {
       // Create a simple text message for WhatsApp
       const message = `Invoice Details:
-Customer: ${customerName || "N/A"}
+Customer: ${partyName || "N/A"}
 Total Amount: ₹${calculateSubTotal().toFixed(2)}
 Items: ${itemInputs.filter((item) => item.itemName.trim() !== "").length} items
 Date: ${new Date().toLocaleDateString()}
@@ -265,7 +269,7 @@ Thank you for your business!`;
       // Configure PDF options
       const opt = {
         margin: [10, 10, 10, 10],
-        filename: `Invoice_${customerName || "Customer"}_${
+        filename: `Invoice_${partyName || "Customer"}_${
           new Date().toISOString().split("T")[0]
         }.pdf`,
         image: { type: "jpeg", quality: 0.98 },
@@ -323,7 +327,7 @@ Thank you for your business!`;
   // Validation function to check if required fields are filled
   const validateInvoiceData = () => {
     // Check if customer name is provided
-    if (!customerName.trim()) {
+    if (!partyName.trim()) {
       setToastMessage("Please enter customer name.");
       setToastType("error");
       setShowToast(true);
@@ -392,9 +396,9 @@ Thank you for your business!`;
         },
 
         body: JSON.stringify({
-          customerId: customerId,
-          customerName: customerName,
-          customerPhone: customerPhone,
+          partyId: partyId,
+          partyName: partyName,
+          partyPhone: partyPhone,
           items: itemInputs,
           receivedAmount: receivedAmount,
           subtotalAmount: calculateSubTotal(),
@@ -424,7 +428,10 @@ Thank you for your business!`;
         setShowToast(true);
 
         // Create product transactions for all items sold
-        await createProductTransactions(data);
+        //await createProductTransactions(data);
+
+        // Create item transactions for all items sold
+        await createItemTransactions(data);
 
         // Also create sales transaction
         await createSalesTransaction(data);
@@ -433,9 +440,9 @@ Thank you for your business!`;
         await createPartyTransaction(data);
 
         // Clear all form fields after successful invoice creation
-        setCustomerName("");
-        setCustomerPhone("");
-        setCustomerId(null);
+        setPartyName("");
+        setPartyPhone("");
+        setPartyId(null);
         setReceivedAmount("");
         setIsFullyReceived(false);
         setItemInputs([
@@ -448,7 +455,7 @@ Thank you for your business!`;
             discount: "",
             discountAmount: "",
             total: "0.00",
-            productId: null,
+            itemId: null,
             hsnCode: null,
             taxType: "With Tax",
           },
@@ -513,7 +520,7 @@ Thank you for your business!`;
       const validItems = itemInputs.filter(
         (item) =>
           item.itemName.trim() !== "" &&
-          item.productId &&
+          item.itemId &&
           item.quantity &&
           item.price
       );
@@ -537,7 +544,7 @@ Thank you for your business!`;
         transactionDate: new Date().toISOString(),
         createdAt: new Date().toISOString(),
         createdBy: "SYSTEM", // You can replace this with actual user info if available
-        notes: `Invoice: ${invoiceNumber}, Customer: ${customerName}`,
+        notes: `Invoice: ${invoiceNumber}, Customer: ${partyName}`,
         status: "COMPLETED",
       }));
 
@@ -554,10 +561,7 @@ Thank you for your business!`;
 
       if (response.ok) {
         const transactionData = await response.json();
-        console.log(
-          "Product transactions created successfully:",
-          transactionData
-        );
+        console.log("Item transactions created successfully:", transactionData);
       } else {
         console.error("Failed to create product transactions");
         const errorText = await response.text();
@@ -565,6 +569,63 @@ Thank you for your business!`;
       }
     } catch (error) {
       console.error("Error creating product transactions:", error);
+    }
+  };
+
+  const createItemTransactions = async (invoiceData) => {
+    try {
+      // Filter out empty items and create transactions for each product sold
+      const validItems = itemInputs.filter(
+        (item) =>
+          item.itemName.trim() !== "" &&
+          item.itemId &&
+          item.quantity &&
+          item.price
+      );
+
+      if (validItems.length === 0) {
+        console.log("No valid items to create transactions for");
+        return;
+      }
+
+      const transactions = validItems.map((item) => ({
+        itemId: item.itemId,
+        itemName: item.itemName,
+        transactionType: "SALE",
+        referenceId: invoiceData.invoiceId || null, // Invoice ID from backend response
+        referenceType: "SALES_INVOICE",
+        referenceNumber: invoiceNumber,
+        partyId: item.partyId || partyId,
+        partyName: item.partyName || partyName,
+        quantity: parseFloat(item.quantity),
+        unitPrice: parseFloat(item.price),
+        totalAmount: parseFloat(item.total),
+        description: `Sale of ${item.quantity} units of ${item.itemName} at ₹${item.price} per unit`,
+        transactionDate: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        createdBy: "SYSTEM", // You can replace this with actual user info if available
+        notes: `Invoice: ${invoiceNumber}, Customer: ${partyName}`,
+        status: "COMPLETED",
+      }));
+
+      const response = await fetch(`${BASE_URL}/${CREATE_ITEM_TRANSACTION}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(transactions),
+      });
+
+      if (response.ok) {
+        const transactionData = await response.json();
+        console.log("Item transactions created successfully:", transactionData);
+      } else {
+        console.error("Failed to create item transactions");
+        const errorText = await response.text();
+        console.error("Error response:", errorText);
+      }
+    } catch (error) {
+      console.error("Error creating item transactions:", error);
     }
   };
 
@@ -591,9 +652,9 @@ Thank you for your business!`;
       const payload = {
         invoiceId: invoiceData.invoiceId || null,
         invoiceNumber: invoiceData.invoiceNumber || invoiceNumber,
-        customerName: customerName,
-        customerPhone: customerPhone,
-        customerId: customerId,
+        customerName: partyName,
+        customerPhone: partyPhone,
+        customerId: partyId,
         totalAmount: calculateSubTotal(),
         taxAmount: invoiceData.totalTaxAmount || 0.0,
         netAmount: calculateSubTotal(),
@@ -643,7 +704,7 @@ Thank you for your business!`;
     try {
       const partyTotal = calculateSubTotal();
       const partyBalance = partyTotal - parseFloat(receivedAmount || 0);
-      
+
       // Determine status based on party balance
       let status = "UNPAID";
       if (partyBalance <= 0) {
@@ -653,9 +714,9 @@ Thank you for your business!`;
       }
 
       const payload = {
-        partyId: customerId,
-        partyName: customerName,
-        partyPhone: customerPhone,
+        partyId: partyId,
+        partyName: partyName,
+        partyPhone: partyPhone,
         invoiceId: invoiceData.invoiceId || null,
         invoiceNumber: invoiceData.invoiceNumber || invoiceNumber,
         partyTotal: partyTotal,
@@ -664,7 +725,7 @@ Thank you for your business!`;
         referenceId: invoiceData.invoiceId || null,
         referenceType: "SALES_INVOICE",
         referenceNumber: invoiceNumber,
-        description: `Sale of ${itemInputs.length} items to ${customerName}`,
+        description: `Sale of ${itemInputs.length} items to ${partyName}`,
         transactionDate: new Date().toISOString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -728,6 +789,26 @@ Thank you for your business!`;
     }
   };
 
+  const fetchAllItems = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/${GET_ALL_ITEMS}`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data.items);
+        setSuggestions(data.items);
+        setShowSuggestions(data.items.length > 0);
+      } else {
+        console.error("Failed to fetch all products");
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    } catch (error) {
+      console.error("Error fetching all products:", error);
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
   const handleItemNameChange = (index, value) => {
     const newItemInputs = [...itemInputs];
     newItemInputs[index].itemName = value;
@@ -741,44 +822,44 @@ Thank you for your business!`;
   const handleItemDropdownFocus = (index, event) => {
     setActiveRowIndex(index);
     // Fetch all products when input is focused
-    fetchAllProducts();
+    //fetchAllProducts();
+    fetchAllItems();
   };
 
-  const handleProductSelect = (product, index) => {
-    console.log(product);
+  const handleProductSelect = (item, index) => {
+    console.log(item);
 
     // Calculate discount values based on product's discount type
     let discount = "0";
     let discountAmount = "0.00";
 
-    if (product.pricing && product.pricing.discountAmount > 0) {
-      if (product.pricing.discountType === "PERCENTAGE") {
-        discount = product.pricing.discountAmount.toString();
+    if (item && item.discountAmount > 0) {
+      if (item.discountType === "Percentage") {
+        discount = item.discountAmount.toString();
         // Calculate amount from percentage
-        const price = parseFloat(product.pricing.salePrice) || 0;
+        const price = parseFloat(item.salePrice) || 0;
         const quantity = 1; // Default quantity
         discountAmount = (
-          (price * quantity * product.pricing.discountAmount) /
+          (price * quantity * item.discountAmount) /
           100
         ).toFixed(2);
-      } else if (product.pricing.discountType === "AMOUNT") {
-        discountAmount = product.pricing.discountAmount.toString();
+      } else if (item.discountType === "Amount") {
+        discountAmount = item.discountAmount.toString();
         // Calculate percentage from amount
-        const price = parseFloat(product.pricing.salePrice) || 0;
+        const price = parseFloat(item.salePrice) || 0;
         const quantity = 1; // Default quantity
         if (price > 0 && quantity > 0) {
-          discount = (
-            (product.pricing.discountAmount / (price * quantity)) *
-            100
-          ).toFixed(2);
+          discount = ((item.discountAmount / (price * quantity)) * 100).toFixed(
+            2
+          );
         }
       }
     }
 
     // Find matching tax rate
     let taxRateId = null;
-    if (product.purchasePriceTaxes && product.purchasePriceTaxes?.taxRate) {
-      const productTaxRate = product.purchasePriceTaxes?.taxRate;
+    if (item && item.taxRate) {
+      const productTaxRate = item.taxRate;
       const matchingTaxRateIndex = taxRates.findIndex(
         (rate) =>
           rate.id === productTaxRate.id ||
@@ -791,56 +872,42 @@ Thank you for your business!`;
     }
 
     // Calculate price based on product's salePriceType and header tax type selection
-    let calculatedPrice = product.pricing.salePrice || 0;
+    let calculatedPrice = item.salePrice || 0;
 
     // If product's salePriceType is "WITH_TAX", use the sale price directly regardless of header selection
-    if (product.pricing.salePriceType === "WITH_TAX") {
-      calculatedPrice = product.pricing.salePrice || 0;
-    } else if (
-      headerTaxType === "With Tax" &&
-      product.purchasePriceTaxes &&
-      product.purchasePriceTaxes.taxRate
-    ) {
+    if (item.salePriceType === "With Tax") {
+      calculatedPrice = item.salePrice || 0;
+    } else if (headerTaxType === "With Tax" && item && item.taxRate) {
       // If product's salePriceType is "WITHOUT_TAX" and "With Tax" is selected, calculate price including tax
-      const taxRate = product.purchasePriceTaxes.taxRate.rate || 0;
-      calculatedPrice =
-        product.pricing.salePrice + (product.pricing.salePrice * taxRate) / 100;
+      const taxRate = item.taxRate.rate || 0;
+      calculatedPrice = item.salePrice + (item.salePrice * taxRate) / 100;
     } else if (
       headerTaxType === "Without Tax" &&
-      product.purchasePriceTaxes &&
-      product.purchasePriceTaxes.taxRate &&
-      product.pricing.salePriceType === "WITHOUT_TAX"
+      item &&
+      item.taxRate &&
+      item.pricing.salePriceType === "Without Tax"
     ) {
-      calculatedPrice = product.pricing.salePrice;
-    } else if (
-      headerTaxType === "Without Tax" &&
-      product.purchasePriceTaxes &&
-      product.purchasePriceTaxes.taxRate
-    ) {
+      calculatedPrice = item.salePrice;
+    } else if (headerTaxType === "Without Tax" && item && item.taxRate) {
       // If "Without Tax" is selected, show price without tax in the input field
-      const taxRate = product.purchasePriceTaxes.taxRate.rate || 0;
-      calculatedPrice =
-        product.pricing.salePrice - (product.pricing.salePrice * taxRate) / 100;
+      const taxRate = item.taxRate.rate || 0;
+      calculatedPrice = item.salePrice - (item.salePrice * taxRate) / 100;
     }
 
     // Calculate total based on header tax selection and product type
     let calculatedTotal = calculatedPrice;
-    if (
-      headerTaxType === "Without Tax" &&
-      product.pricing.salePriceType === "WITH_TAX"
-    ) {
+    if (headerTaxType === "Without Tax" && item.salePriceType === "With Tax") {
       // Add tax to the total when header is "Without Tax" but product includes tax
-      const taxRate = product.purchasePriceTaxes?.taxRate?.rate || 0;
+      const taxRate = item.taxRate?.rate || 0;
       const quantity = 1; // Default quantity
       const subtotal = calculatedPrice * quantity;
       const discountAmountValue = parseFloat(discountAmount) || 0;
       const afterDiscount = subtotal - discountAmountValue;
       calculatedTotal = afterDiscount + (afterDiscount * taxRate) / 100;
-      calculatedPrice =
-        product.pricing.salePrice - product.pricing.salePrice * (taxRate / 100);
+      calculatedPrice = item.salePrice - item.salePrice * (taxRate / 100);
     } else if (
       headerTaxType === "With Tax" &&
-      product.pricing.salePriceType === "WITHOUT_TAX"
+      item.salePriceType === "Without Tax"
     ) {
       // Calculate total as Price - Discount when "With Tax" is selected and product is WITHOUT_TAX
       const quantity = 1; // Default quantity
@@ -850,23 +917,18 @@ Thank you for your business!`;
     }
 
     // Check if product already includes tax
-    const isProductWithTax = product.pricing.salePriceType === "WITH_TAX";
+    const isProductWithTax = item.salePriceType === "With Tax";
 
     // Calculate tax amount based on product configuration
     //let calculatedTaxAmount = "0.00";
     let calculatedTaxAmount = (
-      (product.pricing.salePrice *
-        (product.purchasePriceTaxes?.taxRate?.rate || 0)) /
+      (item.salePrice * (item.taxRate?.rate || 0)) /
       100
     ).toFixed(2);
-    if (
-      !isProductWithTax &&
-      product.purchasePriceTaxes &&
-      product.purchasePriceTaxes?.taxRate
-    ) {
+    if (!isProductWithTax && item && item.taxRate) {
       // For products without tax, calculate tax amount
-      const taxRate = product.purchasePriceTaxes?.taxRate?.rate || 0;
-      const basePrice = parseFloat(product.pricing.salePrice) || 0;
+      const taxRate = item.taxRate?.rate || 0;
+      const basePrice = parseFloat(item.salePrice) || 0;
       const quantity = 1; // Default quantity
       const subtotal = basePrice * quantity;
       //const subtotal = (basePrice * quantity) + ((basePrice * taxRate) / 100).toFixed(2);
@@ -876,13 +938,13 @@ Thank you for your business!`;
       //calculatedTaxAmount = afterDiscount;
     } else if (
       headerTaxType === "With Tax" &&
-      product.pricing.salePriceType === "WITHOUT_TAX" &&
-      product.purchasePriceTaxes &&
-      product.purchasePriceTaxes?.taxRate
+      item.salePriceType === "Without Tax" &&
+      item.purchasePriceTaxes &&
+      item.purchasePriceTaxes?.taxRate
     ) {
       // When "With Tax" is selected and product is WITHOUT_TAX, calculate tax amount
-      const taxRate = product.purchasePriceTaxes?.taxRate?.rate || 0;
-      const basePrice = parseFloat(product.pricing.salePrice) || 0;
+      const taxRate = item.taxRate?.rate || 0;
+      const basePrice = parseFloat(item.salePrice) || 0;
       const quantity = 1; // Default quantity
       const subtotal = basePrice * quantity;
       const discountAmountValue = parseFloat(discountAmount) || 0;
@@ -898,24 +960,24 @@ Thank you for your business!`;
 
     itemInputs[index] = {
       ...itemInputs[index],
-      itemName: product.name,
+      itemName: item.name,
       price: calculatedPrice.toFixed(2),
-      purchasePrice: product.purchasePriceTaxes?.purchasePrice ?? null,
-      originalSalePrice: product.pricing.salePrice, // Store original sale price for calculations
+      purchasePrice: item.purchasePrice ?? null,
+      originalSalePrice: item.salePrice, // Store original sale price for calculations
       quantity: "1",
       discount: discount,
       discountAmount: discountAmount,
       total: calculatedTotal.toFixed(2),
-      productId: product.id,
-      hsnCode: product.hsn,
+      itemId: item.id,
+      hsnCode: item.hsn,
       taxRateId: taxRateId,
-      taxPercent: product.purchasePriceTaxes?.taxRate?.rate || 0,
+      taxPercent: item.taxRate?.rate || 0,
       taxAmount: calculatedTaxAmount,
       isProductWithTax: isProductWithTax, // Track if product includes tax
       isIGST: isIGST, // Track if tax is IGST
     };
     setItemInputs(itemInputs);
-    setSelectedProduct(product);
+    setSelectedProduct(item);
     setShowSuggestions(false);
     setSearchTerm("");
     setActiveRowIndex(null);
@@ -1028,7 +1090,7 @@ Thank you for your business!`;
 
     // Recalculate all existing items based on new header tax selection
     const updatedItemInputs = itemInputs.map((item, index) => {
-      if (item.productId) {
+      if (item.itemId) {
         // Recalculate total based on new header tax selection
         let calculatedTotal = parseFloat(item.price) || 0;
         let calculatedTaxAmount = item.taxAmount || "0.00";
@@ -1141,7 +1203,7 @@ Thank you for your business!`;
       discount: "",
       discountAmount: "",
       total: "0.00",
-      productId: null,
+      itemId: null,
       hsnCode: null,
       taxType: "With Tax",
       taxRateId: null,
@@ -1406,17 +1468,17 @@ Thank you for your business!`;
           <div className="input-section">
             <div className="customer-fields">
               <div className="input-group">
-                <label htmlFor="customerName">Customer Name*</label>
+                <label htmlFor="customerName">Party Name*</label>
                 <PartiesDropdown onPartySelect={handlePartySelect} />
               </div>
               <div className="input-group">
-                <label htmlFor="customerPhone">Customer Phone Number</label>
+                <label htmlFor="customerPhone">Party Phone Number</label>
                 <input
                   type="tel"
                   id="customerPhone"
                   placeholder="Enter Number"
-                  value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value)}
+                  value={partyPhone}
+                  onChange={(e) => setPartyPhone(e.target.value)}
                 />
               </div>
             </div>
@@ -1651,8 +1713,8 @@ Thank you for your business!`;
               <div className="details-header">
                 <div className="bill-to">
                   <h4>Bill To</h4>
-                  <p>{customerName || "Customer Name"}</p>
-                  <p>{customerPhone || "Contact No."}</p>
+                  <p>{partyName || "Customer Name"}</p>
+                  <p>{partyPhone || "Contact No."}</p>
                 </div>
 
                 <div className="invoice-info">

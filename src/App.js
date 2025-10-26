@@ -75,6 +75,8 @@ const App = () => {
   return (
     <Router>
       <Routes>
+        {/* Redirect root hash '/' to '/home' */}
+        <Route path="/" element={<Navigate to="/home" replace />} />
         <Route
           path="/login"
           element={

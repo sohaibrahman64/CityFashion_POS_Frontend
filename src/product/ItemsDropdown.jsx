@@ -85,13 +85,13 @@ const ItemsDropdown = ({
                       {product.productCode || product.code})
                     </td>
                     <td className="sale-price">
-                      ₹{product.pricing?.salePrice || "0.00"}
+                      ₹{product.salePrice || "0.00"}
                     </td>
                     <td className="purchase-price">
-                      ₹{product.pricing?.purchasePrice || "0.00"}
+                      ₹{product.purchasePrice || "0.00"}
                     </td>
                     <td className="stock">
-                      {product.stock?.openingQuantity || "0"}
+                      {product.openingQuantity || "0"}
                     </td>
                   </tr>
                 ))

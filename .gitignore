@@ -25,3 +25,6 @@ dist/
 dist/win-unpacked/
 build/
 node_modules/
+.github/
+.vscode/
+src/.env

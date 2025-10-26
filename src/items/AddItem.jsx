@@ -1,10 +1,18 @@
 import "./AddItem.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
-import * as XLSX from 'xlsx';
-import { BASE_URL, GET_ALL_TAX_TYPES, GET_ALL_DISCOUNT_TYPES, GET_ALL_UNITS, GET_TAX_RATES, SAVE_PRODUCT_NEW } from '../Constants';
-import CategoriesDropdown from './CategoriesDropdown';
-import Toast from '../components/Toast';
+import * as XLSX from "xlsx";
+import {
+  BASE_URL,
+  GET_ALL_TAX_TYPES,
+  GET_ALL_DISCOUNT_TYPES,
+  GET_ALL_UNITS,
+  GET_TAX_RATES,
+  CREATE_ITEM,
+  CREATE_ITEM_WITH_IMAGES,
+} from "../Constants";
+import CategoriesDropdown from "./CategoriesDropdown";
+import Toast from "../components/Toast";
 
 const AddItem = () => {
   const navigate = useNavigate();
@@ -28,19 +36,19 @@ const AddItem = () => {
     // Stock
     openingQuantity: "",
     atPrice: "",
-    asOfDate: "",
+    asOfDate: new Date().toISOString().split('T')[0], // Initialize with current date
     minStockToMaintain: "",
     location: "",
   });
   const [errors, setErrors] = useState({});
-  
+
   // HSN Modal state
   const [showHSNModal, setShowHSNModal] = useState(false);
   const [hsnCodes, setHsnCodes] = useState([]);
   const [filteredHsnCodes, setFilteredHsnCodes] = useState([]);
-  const [hsnSearchTerm, setHsnSearchTerm] = useState('');
+  const [hsnSearchTerm, setHsnSearchTerm] = useState("");
   const [hsnLoading, setHsnLoading] = useState(false);
-  
+
   // API data state
   const [taxTypes, setTaxTypes] = useState([]);
   const [discountTypes, setDiscountTypes] = useState([]);
@@ -48,14 +56,14 @@ const AddItem = () => {
   const [loadingTaxTypes, setLoadingTaxTypes] = useState(false);
   const [loadingDiscountTypes, setLoadingDiscountTypes] = useState(false);
   const [loadingTaxRates, setLoadingTaxRates] = useState(false);
-  
+
   // Unit Modal state
   const [showUnitModal, setShowUnitModal] = useState(false);
   const [units, setUnits] = useState([]);
   const [loadingUnits, setLoadingUnits] = useState(false);
-  const [selectedBaseUnit, setSelectedBaseUnit] = useState('');
-  const [selectedSecondaryUnit, setSelectedSecondaryUnit] = useState('');
-  
+  const [selectedBaseUnit, setSelectedBaseUnit] = useState("");
+  const [selectedSecondaryUnit, setSelectedSecondaryUnit] = useState("");
+
   // Category state
   const [selectedCategory, setSelectedCategory] = useState(null);
 
@@ -165,43 +173,45 @@ const AddItem = () => {
   const loadHSNCodes = async () => {
     setHsnLoading(true);
     try {
-      const response = await fetch('/GST_HSN_CODES.xlsx');
+      const response = await fetch("/GST_HSN_CODES.xlsx");
       const arrayBuffer = await response.arrayBuffer();
-      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-      
+      const workbook = XLSX.read(arrayBuffer, { type: "array" });
+
       let allCodes = [];
-      
+
       // Read all sheets except the first one (header)
       workbook.SheetNames.forEach((sheetName, index) => {
-        if (index > 0) { // Skip first sheet (header)
+        if (index > 0) {
+          // Skip first sheet (header)
           const worksheet = workbook.Sheets[sheetName];
           const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-          
+
           // Skip header row and process data
-          jsonData.slice(1).forEach(row => {
+          jsonData.slice(1).forEach((row) => {
             // Check if we have at least 3 columns (SL NO, HS Code, Description)
             if (row.length >= 3) {
               // Ignore SL NO (index 0), read HS Code (index 1) and Description (index 2)
               const hsCode = row[1];
               const description = row[2];
-              
-              if (hsCode && description) { // Check if both HS Code and Description exist
+
+              if (hsCode && description) {
+                // Check if both HS Code and Description exist
                 allCodes.push({
                   code: hsCode.toString(),
-                  description: description.toString()
+                  description: description.toString(),
                 });
               }
             }
           });
         }
       });
-      
+
       setHsnCodes(allCodes);
       setFilteredHsnCodes(allCodes);
       return allCodes; // Return the codes for chaining
     } catch (error) {
-      console.error('Error loading HSN codes:', error);
-      alert('Error loading HSN codes. Please check if the file exists.');
+      console.error("Error loading HSN codes:", error);
+      alert("Error loading HSN codes. Please check if the file exists.");
       return []; // Return empty array on error
     } finally {
       setHsnLoading(false);
@@ -211,7 +221,7 @@ const AddItem = () => {
   // Handle HSN search
   const handleSearchHSN = () => {
     setShowHSNModal(true);
-    
+
     // Pre-populate search with Item Name if it exists
     if (formData.itemName.trim()) {
       setHsnSearchTerm(formData.itemName.trim());
@@ -227,7 +237,7 @@ const AddItem = () => {
       }
     } else {
       // Clear search term if no item name
-      setHsnSearchTerm('');
+      setHsnSearchTerm("");
       if (hsnCodes.length === 0) {
         loadHSNCodes();
       } else {
@@ -244,18 +254,19 @@ const AddItem = () => {
     } else {
       // Extract meaningful keywords from the search term
       const keywords = extractKeywords(searchTerm);
-      
-      const filtered = hsnCodes.filter(code => {
+
+      const filtered = hsnCodes.filter((code) => {
         const codeText = code.code.toLowerCase();
         const descriptionText = code.description.toLowerCase();
-        
+
         // Check if any keyword matches in code or description
-        return keywords.some(keyword => 
-          codeText.includes(keyword.toLowerCase()) ||
-          descriptionText.includes(keyword.toLowerCase())
+        return keywords.some(
+          (keyword) =>
+            codeText.includes(keyword.toLowerCase()) ||
+            descriptionText.includes(keyword.toLowerCase())
         );
       });
-      
+
       setFilteredHsnCodes(filtered);
     }
   };
@@ -263,13 +274,37 @@ const AddItem = () => {
   // Extract meaningful keywords from item name
   const extractKeywords = (itemName) => {
     // Remove common words and numbers, keep meaningful product terms
-    const commonWords = ['red', 'blue', 'green', 'black', 'white', 'yellow', 'pink', 'purple', 'orange', 'brown', 'gray', 'grey'];
-    const sizeWords = ['small', 'medium', 'large', 'xl', 'xxl', 'xs', 's', 'm', 'l'];
+    const commonWords = [
+      "red",
+      "blue",
+      "green",
+      "black",
+      "white",
+      "yellow",
+      "pink",
+      "purple",
+      "orange",
+      "brown",
+      "gray",
+      "grey",
+    ];
+    const sizeWords = [
+      "small",
+      "medium",
+      "large",
+      "xl",
+      "xxl",
+      "xs",
+      "s",
+      "m",
+      "l",
+    ];
     const numberPattern = /\d+/g;
-    
-    let keywords = itemName.toLowerCase()
+
+    let keywords = itemName
+      .toLowerCase()
       .split(/\s+/)
-      .filter(word => {
+      .filter((word) => {
         // Remove common color words
         if (commonWords.includes(word)) return false;
         // Remove size words
@@ -279,12 +314,12 @@ const AddItem = () => {
         // Keep words with at least 2 characters
         return word.length >= 2;
       });
-    
+
     // If no meaningful keywords found, use the original search term
     if (keywords.length === 0) {
       keywords = [itemName.toLowerCase()];
     }
-    
+
     return keywords;
   };
 
@@ -292,13 +327,13 @@ const AddItem = () => {
   const selectHSNCode = (code) => {
     setFormData({ ...formData, itemHSN: code.code });
     setShowHSNModal(false);
-    setHsnSearchTerm('');
+    setHsnSearchTerm("");
   };
 
   // Close HSN modal
   const closeHSNModal = () => {
     setShowHSNModal(false);
-    setHsnSearchTerm('');
+    setHsnSearchTerm("");
   };
 
   // Handle unit selection modal
@@ -312,8 +347,8 @@ const AddItem = () => {
   // Close unit modal
   const closeUnitModal = () => {
     setShowUnitModal(false);
-    setSelectedBaseUnit('');
-    setSelectedSecondaryUnit('');
+    setSelectedBaseUnit("");
+    setSelectedSecondaryUnit("");
   };
 
   // Confirm unit selection
@@ -321,15 +356,18 @@ const AddItem = () => {
     if (selectedBaseUnit) {
       setFormData({ ...formData, selectedUnit: selectedBaseUnit });
       setShowUnitModal(false);
-      setSelectedBaseUnit('');
-      setSelectedSecondaryUnit('');
+      setSelectedBaseUnit("");
+      setSelectedSecondaryUnit("");
     }
   };
 
   // Handle category selection
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
-    setFormData({ ...formData, category: category.categoryName || category.name || "" });
+    setFormData({
+      ...formData,
+      category: category.categoryName || category.name || "",
+    });
   };
 
   // Handle image selection
@@ -344,7 +382,7 @@ const AddItem = () => {
     const file = event.target.files[0];
     if (file) {
       setSelectedImage(file);
-      
+
       // Create preview URL
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -386,7 +424,7 @@ const AddItem = () => {
   // Save product function
   const saveProduct = async (isSaveAndNew = false) => {
     if (!validateForm()) return;
-    
+
     setSaving(true);
     try {
       // Prepare form data for API
@@ -405,76 +443,90 @@ const AddItem = () => {
         purchasePriceTaxes: {
           purchasePrice: parseFloat(formData.purchasePrice) || 0,
           purchasePriceType: formData.purchasePriceTaxMode,
-          taxRate: formData.taxRate
-            ? taxRates.find((rate) => rate.id == formData.taxRate)
-            : null,
+          taxRateId: formData.taxRate ? parseFloat(formData.taxRate) : 0
         },
         stock: {
           openingQuantity: parseInt(formData.openingQuantity) || 0,
           atPrice: parseFloat(formData.atPrice) || 0,
-          asOfDate: formData.asOfDate,
+          asOfDate: formData.asOfDate ? new Date(formData.asOfDate).toISOString() : null,
           minStock: parseInt(formData.minStockToMaintain) || 0,
           location: formData.location.trim(),
         },
       };
 
-      const formData1 = new FormData();
+      // Choose API endpoint depending on whether an image will be uploaded
+      const apiEndpoint = selectedImage ? CREATE_ITEM_WITH_IMAGES : CREATE_ITEM;
+      const url = `${BASE_URL}/${apiEndpoint}`;
 
-      // Only append image if it exists
+      let response;
+
+      // If an image is selected, send multipart/form-data. Otherwise send JSON.
       if (selectedImage) {
+        const formData1 = new FormData();
         formData1.append("imageFile", selectedImage);
+        formData1.append(
+          "item",
+          new Blob([JSON.stringify(productData)], { type: "application/json" })
+        );
+
+        // Browser will set the correct Content-Type with boundary
+        response = await fetch(url, {
+          method: "PUT",
+          body: formData1,
+        });
+      } else {
+        // Send JSON when there's no file upload — some backends expect this.
+        response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(productData),
+        });
       }
-
-      formData1.append("item", new Blob([JSON.stringify(productData)], { type: "application/json" }));
-
-      const response = await fetch(`${BASE_URL}/${SAVE_PRODUCT_NEW}`,
-        formData1, 
-       {
-        method: "POST",
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
 
       if (response.ok) {
         setToast({ message: "Item saved successfully!", type: "success" });
       } else {
-        setToast({ message: "Failed to save item. Please try again.", type: "error" });
+        setToast({
+          message: "Failed to save item. Please try again.",
+          type: "error",
+        });
       }
 
       if (isSaveAndNew) {
         // Reset form for new item
         setFormData({
-          itemName: '',
-          itemHSN: '',
-          selectedUnit: '',
-          category: '',
-          itemCode: '',
-          salePrice: '',
-          salePriceTaxMode: '',
-          discountOnSale: '',
-          discountType: '',
-          purchasePrice: '',
-          purchasePriceTaxMode: '',
-          taxRate: '',
-          openingQuantity: '',
-          atPrice: '',
-          asOfDate: new Date().toISOString().split('T')[0],
-          minStock: '',
-          location: '',
+          itemName: "",
+          itemHSN: "",
+          selectedUnit: "",
+          category: "",
+          itemCode: "",
+          salePrice: "",
+          salePriceTaxMode: "",
+          discountOnSale: "",
+          discountType: "",
+          purchasePrice: "",
+          purchasePriceTaxMode: "",
+          taxRate: "",
+          openingQuantity: "",
+          atPrice: "",
+          asOfDate: new Date().toISOString().split("T")[0],
+          minStock: "",
+          location: "",
         });
         setSelectedCategory(null);
       } else {
         // Navigate back to items list
         setTimeout(() => {
-          navigate("/item");
-        }, 1500);
+          navigate("/items");
+        }, 500);
       }
     } catch (error) {
       console.error("Error saving product:", error);
-      setToast({ 
-        message: "Failed to save product. Please try again.", 
-        type: "error" 
+      setToast({
+        message: "Failed to save product. Please try again.",
+        type: "error",
       });
     } finally {
       setSaving(false);
@@ -527,7 +579,7 @@ const AddItem = () => {
                     setFormData({ ...formData, itemHSN: e.target.value })
                   }
                 />
-                <button 
+                <button
                   className="add-item-search-icon"
                   onClick={handleSearchHSN}
                   type="button"
@@ -548,20 +600,25 @@ const AddItem = () => {
             </div>
             <div className="add-item-form-group">
               <label>Select Unit</label>
-              <button 
+              <button
                 className="add-item-select-unit-btn"
                 onClick={handleSelectUnit}
                 type="button"
               >
                 Select Unit
               </button>
-              <div className="add-item-selected-unit">{formData.selectedUnit || "PCS"}</div>
+              <div className="add-item-selected-unit">
+                {formData.selectedUnit || "PCS"}
+              </div>
             </div>
             <div className="add-item-form-group">
               <label>Add Item Image</label>
               <div className="add-item-image-upload-section">
                 {!imagePreview ? (
-                  <button className="add-item-add-image-btn" onClick={handleImageSelect}>
+                  <button
+                    className="add-item-add-image-btn"
+                    onClick={handleImageSelect}
+                  >
                     <svg
                       width="20"
                       height="20"
@@ -611,7 +668,7 @@ const AddItem = () => {
           <div className="add-item-form-row">
             <div className="add-item-form-group">
               <label>Category</label>
-              <CategoriesDropdown 
+              <CategoriesDropdown
                 onCategorySelect={handleCategorySelect}
                 selectedCategory={selectedCategory}
                 showAddCategory={true}
@@ -628,7 +685,7 @@ const AddItem = () => {
                   }
                 />
                 {formData.itemCode ? (
-                  <button 
+                  <button
                     type="button"
                     className="add-item-clear-btn"
                     onClick={clearItemCode}
@@ -647,7 +704,7 @@ const AddItem = () => {
                     </svg>
                   </button>
                 ) : (
-                  <button 
+                  <button
                     type="button"
                     className="add-item-assign-btn"
                     onClick={generateItemCode}
@@ -703,9 +760,14 @@ const AddItem = () => {
                       className="add-item-dropdown-input"
                       disabled={loadingTaxTypes}
                     >
-                      <option value="">{loadingTaxTypes ? "Loading..." : "Select Tax Type"}</option>
+                      <option value="">
+                        {loadingTaxTypes ? "Loading..." : "Select Tax Type"}
+                      </option>
                       {taxTypes.map((taxType, index) => (
-                        <option key={taxType.id || index} value={taxType.taxType || taxType.name}>
+                        <option
+                          key={taxType.id || index}
+                          value={taxType.taxType || taxType.name}
+                        >
                           {taxType.taxType || taxType.name}
                         </option>
                       ))}
@@ -736,9 +798,18 @@ const AddItem = () => {
                         className="add-item-dropdown-input"
                         disabled={loadingDiscountTypes}
                       >
-                        <option value="">{loadingDiscountTypes ? "Loading..." : "Select Discount Type"}</option>
+                        <option value="">
+                          {loadingDiscountTypes
+                            ? "Loading..."
+                            : "Select Discount Type"}
+                        </option>
                         {discountTypes.map((discountType, index) => (
-                          <option key={discountType.id || index} value={discountType.discountType || discountType.name}>
+                          <option
+                            key={discountType.id || index}
+                            value={
+                              discountType.discountType || discountType.name
+                            }
+                          >
                             {discountType.discountType || discountType.name}
                           </option>
                         ))}
@@ -777,9 +848,14 @@ const AddItem = () => {
                         className="add-item-dropdown-input"
                         disabled={loadingTaxTypes}
                       >
-                        <option value="">{loadingTaxTypes ? "Loading..." : "Select Tax Type"}</option>
+                        <option value="">
+                          {loadingTaxTypes ? "Loading..." : "Select Tax Type"}
+                        </option>
                         {taxTypes.map((taxType, index) => (
-                          <option key={taxType.id || index} value={taxType.taxType || taxType.name}>
+                          <option
+                            key={taxType.id || index}
+                            value={taxType.taxType || taxType.name}
+                          >
                             {taxType.taxType || taxType.name}
                           </option>
                         ))}
@@ -797,7 +873,9 @@ const AddItem = () => {
                       className="add-item-dropdown-input"
                       disabled={loadingTaxRates}
                     >
-                      <option value="">{loadingTaxRates ? "Loading..." : "Select Tax Rate"}</option>
+                      <option value="">
+                        {loadingTaxRates ? "Loading..." : "Select Tax Rate"}
+                      </option>
                       {taxRates.map((taxRate, index) => (
                         <option key={taxRate.id || index} value={taxRate.id}>
                           {taxRate.label}
@@ -820,7 +898,10 @@ const AddItem = () => {
                           placeholder="Opening Quantity"
                           value={formData.openingQuantity}
                           onChange={(e) =>
-                            handleNumberChange("openingQuantity", e.target.value)
+                            handleNumberChange(
+                              "openingQuantity",
+                              e.target.value
+                            )
                           }
                         />
                         <button className="stock-batch-btn">Batch</button>
@@ -840,13 +921,16 @@ const AddItem = () => {
                       <label className="stock-date-label">As Of Date</label>
                       <div className="stock-date-input">
                         <input
-                          type="text"
+                          type="date"
                           value={formData.asOfDate}
                           onChange={(e) =>
-                            setFormData({ ...formData, asOfDate: e.target.value })
+                            setFormData({
+                              ...formData,
+                              asOfDate: e.target.value,
+                            })
                           }
                         />
-                        <svg
+                        {/* <svg
                           width="16"
                           height="16"
                           viewBox="0 0 24 24"
@@ -855,15 +939,22 @@ const AddItem = () => {
                           strokeWidth="2"
                           className="calendar-icon"
                         >
-                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                          <rect
+                            x="3"
+                            y="4"
+                            width="18"
+                            height="18"
+                            rx="2"
+                            ry="2"
+                          ></rect>
                           <line x1="16" y1="2" x2="16" y2="6"></line>
                           <line x1="8" y1="2" x2="8" y2="6"></line>
                           <line x1="3" y1="10" x2="21" y2="10"></line>
-                        </svg>
+                        </svg> */}
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="stock-form-row">
                     <div className="stock-form-group">
                       <input
@@ -871,7 +962,10 @@ const AddItem = () => {
                         placeholder="Min Stock To Maintain"
                         value={formData.minStockToMaintain}
                         onChange={(e) =>
-                          handleNumberChange("minStockToMaintain", e.target.value)
+                          handleNumberChange(
+                            "minStockToMaintain",
+                            e.target.value
+                          )
                         }
                       />
                     </div>
@@ -924,7 +1018,10 @@ const AddItem = () => {
       {/* HSN Search Modal */}
       {showHSNModal && (
         <div className="hsn-modal-overlay" onClick={closeHSNModal}>
-          <div className="hsn-modal-content" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="hsn-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="hsn-modal-header">
               <div className="hsn-header-content">
                 <h2>Select HSN/SAC Code</h2>
@@ -950,8 +1047,8 @@ const AddItem = () => {
                       className="hsn-search-input"
                     />
                     {hsnSearchTerm && (
-                      <button 
-                        onClick={() => filterHSNCodes('')} 
+                      <button
+                        onClick={() => filterHSNCodes("")}
                         className="hsn-clear-search-btn"
                       >
                         ✕
@@ -981,21 +1078,27 @@ const AddItem = () => {
                 <div className="hsn-table-cell header">DESCRIPTION</div>
                 <div className="hsn-table-cell header"></div>
               </div>
-              
+
               {hsnLoading ? (
                 <div className="hsn-loading">Loading HSN codes...</div>
               ) : filteredHsnCodes.length === 0 ? (
-                <div className="hsn-no-results">No HSN codes found for "{hsnSearchTerm}".</div>
+                <div className="hsn-no-results">
+                  No HSN codes found for "{hsnSearchTerm}".
+                </div>
               ) : (
                 <div className="hsn-table-body">
                   {filteredHsnCodes.map((code, index) => (
-                    <div 
-                      key={index} 
+                    <div
+                      key={index}
                       className="hsn-table-row"
                       onClick={() => selectHSNCode(code)}
                     >
-                      <div className="hsn-table-cell code-cell">{code.code}</div>
-                      <div className="hsn-table-cell description-cell">{code.description}</div>
+                      <div className="hsn-table-cell code-cell">
+                        {code.code}
+                      </div>
+                      <div className="hsn-table-cell description-cell">
+                        {code.description}
+                      </div>
                       <div className="hsn-table-cell action-cell">
                         <svg
                           width="16"
@@ -1021,7 +1124,10 @@ const AddItem = () => {
       {/* Unit Selection Modal */}
       {showUnitModal && (
         <div className="unit-modal-overlay" onClick={closeUnitModal}>
-          <div className="unit-modal-content" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="unit-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="unit-modal-header">
               <h2>Select Unit</h2>
               <button className="unit-modal-close" onClick={closeUnitModal}>
@@ -1049,9 +1155,14 @@ const AddItem = () => {
                     className="unit-select"
                     disabled={loadingUnits}
                   >
-                    <option value="">{loadingUnits ? "Loading..." : "Select Base Unit"}</option>
+                    <option value="">
+                      {loadingUnits ? "Loading..." : "Select Base Unit"}
+                    </option>
                     {units.map((unit, index) => (
-                      <option key={unit.id || index} value={unit.unitName || unit.unitName}>
+                      <option
+                        key={unit.id || index}
+                        value={unit.unitName || unit.unitName}
+                      >
                         {unit.label || unit.unitName}
                       </option>
                     ))}
@@ -1066,9 +1177,14 @@ const AddItem = () => {
                     className="unit-select"
                     disabled={loadingUnits}
                   >
-                    <option value="">{loadingUnits ? "Loading..." : "Select Secondary Unit"}</option>
+                    <option value="">
+                      {loadingUnits ? "Loading..." : "Select Secondary Unit"}
+                    </option>
                     {units.map((unit, index) => (
-                      <option key={unit.id || index} value={unit.unitName || unit.unitName}>
+                      <option
+                        key={unit.id || index}
+                        value={unit.unitName || unit.unitName}
+                      >
                         {unit.label || unit.unitName}
                       </option>
                     ))}
@@ -1078,13 +1194,10 @@ const AddItem = () => {
             </div>
 
             <div className="unit-modal-footer">
-              <button 
-                className="unit-cancel-btn"
-                onClick={closeUnitModal}
-              >
+              <button className="unit-cancel-btn" onClick={closeUnitModal}>
                 Cancel
               </button>
-              <button 
+              <button
                 className="unit-confirm-btn"
                 onClick={confirmUnitSelection}
                 disabled={!selectedBaseUnit}

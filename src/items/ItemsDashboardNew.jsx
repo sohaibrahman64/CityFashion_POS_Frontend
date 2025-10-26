@@ -7,6 +7,8 @@ import {
   GET_PRODUCT_TRANSACTIONS,
   DELETE_PRODUCT_NEW,
   STOCK_ADJUSTMENT,
+  GET_ALL_ITEMS,
+  GET_ITEM_TRANSACTIONS
 } from "../Constants";
 import axios from "axios";
 import Toast from "../components/Toast";
@@ -20,10 +22,10 @@ const ItemsDashboardNew = () => {
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [filterActive, setFilterActive] = useState(false);
   const [filterInactive, setFilterInactive] = useState(false);
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [items, setItems] = useState([]);
+  const [filteredItems, setFilteredItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedProductId, setSelectedProductId] = useState(null);
+  const [selectedItemId, setSelectedItemId] = useState(null);
   const [showAdjustModal, setShowAdjustModal] = useState(false);
   const [stockMode, setStockMode] = useState("add");
   const [adjustmentDate, setAdjustmentDate] = useState(
@@ -71,6 +73,22 @@ const ItemsDashboardNew = () => {
       setTransactionsLoading(true);
       const response = await axios.get(
         `${BASE_URL}/${GET_PRODUCT_TRANSACTIONS}/${productId}`
+      );
+      setTransactions(response.data);
+    } catch (error) {
+      console.error("Error loading transactions:", error);
+    } finally {
+      setTransactionsLoading(false);
+    }
+  };
+
+  const loadItemTransactions = async (itemId) => {
+    if (!itemId) return;
+
+    try {
+      setTransactionsLoading(true);
+      const response = await axios.get(
+        `${BASE_URL}/${GET_ITEM_TRANSACTIONS}/${itemId}`
       );
       setTransactions(response.data);
     } catch (error) {
@@ -147,10 +165,10 @@ const ItemsDashboardNew = () => {
 
   // Call this when a product is selected
   useEffect(() => {
-    if (selectedProductId) {
-      loadProductTransactions(selectedProductId);
+    if (selectedItemId) {
+      loadItemTransactions(selectedItemId);
     }
-  }, [selectedProductId]);
+  }, [selectedItemId]);
 
   // Load products from backend
   useEffect(() => {
@@ -160,29 +178,30 @@ const ItemsDashboardNew = () => {
   // Filter products when search term changes
   useEffect(() => {
     if (searchTerm.trim() === "") {
-      setFilteredProducts(products);
+      setFilteredItems(items);
     } else {
-      const filtered = products.filter((product) =>
+      const filtered = items.filter((product) =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      setFilteredProducts(filtered);
+      setFilteredItems(filtered);
     }
-  }, [searchTerm, products]);
+  }, [searchTerm, items]);
 
   // Auto-select first product when products are loaded
   useEffect(() => {
-    if (filteredProducts.length > 0 && !selectedProductId) {
-      setSelectedProductId(filteredProducts[0].id);
+    if (filteredItems.length > 0 && !selectedItemId) {
+      setSelectedItemId(filteredItems[0].id);
     }
-  }, [filteredProducts, selectedProductId]);
+  }, [filteredItems, selectedItemId]);
 
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${BASE_URL}/${GET_ALL_PRODUCTS_NEW}`);
+      //const response = await axios.get(`${BASE_URL}/${GET_ALL_PRODUCTS_NEW}`);
+      const response = await axios.get(`${BASE_URL}/${GET_ALL_ITEMS}`);
       console.log(response.data);
-      setProducts(response.data.products);
-      setFilteredProducts(response.data.products); // Initialize filtered products
+      setItems(response.data.items);
+      setFilteredItems(response.data.items); // Initialize filtered products
     } catch (error) {
       console.error("Error loading products:", error);
     } finally {
@@ -192,7 +211,7 @@ const ItemsDashboardNew = () => {
 
   // Handle product row click
   const handleProductRowClick = (productId) => {
-    setSelectedProductId(productId);
+    setSelectedItemId(productId);
   };
 
   // Handle product actions click
@@ -209,7 +228,7 @@ const ItemsDashboardNew = () => {
     switch (action) {
       case "view_edit":
         // Find the product data and store it in localStorage for pre-filling
-        const product = products.find((p) => p.id === productId);
+        const product = items.find((p) => p.id === productId);
         if (product) {
           // Store product data in localStorage for the AddNewProductNew component
           localStorage.setItem("editProductData", JSON.stringify(product));
@@ -233,14 +252,14 @@ const ItemsDashboardNew = () => {
             );
 
             // Remove the product from local state
-            setProducts((prev) => prev.filter((p) => p.id !== productId));
-            setFilteredProducts((prev) =>
+            setItems((prev) => prev.filter((p) => p.id !== productId));
+            setFilteredItems((prev) =>
               prev.filter((p) => p.id !== productId)
             );
 
             // If the deleted product was selected, clear selection and select another product if available
-            if (selectedProductId === productId) {
-              setSelectedProductId(null);
+            if (selectedItemId === productId) {
+              setSelectedItemId(null);
               // Reset adjustment modal state and form fields
               setShowAdjustModal(false);
               setTotalQuantity("");
@@ -249,9 +268,9 @@ const ItemsDashboardNew = () => {
               // Clear transactions for the deleted product
               setTransactions([]);
               // Select the first available product if there are any left
-              setFilteredProducts((prev) => {
+              setFilteredItems((prev) => {
                 if (prev.length > 0) {
-                  setSelectedProductId(prev[0].id);
+                  setSelectedItemId(prev[0].id);
                 }
                 return prev;
               });
@@ -393,7 +412,7 @@ const ItemsDashboardNew = () => {
   const handleSaveAdjustment = async () => {
     try {
       // Validate required fields
-      if (!selectedProductId || !totalQuantity || !atPrice) {
+      if (!selectedItemId || !totalQuantity || !atPrice) {
         addToast(
           "Please fill in all required fields (Product, Quantity, and Price)",
           "error"
@@ -403,7 +422,7 @@ const ItemsDashboardNew = () => {
 
       // Prepare the stock adjustment data
       const adjustmentData = {
-        productId: selectedProductId,
+        productId: selectedItemId,
         quantity: parseFloat(totalQuantity),
         atPrice: parseFloat(atPrice),
         description: description || "",
@@ -433,9 +452,9 @@ const ItemsDashboardNew = () => {
         setDescription("");
 
         // Update the local product state immediately to reflect changes
-        setProducts((prevProducts) => {
+        setItems((prevProducts) => {
           return prevProducts.map((product) => {
-            if (product.id === selectedProductId) {
+            if (product.id === selectedItemId) {
               // Create a new product object with updated values
               const updatedProduct = { ...product };
 
@@ -476,9 +495,9 @@ const ItemsDashboardNew = () => {
         });
 
         // Also update filtered products to maintain consistency
-        setFilteredProducts((prevFilteredProducts) => {
+        setFilteredItems((prevFilteredProducts) => {
           return prevFilteredProducts.map((product) => {
-            if (product.id === selectedProductId) {
+            if (product.id === selectedItemId) {
               // Create a new product object with updated values
               const updatedProduct = { ...product };
 
@@ -608,36 +627,36 @@ const ItemsDashboardNew = () => {
 
           {/* Items List */}
           <div className="items-list">
-            {filteredProducts.map((product) => (
+            {filteredItems.map((item) => (
               <div
-                key={product.id}
+                key={item.id}
                 className={`items-dashboard-item-row ${
-                  selectedProductId === product.id ? "selected" : ""
+                  selectedItemId === item.id ? "selected" : ""
                 }`}
-                onClick={() => handleProductRowClick(product.id)}
+                onClick={() => handleProductRowClick(item.id)}
               >
-                <div className="items-dashboard-item-name">{product.name}</div>
+                <div className="items-dashboard-item-name">{item.name}</div>
                 <div className="items-dashboard-item-quantity">
-                  {product.stock?.openingQuantity || 0}
+                  {item.openingQuantity || 0}
                 </div>
                 <div className="item-actions">
                   <div
                     className="item-three-dots"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleProductActionsClick(product.id, e);
+                      handleProductActionsClick(item.id, e);
                     }}
                   >
                     ⋮
                   </div>
 
                   {/* Item Actions Menu */}
-                  {showProductActionsMenu && activeProductId === product.id && (
+                  {showProductActionsMenu && activeProductId === item.id && (
                     <div className="item-actions-menu" ref={productActionsRef}>
                       <div
                         className="item-action-item"
                         onClick={() =>
-                          handleProductAction("view_edit", product.id)
+                          handleProductAction("view_edit", item.id)
                         }
                       >
                         View/Edit
@@ -645,7 +664,7 @@ const ItemsDashboardNew = () => {
                       <div
                         className="item-action-item"
                         onClick={() =>
-                          handleProductAction("delete", product.id)
+                          handleProductAction("delete", item.id)
                         }
                       >
                         Delete
@@ -660,14 +679,14 @@ const ItemsDashboardNew = () => {
 
         {/* Right Column - Item Details and Transactions */}
         <div className="item-details-column">
-          {selectedProductId && (
+          {selectedItemId && (
             <>
               {/* Item Details Section */}
               <div className="item-details-section">
                 <div className="item-name-header-row">
                   <h3 className="item-detail-name">
-                    {products
-                      .find((p) => p.id === selectedProductId)
+                    {items
+                      .find((p) => p.id === selectedItemId)
                       ?.name?.toUpperCase() || "SELECT A PRODUCT"}
                   </h3>
                   <div className="item-detail-actions">
@@ -675,8 +694,8 @@ const ItemsDashboardNew = () => {
                       className="item-detail-edit-icon"
                       title="Edit Product"
                       onClick={() => {
-                        const product = products.find(
-                          (p) => p.id === selectedProductId
+                        const product = items.find(
+                          (p) => p.id === selectedItemId
                         );
                         if (product) {
                           localStorage.setItem(
@@ -704,8 +723,8 @@ const ItemsDashboardNew = () => {
                   SALE PRICE:{" "}
                   <span
                     className={
-                      selectedProductId
-                        ? (filteredProducts.find((p) => p.id === selectedProductId)
+                      selectedItemId
+                        ? (filteredItems.find((p) => p.id === selectedItemId)
                             ?.pricing?.salePrice || 0) > 0
                           ? "value-positive"
                           : "value-zero"
@@ -713,13 +732,13 @@ const ItemsDashboardNew = () => {
                     }
                   >
                     ₹{" "}
-                    {selectedProductId
-                      ? filteredProducts.find((p) => p.id === selectedProductId)
+                    {selectedItemId
+                      ? filteredItems.find((p) => p.id === selectedItemId)
                           ?.pricing?.salePrice || "0"
                       : "0"}
                   </span>{" "}
-                  ({selectedProductId
-                  ? filteredProducts.find((p) => p.id === selectedProductId)
+                  ({selectedItemId
+                  ? filteredItems.find((p) => p.id === selectedItemId)
                       ?.pricing?.salePriceType === "WITH_TAX"
                     ? "incl"
                     : "excl"
@@ -730,8 +749,8 @@ const ItemsDashboardNew = () => {
                   PURCHASE PRICE:{" "}
                   <span
                     className={
-                      selectedProductId
-                        ? (filteredProducts.find((p) => p.id === selectedProductId)
+                      selectedItemId
+                        ? (filteredItems.find((p) => p.id === selectedItemId)
                             ?.purchasePriceTaxes?.purchasePrice || 0) > 0
                           ? "value-positive"
                           : "value-zero"
@@ -739,8 +758,8 @@ const ItemsDashboardNew = () => {
                     }
                   >
                     ₹{" "}
-                    {selectedProductId
-                      ? filteredProducts.find((p) => p.id === selectedProductId)
+                    {selectedItemId
+                      ? filteredItems.find((p) => p.id === selectedItemId)
                           ?.purchasePriceTaxes?.purchasePrice || "0"
                       : "0"}
                   </span>{" "}
@@ -750,16 +769,16 @@ const ItemsDashboardNew = () => {
                   STOCK QUANTITY:{" "}
                   <span
                     className={
-                      selectedProductId
-                        ? (filteredProducts.find((p) => p.id === selectedProductId)
+                      selectedItemId
+                        ? (filteredItems.find((p) => p.id === selectedItemId)
                             ?.stock?.openingQuantity || 0) > 0
                           ? "value-positive"
                           : "value-zero"
                         : "value-zero"
                     }
                   >
-                    {selectedProductId
-                      ? filteredProducts.find((p) => p.id === selectedProductId)?.stock
+                    {selectedItemId
+                      ? filteredItems.find((p) => p.id === selectedItemId)?.stock
                           ?.openingQuantity || "0"
                       : "0"}
                   </span>
@@ -768,10 +787,10 @@ const ItemsDashboardNew = () => {
                   STOCK VALUE:{" "}
                   <span
                     className={
-                      selectedProductId
+                      selectedItemId
                         ? (() => {
-                            const product = filteredProducts.find(
-                              (p) => p.id === selectedProductId
+                            const product = filteredItems.find(
+                              (p) => p.id === selectedItemId
                             );
                             if (product) {
                               const purchasePrice =
@@ -788,10 +807,10 @@ const ItemsDashboardNew = () => {
                     }
                   >
                     ₹{" "}
-                    {selectedProductId
+                    {selectedItemId
                       ? (() => {
-                          const product = products.find(
-                            (p) => p.id === selectedProductId
+                          const product = items.find(
+                            (p) => p.id === selectedItemId
                           );
                           if (product) {
                             const purchasePrice =
@@ -889,10 +908,10 @@ const ItemsDashboardNew = () => {
                               {transaction.transactionType || "Sale"}
                             </td>
                             <td className="transaction-invoice">
-                              {transaction.invoiceNumber || ""}
+                              {transaction.referenceNumber || ""}
                             </td>
                             <td className="transaction-name">
-                              {transaction.customerName || "Opening Stock"}
+                              {transaction.partyName || "XYZ Customer"}
                             </td>
                             <td className="transaction-date">
                               {formatDate(transaction.createdAt)}
@@ -901,7 +920,7 @@ const ItemsDashboardNew = () => {
                               {transaction.quantity || "0"}
                             </td>
                             <td className="transaction-price">
-                              ₹ {transaction.price || "0.00"}
+                              ₹ {transaction.totalValue || "0.00"}
                             </td>
                             <td className="transaction-status">
                               {transaction.status || ""}
@@ -964,8 +983,8 @@ const ItemsDashboardNew = () => {
               <div className="item-name-section">
                 <div className="item-label">Item Name</div>
                 <div className="item-value">
-                  {selectedProductId
-                    ? filteredProducts.find((p) => p.id === selectedProductId)
+                  {selectedItemId
+                    ? filteredItems.find((p) => p.id === selectedItemId)
                         ?.name || "No Product Selected"
                     : "No Product Selected"}
                 </div>
@@ -995,8 +1014,8 @@ const ItemsDashboardNew = () => {
                 <div className="unit-section">
                   <label className="unit-label">Unit</label>
                   <div className="unit-value">
-                    {selectedProductId
-                      ? filteredProducts.find((p) => p.id === selectedProductId)
+                    {selectedItemId
+                      ? filteredItems.find((p) => p.id === selectedItemId)
                           ?.unit?.label || "N/A"
                       : "N/A"}
                   </div>
