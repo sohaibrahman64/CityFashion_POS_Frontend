@@ -37,7 +37,6 @@ const ItemsDashboardNew = () => {
   const [transactionsSearchTerm, setTransactionsSearchTerm] = useState("");
   const [isResizing, setIsResizing] = useState(false);
   const [currentResizeColumn, setCurrentResizeColumn] = useState(null);
-  const [transactionType, setTransactionType] = useState("");
   const dropdownRef = useRef(null);
   const importDropdownRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -93,7 +92,6 @@ const ItemsDashboardNew = () => {
       );
       console.log(response.data);
       setTransactions(response.data);
-      setTransactionType(response.data.transactionType);
     } catch (error) {
       console.error("Error loading transactions:", error);
     } finally {

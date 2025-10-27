@@ -76,3 +76,4 @@ export const UPDATE_ITEM = "api/items/update";
 export const DELETE_ITEM = "api/items/delete";
 export const CREATE_ITEM_TRANSACTION = "api/item-transactions/create";
 export const GET_ITEM_TRANSACTIONS = "api/item-transactions/item";
+export const UPDATE_ITEM_QUANTITY = "api/items/updateItemQuantity";

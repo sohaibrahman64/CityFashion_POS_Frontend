@@ -17,6 +17,7 @@ import {
   SEARCH_PRODUCTS_STARTS_WITH,
   CREATE_ITEM_TRANSACTION,
   CREATE_PRODUCT_TRANSACTION,
+  UPDATE_ITEM_QUANTITY,
 } from "../Constants";
 import PartiesDropdown from "../parties/PartiesDropdown";
 import ItemsDropdown from "../product/ItemsDropdown";
@@ -430,6 +431,9 @@ Thank you for your business!`;
         // Create product transactions for all items sold
         //await createProductTransactions(data);
 
+        // Update item quantities in inventory
+        await updateItemQuantities();
+
         // Create item transactions for all items sold
         await createItemTransactions(data);
 
@@ -488,6 +492,43 @@ Thank you for your business!`;
       );
       setToastType("error");
       setShowToast(true);
+    }
+  };
+
+  const updateItemQuantities = async () => {
+    try {
+      const validItems = itemInputs.filter(
+        (item) => item.itemName.trim() !== "" && item.itemId && item.quantity
+      );
+      if (validItems.length === 0) {
+        console.log("No valid items to update quantities for");
+        return;
+      }
+
+      for (const item of validItems) {
+        const queryParams = new URLSearchParams({
+          id: item.itemId,
+          quantity: parseInt(item.quantity),
+          transactionType: "SALE",
+        });
+
+        const response = await fetch(
+          `${BASE_URL}/${UPDATE_ITEM_QUANTITY}?${queryParams.toString()}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Item quantity updated successfully:", data);
+        } else {
+          console.error("Failed to update item quantity");
+        }
+      }
+    } catch (error) {
+      console.error("Error updating item quantities:", error);
     }
   };
 
@@ -1492,7 +1533,7 @@ Thank you for your business!`;
                     <th className="header-cell">QTY</th>
                     <th className="header-cell price-unit-header">
                       <div className="price-unit-split">
-                        <div className="price-label">PRICE/UNIT</div>
+                        <div className="new-sales-price-label">PRICE/UNIT</div>
                         <div className="tax-type-select">
                           <select
                             className="header-tax-select"
