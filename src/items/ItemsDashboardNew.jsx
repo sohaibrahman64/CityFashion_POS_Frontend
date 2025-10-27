@@ -8,7 +8,7 @@ import {
   DELETE_PRODUCT_NEW,
   STOCK_ADJUSTMENT,
   GET_ALL_ITEMS,
-  GET_ITEM_TRANSACTIONS
+  GET_ITEM_TRANSACTIONS,
 } from "../Constants";
 import axios from "axios";
 import Toast from "../components/Toast";
@@ -37,6 +37,7 @@ const ItemsDashboardNew = () => {
   const [transactionsSearchTerm, setTransactionsSearchTerm] = useState("");
   const [isResizing, setIsResizing] = useState(false);
   const [currentResizeColumn, setCurrentResizeColumn] = useState(null);
+  const [transactionType, setTransactionType] = useState("");
   const dropdownRef = useRef(null);
   const importDropdownRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -56,13 +57,13 @@ const ItemsDashboardNew = () => {
   const [toasts, setToasts] = useState([]);
 
   // Toast management functions
-  const addToast = (message, type = 'success', duration = 5000) => {
+  const addToast = (message, type = "success", duration = 5000) => {
     const id = Date.now() + Math.random();
-    setToasts(prev => [...prev, { id, message, type, duration }]);
+    setToasts((prev) => [...prev, { id, message, type, duration }]);
   };
 
   const removeToast = (id) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
   };
 
   // Add this function to load real transactions
@@ -90,7 +91,9 @@ const ItemsDashboardNew = () => {
       const response = await axios.get(
         `${BASE_URL}/${GET_ITEM_TRANSACTIONS}/${itemId}`
       );
+      console.log(response.data);
       setTransactions(response.data);
+      setTransactionType(response.data.transactionType);
     } catch (error) {
       console.error("Error loading transactions:", error);
     } finally {
@@ -253,9 +256,7 @@ const ItemsDashboardNew = () => {
 
             // Remove the product from local state
             setItems((prev) => prev.filter((p) => p.id !== productId));
-            setFilteredItems((prev) =>
-              prev.filter((p) => p.id !== productId)
-            );
+            setFilteredItems((prev) => prev.filter((p) => p.id !== productId));
 
             // If the deleted product was selected, clear selection and select another product if available
             if (selectedItemId === productId) {
@@ -422,7 +423,7 @@ const ItemsDashboardNew = () => {
 
       // Prepare the stock adjustment data
       const adjustmentData = {
-        productId: selectedItemId,
+        itemId: selectedItemId,
         quantity: parseFloat(totalQuantity),
         atPrice: parseFloat(atPrice),
         description: description || "",
@@ -456,34 +457,31 @@ const ItemsDashboardNew = () => {
           return prevProducts.map((product) => {
             if (product.id === selectedItemId) {
               // Create a new product object with updated values
-              const updatedProduct = { ...product };
+              let updatedProduct = { ...product };
 
               // Update stock quantity based on mode
               if (stockMode === "add") {
-                updatedProduct.stock = {
-                  ...updatedProduct.stock,
+                updatedProduct = {
+                  ...updatedProduct,
                   openingQuantity:
-                    (updatedProduct.stock.openingQuantity || 0) +
+                    (updatedProduct.openingQuantity || 0) +
                     parseFloat(totalQuantity),
                 };
               } else {
-                updatedProduct.stock = {
-                  ...updatedProduct.stock,
+                updatedProduct = {
+                  ...updatedProduct,
                   openingQuantity: Math.max(
                     0,
-                    (updatedProduct.stock.openingQuantity || 0) -
+                    (updatedProduct.openingQuantity || 0) -
                       parseFloat(totalQuantity)
                   ),
                 };
               }
 
               // Update purchase price if it's different from current price
-              if (
-                parseFloat(atPrice) !==
-                (updatedProduct.purchasePriceTaxes?.purchasePrice || 0)
-              ) {
+              if (parseFloat(atPrice) !== (updatedProduct.purchasePrice || 0)) {
                 updatedProduct.purchasePriceTaxes = {
-                  ...updatedProduct.purchasePriceTaxes,
+                  ...updatedProduct,
                   purchasePrice: parseFloat(atPrice),
                 };
               }
@@ -499,34 +497,31 @@ const ItemsDashboardNew = () => {
           return prevFilteredProducts.map((product) => {
             if (product.id === selectedItemId) {
               // Create a new product object with updated values
-              const updatedProduct = { ...product };
+              let updatedProduct = { ...product };
 
               // Update stock quantity based on mode
               if (stockMode === "add") {
-                updatedProduct.stock = {
-                  ...updatedProduct.stock,
+                updatedProduct = {
+                  ...updatedProduct,
                   openingQuantity:
-                    (updatedProduct.stock.openingQuantity || 0) +
+                    (updatedProduct.openingQuantity || 0) +
                     parseFloat(totalQuantity),
                 };
               } else {
-                updatedProduct.stock = {
-                  ...updatedProduct.stock,
+                updatedProduct = {
+                  ...updatedProduct,
                   openingQuantity: Math.max(
                     0,
-                    (updatedProduct.stock.openingQuantity || 0) -
+                    (updatedProduct.openingQuantity || 0) -
                       parseFloat(totalQuantity)
                   ),
                 };
               }
 
               // Update purchase price if it's different from current price
-              if (
-                parseFloat(atPrice) !==
-                (updatedProduct.purchasePriceTaxes?.purchasePrice || 0)
-              ) {
-                updatedProduct.purchasePriceTaxes = {
-                  ...updatedProduct.purchasePriceTaxes,
+              if (parseFloat(atPrice) !== (updatedProduct.purchasePrice || 0)) {
+                updatedProduct = {
+                  ...updatedProduct,
                   purchasePrice: parseFloat(atPrice),
                 };
               }
@@ -552,7 +547,10 @@ const ItemsDashboardNew = () => {
           "error"
         );
       } else if (error.request) {
-        addToast("Error: No response from server. Please check your connection.", "error");
+        addToast(
+          "Error: No response from server. Please check your connection.",
+          "error"
+        );
       } else {
         addToast(`Error: ${error.message}`, "error");
       }
@@ -663,9 +661,7 @@ const ItemsDashboardNew = () => {
                       </div>
                       <div
                         className="item-action-item"
-                        onClick={() =>
-                          handleProductAction("delete", item.id)
-                        }
+                        onClick={() => handleProductAction("delete", item.id)}
                       >
                         Delete
                       </div>
@@ -692,18 +688,16 @@ const ItemsDashboardNew = () => {
                   <div className="item-detail-actions">
                     <button
                       className="item-detail-edit-icon"
-                      title="Edit Product"
+                      title="Edit Item"
                       onClick={() => {
-                        const product = items.find(
-                          (p) => p.id === selectedItemId
-                        );
-                        if (product) {
+                        const item = items.find((p) => p.id === selectedItemId);
+                        if (item) {
                           localStorage.setItem(
                             "editProductData",
-                            JSON.stringify(product)
+                            JSON.stringify(item)
                           );
-                          navigate("/products/add", {
-                            state: { fromComponent: "ProductTransactions" },
+                          navigate("/items/add", {
+                            state: { fromComponent: "ItemDashboardNew" },
                           });
                         }
                       }}
@@ -734,16 +728,17 @@ const ItemsDashboardNew = () => {
                     ₹{" "}
                     {selectedItemId
                       ? filteredItems.find((p) => p.id === selectedItemId)
-                          ?.pricing?.salePrice || "0"
+                          ?.salePrice || "0"
                       : "0"}
                   </span>{" "}
-                  ({selectedItemId
-                  ? filteredItems.find((p) => p.id === selectedItemId)
-                      ?.pricing?.salePriceType === "WITH_TAX"
-                    ? "incl"
-                    : "excl"
-                  : "excl"}
-                )
+                  (
+                  {selectedItemId
+                    ? filteredItems.find((p) => p.id === selectedItemId)
+                        ?.salePriceType === "With Tax"
+                      ? "incl"
+                      : "excl"
+                    : "excl"}
+                  )
                 </div>
                 <div className="purchase-price-info">
                   PURCHASE PRICE:{" "}
@@ -751,7 +746,7 @@ const ItemsDashboardNew = () => {
                     className={
                       selectedItemId
                         ? (filteredItems.find((p) => p.id === selectedItemId)
-                            ?.purchasePriceTaxes?.purchasePrice || 0) > 0
+                            ?.purchasePrice || 0) > 0
                           ? "value-positive"
                           : "value-zero"
                         : "value-zero"
@@ -760,7 +755,7 @@ const ItemsDashboardNew = () => {
                     ₹{" "}
                     {selectedItemId
                       ? filteredItems.find((p) => p.id === selectedItemId)
-                          ?.purchasePriceTaxes?.purchasePrice || "0"
+                          ?.purchasePrice || "0"
                       : "0"}
                   </span>{" "}
                   (incl)
@@ -771,14 +766,14 @@ const ItemsDashboardNew = () => {
                     className={
                       selectedItemId
                         ? (filteredItems.find((p) => p.id === selectedItemId)
-                            ?.stock?.openingQuantity || 0) > 0
+                            ?.openingQuantity || 0) > 0
                           ? "value-positive"
                           : "value-zero"
                         : "value-zero"
                     }
                   >
                     {selectedItemId
-                      ? filteredItems.find((p) => p.id === selectedItemId)?.stock
+                      ? filteredItems.find((p) => p.id === selectedItemId)
                           ?.openingQuantity || "0"
                       : "0"}
                   </span>
@@ -789,14 +784,12 @@ const ItemsDashboardNew = () => {
                     className={
                       selectedItemId
                         ? (() => {
-                            const product = filteredItems.find(
+                            const item = filteredItems.find(
                               (p) => p.id === selectedItemId
                             );
-                            if (product) {
-                              const purchasePrice =
-                                product.purchasePriceTaxes?.purchasePrice || 0;
-                              const openingQuantity =
-                                product.stock?.openingQuantity || 0;
+                            if (item) {
+                              const purchasePrice = item.purchasePrice || 0;
+                              const openingQuantity = item.openingQuantity || 0;
                               return purchasePrice * openingQuantity > 0
                                 ? "value-positive"
                                 : "value-zero";
@@ -809,14 +802,12 @@ const ItemsDashboardNew = () => {
                     ₹{" "}
                     {selectedItemId
                       ? (() => {
-                          const product = items.find(
+                          const item = items.find(
                             (p) => p.id === selectedItemId
                           );
-                          if (product) {
-                            const purchasePrice =
-                              product.purchasePriceTaxes?.purchasePrice || 0;
-                            const openingQuantity =
-                              product.stock?.openingQuantity || 0;
+                          if (item) {
+                            const purchasePrice = item.purchasePrice || 0;
+                            const openingQuantity = item.openingQuantity || 0;
                             return (purchasePrice * openingQuantity).toFixed(2);
                           }
                           return "0.00";
@@ -853,35 +844,35 @@ const ItemsDashboardNew = () => {
                   <table className="transactions-table">
                     <thead>
                       <tr>
-                        <th className="type-column">
+                        <th className="type-column" title="Transaction Type">
                           TYPE
                           <span className="filter-icon">🔽</span>
                         </th>
-                        <th className="invoice-column">
+                        <th className="invoice-column" title="Invoice Number">
                           INVOICE...
                           <span className="filter-icon">🔽</span>
                         </th>
-                        <th className="name-column">
+                        <th className="name-column" title="Customer/Party Name">
                           NAME
                           <span className="filter-icon">🔽</span>
                         </th>
-                        <th className="date-column">
+                        <th className="date-column" title="Transaction Date">
                           DATE
                           <span className="filter-icon">🔽</span>
                         </th>
-                        <th className="quantity-column">
+                        <th className="quantity-column" title="Item Quantity">
                           QUANTI...
                           <span className="filter-icon">🔽</span>
                         </th>
-                        <th className="price-column">
+                        <th className="price-column" title="Price per Unit">
                           PRICE/...
                           <span className="filter-icon">🔽</span>
                         </th>
-                        <th className="status-column">
+                        <th className="status-column" title="Transaction Status">
                           STATUS
                           <span className="filter-icon">🔽</span>
                         </th>
-                        <th className="actions-column"></th>
+                        <th className="actions-column" title="Actions"></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -899,7 +890,10 @@ const ItemsDashboardNew = () => {
                               index === 1 ? "highlighted" : ""
                             }`}
                           >
-                            <td className="transaction-type">
+                            <td 
+                              className="transaction-type"
+                              title={transaction.transactionType || "Sale"}
+                            >
                               <span
                                 className={`status-dot ${getStatusDotClass(
                                   transaction.transactionType
@@ -907,25 +901,59 @@ const ItemsDashboardNew = () => {
                               ></span>
                               {transaction.transactionType || "Sale"}
                             </td>
-                            <td className="transaction-invoice">
+                            <td 
+                              className="transaction-invoice"
+                              title={`Invoice: ${transaction.referenceNumber || "N/A"}`}
+                            >
                               {transaction.referenceNumber || ""}
                             </td>
-                            <td className="transaction-name">
-                              {transaction.partyName || "XYZ Customer"}
+                            <td 
+                              className="transaction-name"
+                              title=
+                              {
+                                  transaction.transactionType === "STOCK_ADJUSTMENT" 
+                                  ? transaction.description ? transaction.description : "N/A" 
+                                  : transaction.transactionType === "SALE" || transaction.transactionType === "PURCHASE" 
+                                    ? transaction.partyName || "Unknown Party"
+                                    : "N/A"
+                              }
+                            >
+                              {
+                                transaction.transactionType === "STOCK_ADJUSTMENT" 
+                                  ? transaction.description ? transaction.description : "N/A" 
+                                  : transaction.transactionType === "SALE" || transaction.transactionType === "PURCHASE" 
+                                    ? transaction.partyName || "Unknown Party"
+                                    : "N/A"
+                              }
                             </td>
-                            <td className="transaction-date">
+                            <td 
+                              className="transaction-date"
+                              title={`Date: ${formatDate(transaction.createdAt)}`}
+                            >
                               {formatDate(transaction.createdAt)}
                             </td>
-                            <td className="transaction-quantity">
+                            <td 
+                              className="transaction-quantity"
+                              title={`Quantity: ${transaction.quantity || "0"}`}
+                            >
                               {transaction.quantity || "0"}
                             </td>
-                            <td className="transaction-price">
+                            <td 
+                              className="transaction-price"
+                              title={`Price: ₹${transaction.totalValue || "0.00"}`}
+                            >
                               ₹ {transaction.totalValue || "0.00"}
                             </td>
-                            <td className="transaction-status">
+                            <td 
+                              className="transaction-status"
+                              title={`Status: ${transaction.status || "N/A"}`}
+                            >
                               {transaction.status || ""}
                             </td>
-                            <td className="transaction-actions">
+                            <td 
+                              className="transaction-actions"
+                              title="More actions"
+                            >
                               <span className="more-icon">⋮</span>
                             </td>
                           </tr>
@@ -1016,7 +1044,7 @@ const ItemsDashboardNew = () => {
                   <div className="unit-value">
                     {selectedItemId
                       ? filteredItems.find((p) => p.id === selectedItemId)
-                          ?.unit?.label || "N/A"
+                          ?.unit || "N/A"
                       : "N/A"}
                   </div>
                 </div>
