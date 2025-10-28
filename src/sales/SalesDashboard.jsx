@@ -481,7 +481,7 @@ const SalesDashboard = () => {
             </span>
             <span className="separator">|</span>
             <span className="balance-label">Balance:</span>
-            <span className="balance-amount">
+            <span className="sales-dashboard-balance-amount">
               ₹{" "}
               {salesData.totalBalanceAmount.toLocaleString("en-IN", {
                 minimumFractionDigits: 2,
@@ -628,7 +628,7 @@ const SalesDashboard = () => {
                         : "0.00"}
                     </td>
                     <td>
-                      <div className="transaction-actions">
+                      <div className="sales-dashboard-transaction-actions">
                         <div
                           className="transaction-three-dots"
                           onClick={(e) => {
@@ -643,11 +643,11 @@ const SalesDashboard = () => {
                         {showTransactionActionsMenu &&
                           activeTransactionId === transaction.id && (
                             <div
-                              className="transaction-actions-menu"
+                              className="sales-dashboard-transaction-actions-menu"
                               ref={transactionActionsRef}
                             >
                                <div
-                                 className="transaction-action-item"
+                                 className="sales-dashboard-transaction-action-item"
                                  onClick={() =>
                                    handleTransactionAction(
                                      "view_edit",
@@ -658,7 +658,7 @@ const SalesDashboard = () => {
                                  View/Edit
                                </div>
                                <div
-                                 className="transaction-action-item"
+                                 className="sales-dashboard-transaction-action-item"
                                  onClick={() =>
                                    handleTransactionAction(
                                      "convert_to_return",
@@ -669,7 +669,7 @@ const SalesDashboard = () => {
                                  Convert To Return
                                </div>
                                <div
-                                 className="transaction-action-item"
+                                 className="sales-dashboard-transaction-action-item"
                                  onClick={() =>
                                    handleTransactionAction(
                                      "preview_delivery_challan",
@@ -680,7 +680,7 @@ const SalesDashboard = () => {
                                  Preview Delivery Challan
                                </div>
                                <div
-                                 className="transaction-action-item"
+                                 className="sales-dashboard-transaction-action-item"
                                  onClick={() =>
                                    handleTransactionAction(
                                      "cancel_invoice",
@@ -691,7 +691,7 @@ const SalesDashboard = () => {
                                  Cancel Invoice
                                </div>
                                <div
-                                 className="transaction-action-item"
+                                 className="sales-dashboard-transaction-action-item"
                                  onClick={() =>
                                    handleTransactionAction(
                                      "delete",
@@ -702,7 +702,7 @@ const SalesDashboard = () => {
                                  Delete
                                </div>
                                <div
-                                 className="transaction-action-item"
+                                 className="sales-dashboard-transaction-action-item"
                                  onClick={() =>
                                    handleTransactionAction(
                                      "duplicate",
@@ -713,7 +713,7 @@ const SalesDashboard = () => {
                                  Duplicate
                                </div>
                                <div
-                                 className="transaction-action-item"
+                                 className="sales-dashboard-transaction-action-item"
                                  onClick={() =>
                                    handleTransactionAction(
                                      "open_pdf",
@@ -724,7 +724,7 @@ const SalesDashboard = () => {
                                  Open PDF
                                </div>
                                <div
-                                 className="transaction-action-item"
+                                 className="sales-dashboard-transaction-action-item"
                                  onClick={() =>
                                    handleTransactionAction(
                                      "preview",
@@ -735,7 +735,7 @@ const SalesDashboard = () => {
                                  Preview
                                </div>
                                <div
-                                 className="transaction-action-item"
+                                 className="sales-dashboard-transaction-action-item"
                                  onClick={() =>
                                    handleTransactionAction(
                                      "print",
@@ -746,7 +746,7 @@ const SalesDashboard = () => {
                                  Print
                                </div>
                                <div
-                                 className="transaction-action-item"
+                                 className="sales-dashboard-transaction-action-item"
                                  onClick={() =>
                                    handleTransactionAction(
                                      "view_history",

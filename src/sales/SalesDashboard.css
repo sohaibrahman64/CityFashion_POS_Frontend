@@ -268,7 +268,7 @@
    font-weight: 500;
  }
 
- .balance-amount {
+ .sales-dashboard-balance-amount {
    color: #574c61;
    font-weight: 600;
  }
@@ -462,7 +462,7 @@
   background-color: #f8f9fa;
 }
 
-.transaction-actions {
+.sales-dashboard-transaction-actions {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -485,7 +485,7 @@
   color: #333;
 }
 
-.transaction-actions-menu {
+.sales-dashboard-transaction-actions-menu {
   position: fixed;
   top: 60%;
   right: 120px;
@@ -498,10 +498,10 @@
   min-width: 180px;
   overflow: hidden;
   animation: fadeIn 0.2s ease-in-out;
-  white-space: nowrap;
+  /* white-space: nowrap; */
 }
 
-.transaction-action-item {
+.sales-dashboard-transaction-action-item {
   padding: 10px 16px;
   cursor: pointer;
   font-size: 14px;
@@ -510,16 +510,16 @@
   transition: background-color 0.2s;
 }
 
-.transaction-action-item:last-child {
+.sales-dashboard-transaction-action-item:last-child {
   border-bottom: none;
 }
 
-.transaction-action-item:hover {
+.sales-dashboard-transaction-action-item:hover {
   background-color: #f8f9fa;
   color: #007bff;
 }
 
-.transaction-action-item:active {
+.sales-dashboard-transaction-action-item:active {
   background-color: #e9ecef;
 }
 
