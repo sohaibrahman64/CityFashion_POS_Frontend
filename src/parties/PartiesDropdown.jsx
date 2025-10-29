@@ -35,6 +35,14 @@ const PartiesDropdown = ({ onPartySelect, selectedParty, showAddParty = true }) 
     fetchParties();
   }, []);
 
+  useEffect(() => {
+    if (selectedParty && parties.length > 0) {
+      const match = parties.find((party) => party.id === selectedParty);
+      if (match) {
+        setSearchTerm(match.partyName || match.name || "");
+      }
+    }}, [selectedParty, parties]);
+
   // Filter parties when search term changes
   useEffect(() => {
     if (searchTerm.trim() === "") {
@@ -168,7 +176,7 @@ const PartiesDropdown = ({ onPartySelect, selectedParty, showAddParty = true }) 
       </div>
 
       {/* Selected Party Details */}
-      {selectedParty && (
+      {/* {selectedParty && (
         <div className="parties-dropdown-selected-details">
           <div className="selected-party-phone">
             <label>Phone No.</label>
@@ -191,7 +199,7 @@ const PartiesDropdown = ({ onPartySelect, selectedParty, showAddParty = true }) 
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Add Party Modal */}
       {showAddPartyModal && (

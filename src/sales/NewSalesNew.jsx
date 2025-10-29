@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   useNavigate,
   useNavigate as useRouterNavigate,
+  useLocation,
 } from "react-router-dom";
 import Toast from "../components/Toast";
 import {
@@ -18,6 +19,7 @@ import {
   CREATE_ITEM_TRANSACTION,
   CREATE_PRODUCT_TRANSACTION,
   UPDATE_ITEM_QUANTITY,
+  GET_INVOICE_BY_ID
 } from "../Constants";
 import PartiesDropdown from "../parties/PartiesDropdown";
 import ItemsDropdown from "../product/ItemsDropdown";
@@ -26,7 +28,9 @@ import "./NewSalesNew.css";
 const NewSalesNew = () => {
   const navigate = useNavigate();
   const routerNavigate = useRouterNavigate();
+  const location = useLocation();
   const [isMobile, setIsMobile] = useState(false);
+  const [selectedParty, setSelectedParty] = useState(null);
   const [partyName, setPartyName] = useState("");
   const [partyPhone, setPartyPhone] = useState("");
   const [partyId, setPartyId] = useState(null);
@@ -37,6 +41,7 @@ const NewSalesNew = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [receivedAmount, setReceivedAmount] = useState("");
   const [isFullyReceived, setIsFullyReceived] = useState(false);
+  const invoiceIdFromState = location.state?.invoiceId || null;
   const [itemInputs, setItemInputs] = useState([
     {
       id: 1,
@@ -113,6 +118,66 @@ const NewSalesNew = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    const fetchInvoiceDetails = async (invoiceId) => {
+      try {
+        const response = await fetch(`${BASE_URL}/${GET_INVOICE_BY_ID}/${invoiceId}`, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Fetched invoice details:", data);
+          // Populate state with fetched invoice data
+          setSelectedParty(data.party.id || null);
+          setPartyName(data.partyName || "");
+          setPartyPhone(data.partyPhone || "");
+          setPartyId(data.partyId || null);
+          setReceivedAmount(data.receivedAmount || "");
+          setIsFullyReceived(data.balanceAmount === 0);
+          setItemInputs(
+            data.items.length > 0
+              ? data.items.map((item, index) => ({
+                  id: index + 1,
+                  itemName: item.itemName || "",
+                  quantity: item.quantity || "",
+                  price: item.price || "",
+                  discount: item.discount || "",
+                  discountAmount: item.discountAmount || "",
+                  total: item.total || "0.00",
+                  itemId: item.itemId || null,
+                  taxType: item.taxType || "With Tax",
+                  taxRateId: item.taxRate.id || null,
+                  taxPercent: item.taxPercent || "0.00",
+                  taxAmount: item.taxAmount || "0.00",
+                  receivedAmount: item.receivedAmount || "0.00",
+                }))
+              : [
+                  {
+                    id: 1,
+                    itemName: "",
+                    quantity: "",
+                    price: "",
+                    total: "0.00",
+                    itemId: null,
+                    taxType: "With Tax",
+                    taxRateId: null,
+                    taxAmount: "0.00",
+                  },
+                ]
+          );
+        } else {
+          console.error("Failed to fetch invoice details");
+        }
+      } catch (error) {
+        console.error("Error fetching invoice details:", error);
+      }
+    };
+    fetchInvoiceDetails(invoiceIdFromState);
+  }, [invoiceIdFromState]);
 
   // Fetch tax rates on component mount
   useEffect(() => {
@@ -1510,7 +1575,7 @@ Thank you for your business!`;
             <div className="customer-fields">
               <div className="input-group">
                 <label htmlFor="customerName">Party Name*</label>
-                <PartiesDropdown onPartySelect={handlePartySelect} />
+                <PartiesDropdown onPartySelect={handlePartySelect} selectedParty={selectedParty} />
               </div>
               <div className="input-group">
                 <label htmlFor="customerPhone">Party Phone Number</label>
@@ -1661,8 +1726,8 @@ Thank you for your business!`;
                             >
                               <option value="">Select Tax</option>
                               {taxRates.map((taxRate, rateIndex) => (
-                                <option key={taxRate.id} value={rateIndex}>
-                                  {item.taxRateId == rateIndex
+                                <option key={taxRate.id} value={rateIndex - 1}>
+                                  {item.taxRateId == rateIndex - 1
                                     ? `✓ ${taxRate.label}`
                                     : taxRate.label}
                                 </option>
@@ -1819,7 +1884,7 @@ Thank you for your business!`;
                               )}
                               <span className="gst-percentage">
                                 (
-                                {item.taxPercent ? `${item.taxPercent}%` : "0%"}
+                                {item.taxPercent ? `${item.taxPercent || item.taxRate.id}%` : "0%"}
                                 )
                               </span>
                             </td>

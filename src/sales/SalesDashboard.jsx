@@ -154,6 +154,7 @@ const SalesDashboard = () => {
       // Assuming the API returns data in data.data or data array format
       const transactions = data.data || data || [];
       setSalesTransactions(transactions);
+
     } catch (error) {
       console.error("Error fetching sales reports:", error);
       setError(error.message);
@@ -260,14 +261,14 @@ const SalesDashboard = () => {
 
     // Find the transaction data
     const transaction = salesTransactions.find(
-      (t) => t.id === transactionId
+      (t) => t.transactionId === transactionId
     );
 
     switch (action) {
       case "view_edit":
         if (transaction) {
           console.log("View/Edit transaction:", transaction);
-          // TODO: Navigate to edit page or open edit modal
+          navigate("/sales/new", { state: { invoiceId: transaction.invoiceId } });
         }
         break;
       case "convert_to_return":
@@ -633,7 +634,7 @@ const SalesDashboard = () => {
                           className="transaction-three-dots"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleTransactionActionsClick(transaction.id, e);
+                            handleTransactionActionsClick(transaction.transactionId, e);
                           }}
                         >
                           ⋮
@@ -641,7 +642,7 @@ const SalesDashboard = () => {
 
                         {/* Transaction Actions Menu - positioned relative to this transaction */}
                         {showTransactionActionsMenu &&
-                          activeTransactionId === transaction.id && (
+                          activeTransactionId === transaction.transactionId && (
                             <div
                               className="sales-dashboard-transaction-actions-menu"
                               ref={transactionActionsRef}
@@ -651,7 +652,7 @@ const SalesDashboard = () => {
                                  onClick={() =>
                                    handleTransactionAction(
                                      "view_edit",
-                                     transaction.id
+                                     transaction.transactionId || transaction.id
                                    )
                                  }
                                >
