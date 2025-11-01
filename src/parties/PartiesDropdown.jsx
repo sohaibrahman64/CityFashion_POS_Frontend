@@ -175,31 +175,6 @@ const PartiesDropdown = ({ onPartySelect, selectedParty, showAddParty = true }) 
         )}
       </div>
 
-      {/* Selected Party Details */}
-      {/* {selectedParty && (
-        <div className="parties-dropdown-selected-details">
-          <div className="selected-party-phone">
-            <label>Phone No.</label>
-            <input
-              type="text"
-              value={selectedParty.phoneNumber || ""}
-              readOnly
-              className="phone-display-input"
-            />
-          </div>
-          <div className="selected-party-balance">
-            <label>Party Balance</label>
-            <div className="balance-display">
-              <span className="balance-amount">
-                {formatBalance(selectedParty.openingBalance)}
-              </span>
-              <button className="balance-action-btn" title="View Balance Details">
-                ↗
-              </button>
-            </div>
-          </div>
-        </div>
-      )} */}
 
       {/* Add Party Modal */}
       {showAddPartyModal && (

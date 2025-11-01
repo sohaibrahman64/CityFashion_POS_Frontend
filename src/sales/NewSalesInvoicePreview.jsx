@@ -251,10 +251,10 @@ const NewSalesInvoicePreview = () => {
               <div className="bill-to">
                 <div className="section-title">Bill To:</div>
                 <div className="bill-name">
-                  {invoiceData.customerName || "Customer Name"}
+                  {invoiceData.partyName || "Customer Name"}
                 </div>
                 <div className="bill-address">
-                  {invoiceData.customerPhone || "Contact No."}
+                  {invoiceData.partyPhone || "Contact No."}
                 </div>
                 <div className="bill-state">State: 27-Maharashtra</div>
               </div>

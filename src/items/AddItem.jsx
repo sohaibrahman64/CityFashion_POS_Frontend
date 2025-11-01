@@ -33,6 +33,7 @@ const AddItem = () => {
     purchasePriceTaxMode: "",
     // Taxes
     taxRate: "", // percent only for now
+    taxRateIndex: null, // Store the tax rate index
     // Stock
     openingQuantity: "",
     atPrice: "",
@@ -443,7 +444,8 @@ const AddItem = () => {
         purchasePriceTaxes: {
           purchasePrice: parseFloat(formData.purchasePrice) || 0,
           purchasePriceType: formData.purchasePriceTaxMode,
-          taxRateId: formData.taxRate ? parseFloat(formData.taxRate) : 0
+          taxRateId: formData.taxRate ? parseFloat(formData.taxRate) : 0,
+          taxRateIndex: formData.taxRateIndex !== null ? parseInt(formData.taxRateIndex) : null, // Ensure taxRateIndex is included
         },
         stock: {
           openingQuantity: parseInt(formData.openingQuantity) || 0,
@@ -509,6 +511,7 @@ const AddItem = () => {
           purchasePrice: "",
           purchasePriceTaxMode: "",
           taxRate: "",
+          taxRateIndex: null,
           openingQuantity: "",
           atPrice: "",
           asOfDate: new Date().toISOString().split("T")[0],
@@ -867,9 +870,15 @@ const AddItem = () => {
                     <label>Taxes</label>
                     <select
                       value={formData.taxRate}
-                      onChange={(e) =>
-                        handleNumberChange("taxRate", e.target.value)
-                      }
+                      onChange={(e) => {
+                        const selectedTaxRate = e.target.value;
+                        const selectedIndex = taxRates.findIndex(tax => tax.id.toString() === selectedTaxRate);
+                        setFormData(prev => ({
+                          ...prev,
+                          taxRate: selectedTaxRate,
+                          taxRateIndex: selectedIndex !== -1 ? selectedIndex : null
+                        }));
+                      }}
                       className="add-item-dropdown-input"
                       disabled={loadingTaxRates}
                     >

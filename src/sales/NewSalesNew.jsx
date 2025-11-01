@@ -42,6 +42,7 @@ const NewSalesNew = () => {
   const [receivedAmount, setReceivedAmount] = useState("");
   const [isFullyReceived, setIsFullyReceived] = useState(false);
   const invoiceIdFromState = location.state?.invoiceId || null;
+  const [isFromSalesDashboard, setIsFromSalesDashboard] = useState(false);
   const [itemInputs, setItemInputs] = useState([
     {
       id: 1,
@@ -56,6 +57,7 @@ const NewSalesNew = () => {
       itemId: null,
       taxType: "With Tax", // New field for tax type
       taxRateId: null, // New field for selected tax rate ID
+      taxRateIndex: null, // New field for tax rate index
       taxAmount: "0.00", // New field for tax amount
       isProductWithTax: false, // New field to track if product includes tax
     },
@@ -151,7 +153,8 @@ const NewSalesNew = () => {
                   itemId: item.itemId || null,
                   taxType: item.taxType || "With Tax",
                   taxRateId: item.taxRate.id || null,
-                  taxPercent: item.taxPercent || "0.00",
+                  taxRateIndex: item.taxRate.index || null,
+                  taxPercent: item.taxRate.rate || "0.00",
                   taxAmount: item.taxAmount || "0.00",
                   receivedAmount: item.receivedAmount || "0.00",
                 }))
@@ -165,6 +168,7 @@ const NewSalesNew = () => {
                     itemId: null,
                     taxType: "With Tax",
                     taxRateId: null,
+                    taxRateIndex: null,
                     taxAmount: "0.00",
                   },
                 ]
@@ -177,6 +181,7 @@ const NewSalesNew = () => {
       }
     };
     fetchInvoiceDetails(invoiceIdFromState);
+    setIsFromSalesDashboard(invoiceIdFromState != null);
   }, [invoiceIdFromState]);
 
   // Fetch tax rates on component mount
@@ -758,9 +763,8 @@ Thank you for your business!`;
       const payload = {
         invoiceId: invoiceData.invoiceId || null,
         invoiceNumber: invoiceData.invoiceNumber || invoiceNumber,
-        customerName: partyName,
-        customerPhone: partyPhone,
-        customerId: partyId,
+        partyName: partyName,
+        partyId: partyId,
         totalAmount: calculateSubTotal(),
         taxAmount: invoiceData.totalTaxAmount || 0.0,
         netAmount: calculateSubTotal(),
@@ -963,17 +967,32 @@ Thank you for your business!`;
     }
 
     // Find matching tax rate
-    let taxRateId = null;
+    let taxRateId = item.taxRate.id;
+    // if (item && item.taxRate) {
+    //   const productTaxRate = item.taxRate;
+    //   const matchingTaxRateIndex = taxRates.findIndex(
+    //     (rate) =>
+    //       rate.id === productTaxRate.id ||
+    //       rate.label === productTaxRate.label ||
+    //       rate.rate === productTaxRate?.rate
+    //   );
+    //   //const matchingTaxRateIndex = item.taxRate.id;
+    //   if (matchingTaxRateIndex !== -1) {
+    //     taxRateId = matchingTaxRateIndex.toString();
+    //   }
+    // }
+
+    let taxRateIndex = null;
     if (item && item.taxRate) {
       const productTaxRate = item.taxRate;
-      const matchingTaxRateIndex = taxRates.findIndex(
+      const matchingTaxRate = taxRates.find(
         (rate) =>
           rate.id === productTaxRate.id ||
           rate.label === productTaxRate.label ||
           rate.rate === productTaxRate?.rate
       );
-      if (matchingTaxRateIndex !== -1) {
-        taxRateId = matchingTaxRateIndex.toString();
+      if (matchingTaxRate) {
+        taxRateIndex = matchingTaxRate.index.toString();
       }
     }
 
@@ -1060,7 +1079,7 @@ Thank you for your business!`;
 
     // Check if the selected tax is IGST
     const selectedTaxRate =
-      taxRateId !== null ? taxRates[parseInt(taxRateId)] : null;
+      taxRateIndex !== null ? taxRates[parseInt(taxRateIndex)] : null;
     const isIGST =
       selectedTaxRate?.label?.toUpperCase().includes("IGST") || false;
 
@@ -1077,6 +1096,7 @@ Thank you for your business!`;
       itemId: item.id,
       hsnCode: item.hsn,
       taxRateId: taxRateId,
+      taxRateIndex: taxRateIndex,
       taxPercent: item.taxRate?.rate || 0,
       taxAmount: calculatedTaxAmount,
       isProductWithTax: isProductWithTax, // Track if product includes tax
@@ -1104,7 +1124,7 @@ Thank you for your business!`;
     newItemInputs[index].discountAmount = discountAmount.toFixed(2);
 
     // Recalculate tax amount based on new quantity
-    const selectedTaxRate = taxRates[parseInt(newItemInputs[index].taxRateId)];
+    const selectedTaxRate = taxRates[parseInt(newItemInputs[index].taxRateIndex)];
     if (selectedTaxRate) {
       const rate = selectedTaxRate.rate || 0;
       const subtotal = price * quantity;
@@ -1169,7 +1189,7 @@ Thank you for your business!`;
 
   const handleTaxRateChange = (index, value) => {
     const newItemInputs = [...itemInputs];
-    newItemInputs[index].taxRateId = value;
+    newItemInputs[index].taxRateIndex = value;
     newItemInputs[index].taxRate = value;
     // Get the selected tax rate by array index
     const selectedTaxRate = taxRates[parseInt(value)];
@@ -1210,8 +1230,8 @@ Thank you for your business!`;
           const afterDiscount = subtotal - discountAmount;
 
           // Get tax rate from the selected tax rate
-          if (item.taxRateId && taxRates[parseInt(item.taxRateId)]) {
-            const taxRate = taxRates[parseInt(item.taxRateId)].rate || 0;
+          if (item.taxRateIndex && taxRates[parseInt(item.taxRateIndex)]) {
+            const taxRate = taxRates[parseInt(item.taxRateIndex)].rate || 0;
             calculatedTotal = afterDiscount + (afterDiscount * taxRate) / 100;
             calculatedTaxAmount = ((afterDiscount * taxRate) / 100).toFixed(2);
           }
@@ -1224,8 +1244,8 @@ Thank you for your business!`;
           const afterDiscount = subtotal - discountAmount;
 
           // Get tax rate from the selected tax rate
-          if (item.taxRateId && taxRates[parseInt(item.taxRateId)]) {
-            const taxRate = taxRates[parseInt(item.taxRateId)].rate || 0;
+          if (item.taxRateIndex && taxRates[parseInt(item.taxRateIndex)]) {
+            const taxRate = taxRates[parseInt(item.taxRateIndex)].rate || 0;
             // Calculate price with tax added (original price + tax amount)
             const taxAmount = (parseFloat(item.price) * taxRate) / 100;
             //updatedPrice = parseFloat(item.price) + taxAmount;
@@ -1284,7 +1304,7 @@ Thank you for your business!`;
     } else {
       // For products without tax, calculate tax on the amount after discount
       const selectedTaxRate =
-        taxRates[parseInt(newItemInputs[index].taxRateId)];
+        taxRates[parseInt(newItemInputs[index].taxRateIndex)];
       if (selectedTaxRate) {
         const rate = selectedTaxRate.rate || 0;
         taxAmount = (afterDiscount * rate) / 100;
@@ -1313,6 +1333,7 @@ Thank you for your business!`;
       hsnCode: null,
       taxType: "With Tax",
       taxRateId: null,
+      taxRateIndex: null,
       taxAmount: "0.00",
       isProductWithTax: false, // New field for new rows
     };
@@ -1718,20 +1739,37 @@ Thank you for your business!`;
                         <div className="tax-split">
                           <div className="tax-sub-split">
                             <select
-                              value={item.taxRateId || ""}
+                              value={item.taxRateIndex || ""}
                               onChange={(e) =>
                                 handleTaxRateChange(index, e.target.value)
                               }
                               className="tax-select"
                             >
                               <option value="">Select Tax</option>
-                              {taxRates.map((taxRate, rateIndex) => (
-                                <option key={taxRate.id} value={rateIndex - 1}>
-                                  {item.taxRateId == rateIndex - 1
+                              {
+                                isFromSalesDashboard ?
+                                  taxRates.map((taxRate, rateIndex) => (
+                                    <option key={taxRate.index} value={rateIndex}>
+                                      {item.taxRateIndex == rateIndex
+                                        ? `✓ ${taxRate.label}`
+                                        : taxRate.label}  
+                                    </option>
+                                  ))
+                                  : taxRates.map((taxRate, rateIndex) => (
+                                    <option key={taxRate.index} value={rateIndex}>
+                                      {item.taxRateIndex == rateIndex
+                                        ? `✓ ${taxRate.label}`
+                                        : taxRate.label}
+                                    </option>
+                                  ))
+                              }
+                              {/* {taxRates.map((taxRate, rateIndex) => (
+                                <option key={taxRate.id} value={rateIndex}>
+                                  {item.taxRateId == rateIndex
                                     ? `✓ ${taxRate.label}`
                                     : taxRate.label}
                                 </option>
-                              ))}
+                              ))} */}
                             </select>
                             <input
                               type="text"
@@ -1884,7 +1922,7 @@ Thank you for your business!`;
                               )}
                               <span className="gst-percentage">
                                 (
-                                {item.taxPercent ? `${item.taxPercent || item.taxRate.id}%` : "0%"}
+                                {item.taxPercent ? `${item.taxPercent}%` : "0%"}
                                 )
                               </span>
                             </td>
