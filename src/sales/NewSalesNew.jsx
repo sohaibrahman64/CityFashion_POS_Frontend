@@ -2371,7 +2371,7 @@ Thank you for your business!`;
             </div>
 
             <div className="action-buttons">
-              <button className="save-new-btn" onClick={handleSaveNew}>
+              <button className="new-sales-save-new-btn" onClick={handleSaveNew}>
                 Save & Preview Invoice
               </button>
               <div className="action-icons">
