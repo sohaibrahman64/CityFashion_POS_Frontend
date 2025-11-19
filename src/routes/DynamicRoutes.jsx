@@ -217,6 +217,7 @@ const DynamicRoutes = ({ menuData }) => {
       <Route path="/sales/return/add" element={<AddSalesReturn />} />
       <Route path="/sales/order/add" element={<AddSalesOrder />} />
       <Route path="/parties/add" element={<AddParty />} />
+      <Route path="/sales/estimate-quotation/add" element={<AddEstimateQuotation />} />
 
       <Route path="*" element={<h3>404 - Page Not Found</h3>} />
     </Routes>
