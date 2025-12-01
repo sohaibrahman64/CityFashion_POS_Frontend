@@ -78,3 +78,5 @@ export const CREATE_ITEM_TRANSACTION = "api/item-transactions/create";
 export const GET_ITEM_TRANSACTIONS = "api/item-transactions/item";
 export const UPDATE_ITEM_QUANTITY = "api/items/updateItemQuantity";
 export const GET_INVOICE_BY_ID = "api/new-sales-invoice/getInvoiceById";
+export const CREATE_NEW_ESTIMATE_QUOTATION = "api/estimate-quotation/create";
+export const GENERATE_ESTIMATE_QUOTATION_NUMBER = "api/estimate-quotation/estimate-number";

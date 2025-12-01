@@ -33,6 +33,12 @@ const NewSalesNew = () => {
   const [selectedParty, setSelectedParty] = useState(null);
   const [partyName, setPartyName] = useState("");
   const [partyPhone, setPartyPhone] = useState("");
+  const [billingAddress, setBillingAddress] = useState("");
+  const [shippingAddress, setShippingAddress] = useState("");
+  const [billingEnabled, setBillingEnabled] = useState(false);
+  const [shippingEnabled, setShippingEnabled] = useState(false);
+  const [showBillingAddress, setShowBillingAddress] = useState(true);
+  const [showShippingAddress, setShowShippingAddress] = useState(true);
   const [partyId, setPartyId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [suggestions, setSuggestions] = useState([]);
@@ -80,6 +86,8 @@ const NewSalesNew = () => {
   const searchTimeoutRef = useRef(null);
   const invoicePreviewRef = useRef(null);
   const fileInputRef = useRef(null);
+  const billingRef = useRef(null);
+  const shippingRef = useRef(null);
 
   // Check if device is mobile
   useEffect(() => {
@@ -239,7 +247,33 @@ const NewSalesNew = () => {
   const handlePartySelect = (party) => {
     setPartyName(party?.partyName || party?.name || "");
     setPartyPhone(party?.phoneNumber || "");
+    setBillingAddress(party?.billingAddress || "");
+    setShippingAddress(party?.shippingAddress || ""); 
     setPartyId(party?.id ?? null);
+  };
+
+  // Handlers for address controls
+  const handleEnableBilling = () => {
+    setBillingEnabled(true);
+    // focus after enabling
+    setTimeout(() => billingRef.current?.focus(), 0);
+  };
+
+  const handleEnableShipping = () => {
+    setShippingEnabled(true);
+    setTimeout(() => shippingRef.current?.focus(), 0);
+  };
+
+  const handleRemoveBilling = () => {
+    setShowBillingAddress(false);
+    setBillingAddress("");
+    setBillingEnabled(false);
+  };
+
+  const handleRemoveShipping = () => {
+    setShowShippingAddress(false);
+    setShippingAddress("");
+    setShippingEnabled(false);
   };
 
   // Fetch invoice number when component mounts
@@ -1608,6 +1642,70 @@ Thank you for your business!`;
                   onChange={(e) => setPartyPhone(e.target.value)}
                 />
               </div>
+            </div>
+
+            <div className="address-fields">
+              {showBillingAddress && (
+                <div className="address-input-group">
+                  <label htmlFor="billingAddress">Billing Address</label>
+                  <textarea
+                    id="billingAddress"
+                    placeholder="Enter Billing Address"
+                    value={billingAddress}
+                    onChange={(e) => setBillingAddress(e.target.value)}
+                    rows="3"
+                    disabled={!billingEnabled}
+                    ref={billingRef}
+                  />
+                  <div className="address-actions">
+                    <button
+                      type="button"
+                      className="address-btn remove"
+                      onClick={handleRemoveBilling}
+                    >
+                      Remove
+                    </button>
+                    <button
+                      type="button"
+                      className="address-btn change"
+                      onClick={handleEnableBilling}
+                    >
+                      Change
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {showShippingAddress && (
+                <div className="address-input-group">
+                  <label htmlFor="shippingAddress">Shipping Address</label>
+                  <textarea
+                    id="shippingAddress"
+                    placeholder="Enter Shipping Address"
+                    value={shippingAddress}
+                    onChange={(e) => setShippingAddress(e.target.value)}
+                    rows="3"
+                    disabled={!shippingEnabled}
+                    ref={shippingRef}
+                  />
+                  <div className="address-actions">
+                    <button
+                      type="button"
+                      className="address-btn remove"
+                      onClick={handleRemoveShipping}
+                    >
+                      Remove
+                    </button>
+                    <button
+                      type="button"
+                      className="address-btn change"
+                      onClick={handleEnableShipping}
+                    >
+                      Change
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="items-section">

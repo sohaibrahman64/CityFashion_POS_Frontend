@@ -128,6 +128,73 @@
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
+/* Address Fields - Aligned Horizontally */
+.address-fields {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.address-input-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.address-input-group label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.address-input-group textarea {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 10px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+  resize: none;
+}
+
+.address-input-group textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Small text-only buttons under each textarea */
+.address-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.address-btn {
+  background: none;
+  border: none;
+  color: #0a69b9;
+  cursor: pointer;
+  padding: 0;
+  font-size: 12px;
+}
+
+.address-btn.remove {
+  color: #dc3545; /* red for remove */
+}
+
+.address-btn.change {
+  color: #0a69b9;
+}
+
+.address-input-group textarea[disabled] {
+  background-color: #f7f7f7;
+  color: #666;
+}
+
+
 /* Items Section */
 .items-section {
   border: 1px solid #ddd;

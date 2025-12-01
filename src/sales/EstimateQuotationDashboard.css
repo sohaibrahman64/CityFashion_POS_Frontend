@@ -330,7 +330,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100%; /* fill the table container */
+  padding-top: 25px;
+  padding-bottom: 25px;
   box-sizing: border-box;
   text-align: center;
 }
