@@ -149,7 +149,6 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  /* border: 1px solid #838491; */
   border-radius: 4px;
   padding: 10px;
 }

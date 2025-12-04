@@ -1,0 +1,406 @@
+.new-estimate-quotation-preview-container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 10px;
+  box-sizing: border-box;
+  color: #3f4155;
+}
+
+.new-estimate-quotation-preview-header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.new-estimate-quotation-preview-header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.new-estimate-quotation-preview-header-left-label {
+  font-size: 18px;
+  font-weight: 600;
+  color: #3f4155;
+}
+
+.new-estimate-quotation-preview-header-right {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.new-estimate-quotation-preview-download-button {
+  padding: 8px 16px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+.new-estimate-quotation-preview-download-button:hover {
+  background-color: #218838;
+}
+
+.new-estimate-quotation-preview-download-button:active {
+  transform: scale(0.98);
+}
+
+.new-estimate-quotation-preview-download-button-label {
+  display: inline-block;
+}
+
+.new-estimate-quotation-preview-header-right-button {
+  padding: 8px 16px;
+  background-color: #0a69b9;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+.new-estimate-quotation-preview-header-right-button:hover {
+  background-color: #0a69b9;
+}
+
+.new-estimate-quotation-preview-header-right-button:active {
+  transform: scale(0.98);
+}
+
+.new-estimate-quotation-preview-header-right-button-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.new-estimate-quotation-preview-content-section {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  min-height: 400px;
+  color: #3f4155;
+}
+
+.new-estimate-quotation-tax-title {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #3f4155;
+}
+
+.new-estimate-quotation-paper {
+  margin-top: 16px;
+  background: #fff;
+  border: 1px solid #838491;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.new-estimate-quotation-header-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid #838491;
+}
+
+.new-estimate-quotation-company-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.new-estimate-quotation-company-logo {
+  width: 96px;
+  height: 96px;
+  background: #9e9ea7;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border-radius: 2px;
+}
+
+.new-estimate-quotation-logo-image {
+  border-radius: 4px;
+}
+
+.new-estimate-quotation-company-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.new-estimate-quotation-company-name-input
+  .new-estimate-quotation-company-phone-input {
+  outline: none;
+  border-radius: 4px;
+}
+
+.new-estimate-quotation-company-name-input:focus
+  .new-estimate-quotation-company-phone-input:focus {
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+.new-estimate-quotation-company-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: #2f3142;
+}
+
+.new-estimate-quotation-company-phone {
+  font-size: 12px;
+  color: #3f4155;
+  margin-top: 6px;
+}
+
+.new-bill-estimate-quotation-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.new-bill-estimate-quotation-grid .new-estimate-quotation-bill-to,
+.new-bill-estimate-quotation-grid .new-estimate-quotation-details {
+  border: 1px solid #838491;
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.new-estimate-quotation-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #3f4155;
+  margin-bottom: 6px;
+}
+
+.new-estimate-quotation-bill-name {
+  font-weight: 700;
+}
+
+.new-estimate-quotation-bill-address,
+.new-estimate-quotation-bill-state {
+  font-size: 12px;
+  color: #3f4155;
+}
+
+.new-estimate-quotation-details .new-estimate-quotation-detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #3f4155;
+}
+
+.new-estimate-quotation-details
+  .new-estimate-quotation-detail-row
+  span:first-child {
+  color: #3f4155;
+}
+
+.new-estimate-quotation-section-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: #3f4155;
+  margin-bottom: 6px;
+}
+
+.new-estimate-quotation-items-table-wrapper {
+  padding: 0px 0px 0px;
+}
+
+.new-estimate-quotation-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+/* .new-estimate-quotation-items-table {
+  margin: 5px 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+} */
+
+.new-estimate-quotation-items-table th, 
+.new-estimate-quotation-items-table td {
+  border: 1px solid #838491;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.new-estimate-quotation-col-serial {
+  width: 40px;
+  text-align: center;
+}
+
+.new-estimate-quotation-col-name {
+  width: 320px;
+}
+
+.new-estimate-quotation-col-qty {
+  width: 90px;
+  text-align: center;
+}
+
+.new-estimate-quotation-col-unit {
+  width: 70px;
+  text-align: center;
+}
+
+.new-estimate-quotation-col-price,
+.new-estimate-quotation-col-discount,
+.new-estimate-quotation-col-gst,
+.new-estimate-quotation-col-amount {
+  width: 140px;
+  text-align: right;
+}
+
+.new-estimate-quotation-total-row td {
+  font-weight: 700;
+  background: #fafafa;
+}
+
+.new-estimate-quotation-ta-right {
+  text-align: right;
+}
+
+.new-estimate-quotation-no-padding-cell {
+  padding: 0;
+  border-left: none;
+  border-right: none;
+}
+
+.new-estimate-quotation-tax-summary-wrapper {
+  border-top: 1px solid #838491;
+}
+
+.new-estimate-quotation-tax-summary-title {
+  font-weight: 700;
+  padding: 8px 10px;
+  border-bottom: 1px solid #838491;
+  background: #f4f6f8;
+}
+
+.new-estimate-quotation-tax-summary-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.new-estimate-quotation-tax-summary-table th,
+.new-estimate-quotation-tax-summary-table td {
+  border: 1px solid #838491;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.new-estimate-quotation-tax-summary-table thead th {
+  background: #f4f6f8;
+  color: #3f4155;
+  text-align: left;
+}
+
+.new-estimate-quotation-ts-col-hsn {
+  width: 120px;
+}
+
+.new-estimate-quotation-ts-col-taxable {
+  width: 160px;
+}
+
+.new-estimate-quotation-ts-col-igst {
+  width: 60px;
+}
+
+.new-estimate-quotation-ts-col-cgst {
+  width: 60px;
+}
+
+.new-estimate-quotation-ts-col-sgst {
+  width: 60px;
+}
+
+.new-estimate-quotation-ts-col-total {
+  width: 140px;
+  text-align: right;
+}
+
+.new-estimate-quotation-ts-col-rate {
+  width: 90px;
+  text-align: center;
+}
+
+.new-estimate-quotation-ts-col-amt {
+  width: 110px;
+  text-align: right;
+}
+
+.new-estimate-quotation-ta-center {
+  text-align: center;
+}
+
+.new-estimate-quotation-footer-sections {
+  margin-top: 12px;
+}
+
+.new-estimate-quotation-terms-section {
+  border: 1px solid #838491;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.new-estimate-quotation-terms-title {
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 10px;
+  border-bottom: 1px solid #838491;
+  background: #f4f6f8;
+}
+
+.new-estimate-quotation-terms-body {
+  font-size: 12px;
+  padding: 8px 10px;
+}
+
+.new-estimate-quotation-sign-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.new-estimate-quotation-company-box,
+.new-estimate-quotation-sign-box {
+  border: 1px solid #838491;
+  min-height: 140px;
+}
+
+.new-estimate-quotation-company-box-title {
+  font-weight: 700;
+  padding: 8px 10px;
+  border-bottom: 1px solid #838491;
+  background: #f4f6f8;
+}
+
+.new-estimate-quotation-signatory-text {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  font-weight: 600;
+}

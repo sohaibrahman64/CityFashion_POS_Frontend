@@ -19,6 +19,7 @@ import {
   GENERATE_ESTIMATE_QUOTATION_NUMBER,
 } from "../Constants";
 import html2pdf from "html2pdf.js";
+import Toast from "../components/Toast";
 
 const AddEstimateQuotation = () => {
   const navigate = useNavigate();
@@ -702,8 +703,12 @@ Thank you for your business!`;
         // Generate and download PDF after successful estimate creation
         // await generateAndDownloadPDF();
 
-        // Navigate to estimate preview page
-        routerNavigate("/sales/estimate-quotation-preview", { state: { estimate_preview_data: data } });
+        // Delay navigation to allow toast to display
+        setTimeout(() => {
+          routerNavigate("/sales/estimate-quotation/preview", {
+            state: { estimateQuotationData: data },
+          });
+        }, 2500);
         // Add any additional logic here, like redirecting to the estimate page
       } else {
         console.error("Failed to create estimate");
@@ -750,8 +755,6 @@ Thank you for your business!`;
         }
       }
     }
-
-
 
     // Find matching tax rate
     let taxRateId = item.taxRate.id;
@@ -889,22 +892,24 @@ Thank you for your business!`;
     fetchEstimateQuotationNumber();
   }, []);
 
-  const fetchEstimateQuotationNumber = async() => {
+  const fetchEstimateQuotationNumber = async () => {
     try {
-        const response = await fetch(`${BASE_URL}/${GENERATE_ESTIMATE_QUOTATION_NUMBER}`);
-        console.log(response.body);
-        if (response.ok)  {
-            const data = await response.json();
-            setEstimateNumber(data.estimateNumber);
-        } else {
-            console.error("Failed to fetch estimate number");
-            setEstimateNumber("RS-00001")
-        }
+      const response = await fetch(
+        `${BASE_URL}/${GENERATE_ESTIMATE_QUOTATION_NUMBER}`
+      );
+      console.log(response.body);
+      if (response.ok) {
+        const data = await response.json();
+        setEstimateNumber(data.estimateNumber);
+      } else {
+        console.error("Failed to fetch estimate number");
+        setEstimateNumber("RS-00001");
+      }
     } catch (error) {
       console.error("Error fetching estimate number:", error);
       setEstimateNumber("RS-00001");
     }
-  }
+  };
 
   const handleQuantityChange = (index, value) => {
     const newItemInputs = [...itemInputs];
@@ -1485,56 +1490,6 @@ Thank you for your business!`;
                 + Add Row
               </div>
             </div>
-            {/* <div className="add-estimate-quotation-payment-section">
-              <div className="add-estimate-quotation-payment-summary-row">
-                <div className="add-estimate-quotation-summary-item">
-                  <span>Sub Total</span>
-                  <span>
-                    {" "}
-                    ₹ {formatNumberWithCommas(calculateSubTotal().toFixed(2))}
-                  </span>
-                </div>
-              </div>
-              <div className="add-estimate-quotation-payment-row">
-                <div className="add-estimate-quotation-payment-label">
-                  <label>Received</label>
-                </div>
-              </div>
-              <div className="add-estimate-quotation-payment-controls">
-                <input
-                  type="number"
-                  placeholder="0.00"
-                  value={receivedAmount}
-                  onChange={(e) => setReceivedAmount(e.target.value)}
-                />
-                <div className="add-estimate-quotation-checkbox-group">
-                  <input
-                    type="checkbox"
-                    id="add-estimate-quotation-fullyReceived"
-                    checked={isFullyReceived}
-                    onChange={(e) =>
-                      handleFullyReceivedChange(e.target.checked)
-                    }
-                  />
-                  <label htmlFor="add-estimate-quotation-fullyReceived">
-                    Fully Received
-                  </label>
-                </div>
-              </div>
-            </div> */}
-            {/* <div className="add-estimate-quotation-balance-row" hidden>
-              <div className="add-estimate-quotation-balance-summary-item">
-                <span>Balance: </span>
-                <span>
-                  ₹{" "}
-                  {formatNumberWithCommas(
-                    (
-                      calculateSubTotal() - parseFloat(receivedAmount || 0)
-                    ).toFixed(2)
-                  )}
-                </span>
-              </div>
-            </div> */}
           </div>
 
           <div className="add-estimate-quotation-total-amount-bar">
@@ -2022,34 +1977,6 @@ Thank you for your business!`;
                       ₹ {formatNumberWithCommas(calculateSubTotal().toFixed(2))}
                     </span>
                   </div>
-                  {/* <div className="add-estimate-quotation-summary-item add-estimate-quotation-no-border">
-                    <span className="add-estimate-quotation-total-label">
-                      <strong>Total</strong>
-                    </span>
-                    <span>
-                      ₹ {formatNumberWithCommas(calculateSubTotal().toFixed(2))}
-                    </span>
-                  </div> */}
-                  {/* <div className="add-estimate-quotation-summary-item">
-                    <span>Received</span>
-                    <span>
-                      ₹{" "}
-                      {formatNumberWithCommas(
-                        parseFloat(receivedAmount || 0).toFixed(2)
-                      )}
-                    </span>
-                  </div> */}
-                  {/* <div className="add-estimate-quotation-summary-item">
-                    <span>Balance</span>
-                    <span>
-                      ₹{" "}
-                      {formatNumberWithCommas(
-                        (
-                          calculateSubTotal() - parseFloat(receivedAmount || 0)
-                        ).toFixed(2)
-                      )}
-                    </span>
-                  </div> */}
                   <div className="add-estimate-quotation-summary-item">
                     <span>You Saved</span>
                     <span>
@@ -2094,7 +2021,10 @@ Thank you for your business!`;
                 >
                   📱
                 </button>
-                <button className="add-estimate-quotation-icon-btn" onClick={printInvoice}>
+                <button
+                  className="add-estimate-quotation-icon-btn"
+                  onClick={printInvoice}
+                >
                   🖨️
                 </button>
                 <button
@@ -2108,6 +2038,15 @@ Thank you for your business!`;
           </div>
         </div>
       </div>
+      {/* Toast Notification */}
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          duration={2000}
+          onClose={() => setShowToast(false)}
+        />
+      )}
     </div>
   );
 };

@@ -582,6 +582,7 @@ Thank you for your business!`;
 
         // Navigate to invoice preview page
         routerNavigate("/sales/preview", { state: { invoice: data } });
+        
         // Add any additional logic here, like redirecting to the invoice page
       } else {
         console.error("Failed to create invoice");
