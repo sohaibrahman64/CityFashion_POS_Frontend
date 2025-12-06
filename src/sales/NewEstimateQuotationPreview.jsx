@@ -132,7 +132,7 @@ const NewEstimateQuotationPreview = () => {
       };
 
       // Apply print-friendly styles before PDF generation to compress layout
-      const styleSheet = document.createElement('style');
+      const styleSheet = document.createElement("style");
       styleSheet.innerHTML = `
         @media print {
           body { margin: 0; padding: 0; }
@@ -229,7 +229,9 @@ const NewEstimateQuotationPreview = () => {
         className="new-estimate-quotation-preview-content-section"
         ref={estimateQuotationPreviewRef}
       >
-        <div className="new-estimate-quotation-tax-title">Tax Invoice</div>
+        <div className="new-estimate-quotation-tax-title">
+          Estimate/Quotation
+        </div>
         <div className="new-estimate-quotation-paper">
           <div className="new-estimate-quotation-header-grid">
             <div className="new-estimate-quotation-company-block">
@@ -318,7 +320,7 @@ const NewEstimateQuotationPreview = () => {
             <div className="new-bill-estimate-quotation-grid">
               <div className="new-estimate-quotation-bill-to">
                 <div className="new-estimate-quotation-section-title">
-                  Bill To:
+                  Estimate For:
                 </div>
                 <div className="new-estimate-quotation-bill-name">
                   {estimateQuotationData.partyName || "Customer Name"}
@@ -332,7 +334,7 @@ const NewEstimateQuotationPreview = () => {
               </div>
               <div className="new-estimate-quotation-details">
                 <div className="new-estimate-quotation-section-title">
-                  Invoice Details:
+                  Estimate Details:
                 </div>
                 <div className="new-estimate-quotation-detail-row">
                   <span>No:</span>
@@ -413,7 +415,21 @@ const NewEstimateQuotationPreview = () => {
                   </tr>
                 ))}
                 <tr className="new-estimate-quotation-total-row">
-                  <td colSpan="4">Total</td>
+                  {/* Merge first 4 columns for "Total" label */}
+                  <td colSpan="2">Total</td>
+
+                  {/* Quantity total */}
+                  <td className="new-estimate-quotation-ta-left">
+                    {estimateQuotationData.totalQuantity}
+                  </td>
+
+                  {/* Price/Unit column left blank */}
+                  <td></td>
+
+                  {/* Price/Unit column left blank */}
+                  <td className="new-estimate-quotation-ta-right"></td>
+
+                  {/* Discount total */}
                   <td className="new-estimate-quotation-ta-right">
                     ₹{" "}
                     {formatNumberWithCommas(
@@ -430,6 +446,8 @@ const NewEstimateQuotationPreview = () => {
                         .toFixed(2)
                     )}
                   </td>
+
+                  {/* GST total */}
                   <td className="new-estimate-quotation-ta-right">
                     ₹{" "}
                     {formatNumberWithCommas(
@@ -441,10 +459,8 @@ const NewEstimateQuotationPreview = () => {
                         .toFixed(2)
                     )}
                   </td>
-                  <td
-                    className="new-estimate-quotation-ta-right"
-                    colSpan="1"
-                  ></td>
+
+                  {/* Amount total */}
                   <td className="new-estimate-quotation-ta-right">
                     ₹{" "}
                     {formatNumberWithCommas(

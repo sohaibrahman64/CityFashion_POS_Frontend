@@ -17,6 +17,7 @@ import {
   CREATE_SALES_TRANSACTION,
   CREATE_PARTY_TRANSACTION,
   GENERATE_ESTIMATE_QUOTATION_NUMBER,
+  CREATE_ESTIMATE_QUOTATION_TRANSACTION,
 } from "../Constants";
 import html2pdf from "html2pdf.js";
 import Toast from "../components/Toast";
@@ -374,114 +375,13 @@ Thank you for your business!`;
     return true;
   };
 
-  const updateItemQuantities = async () => {
-    try {
-      const validItems = itemInputs.filter(
-        (item) => item.itemName.trim() !== "" && item.itemId && item.quantity
-      );
-      if (validItems.length === 0) {
-        console.log("No valid items to update quantities for");
-        return;
-      }
-
-      for (const item of validItems) {
-        const queryParams = new URLSearchParams({
-          id: item.itemId,
-          quantity: parseInt(item.quantity),
-          transactionType: "SALE",
-        });
-
-        const response = await fetch(
-          `${BASE_URL}/${UPDATE_ITEM_QUANTITY}?${queryParams.toString()}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log("Item quantity updated successfully:", data);
-        } else {
-          console.error("Failed to update item quantity");
-        }
-      }
-    } catch (error) {
-      console.error("Error updating item quantities:", error);
-    }
-  };
-
-  const createItemTransactions = async (invoiceData) => {
-    try {
-      // Filter out empty items and create transactions for each product sold
-      const validItems = itemInputs.filter(
-        (item) =>
-          item.itemName.trim() !== "" &&
-          item.itemId &&
-          item.quantity &&
-          item.price
-      );
-
-      if (validItems.length === 0) {
-        console.log("No valid items to create transactions for");
-        return;
-      }
-
-      const transactions = validItems.map((item) => ({
-        itemId: item.itemId,
-        itemName: item.itemName,
-        transactionType: "SALE",
-        referenceId: invoiceData.invoiceId || null, // Invoice ID from backend response
-        referenceType: "SALES_INVOICE",
-        referenceNumber: invoiceNumber,
-        partyId: item.partyId || partyId,
-        partyName: item.partyName || partyName,
-        quantity: parseFloat(item.quantity),
-        unitPrice: parseFloat(item.price),
-        totalAmount: parseFloat(item.total),
-        description: `Sale of ${item.quantity} units of ${item.itemName} at ₹${item.price} per unit`,
-        transactionDate: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-        createdBy: "SYSTEM", // You can replace this with actual user info if available
-        notes: `Invoice: ${invoiceNumber}, Customer: ${partyName}`,
-        status: "COMPLETED",
-      }));
-
-      const response = await fetch(`${BASE_URL}/${CREATE_ITEM_TRANSACTION}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(transactions),
-      });
-
-      if (response.ok) {
-        const transactionData = await response.json();
-        console.log("Item transactions created successfully:", transactionData);
-      } else {
-        console.error("Failed to create item transactions");
-        const errorText = await response.text();
-        console.error("Error response:", errorText);
-      }
-    } catch (error) {
-      console.error("Error creating item transactions:", error);
-    }
-  };
-
-  const createEstimatesQuotationTransaction = async (invoiceData) => {
+  const createEstimateQuotationTransaction = async (estimatesQuotationData) => {
     try {
       const validItemsForPayload = itemInputs.filter(
         (i) => i.itemName.trim() !== ""
       );
-      const costOfGoodsSold = validItemsForPayload.reduce(
-        (sum, item) =>
-          sum +
-          parseFloat(item.purchasePrice || 0) * parseFloat(item.quantity || 0),
-        0
-      );
 
       console.log("validItemsForPayload", validItemsForPayload);
-      console.log("costOfGoodsSold", costOfGoodsSold);
 
       const totalQuantity = validItemsForPayload.reduce(
         (sum, item) => sum + parseFloat(item.quantity || 0),
@@ -489,15 +389,14 @@ Thank you for your business!`;
       );
 
       const payload = {
-        invoiceId: invoiceData.invoiceId || null,
-        invoiceNumber: invoiceData.invoiceNumber || invoiceNumber,
+        estimateQuotationId: estimatesQuotationData.estimateQuotationId || null,
+        estimateNumber:
+          estimatesQuotationData.estimateQuotationNumber || estimateNumber,
         partyName: partyName,
         partyId: partyId,
         totalAmount: calculateSubTotal(),
-        taxAmount: invoiceData.totalTaxAmount || 0.0,
-        netAmount: calculateSubTotal(),
-        receivedAmount: parseFloat(receivedAmount || 0),
-        balanceAmount: calculateSubTotal() - parseFloat(receivedAmount || 0),
+        balanceAmount: calculateSubTotal(),
+        taxAmount: estimatesQuotationData.totalTaxAmount || 0.0,
         discountAmount: itemInputs
           .filter((item) => item.itemName.trim() !== "")
           .reduce(
@@ -512,81 +411,33 @@ Thank you for your business!`;
         itemCount: validItemsForPayload.length,
         totalQuantity: totalQuantity,
         items: validItemsForPayload,
-        costOfGoodsSold: costOfGoodsSold,
         createdBy: "SYSTEM",
-        paymentMode: "Cash",
-        notes: `POS sale via NewSalesNew | Invoice: ${
-          invoiceData.invoiceNumber || invoiceNumber
+        notes: `Estimates Quotation Data | Quotation: ${
+          estimatesQuotationData.estimateNumber || estimateNumber
         }`,
         createdAt: new Date().toISOString(),
       };
 
       console.log(payload);
 
-      const res = await fetch(`${BASE_URL}/${CREATE_SALES_TRANSACTION}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        `${BASE_URL}/${CREATE_ESTIMATE_QUOTATION_TRANSACTION}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (!res.ok) {
         const txt = await res.text();
-        console.error("Failed to create sales transaction", txt);
+        console.error("Failed to create estimates/quotation transaction", txt);
       }
     } catch (err) {
-      console.error("Error creating sales transaction:", err);
+      console.error("Error creating estimates/quotation transaction:", err);
     }
   };
 
-  const createPartyTransaction = async (invoiceData) => {
-    try {
-      const partyTotal = calculateSubTotal();
-      const partyBalance = partyTotal - parseFloat(receivedAmount || 0);
-
-      // Determine status based on party balance
-      let status = "UNPAID";
-      if (partyBalance <= 0) {
-        status = "COMPLETED";
-      } else if (partyBalance < partyTotal) {
-        status = "PARTIAL";
-      }
-
-      const payload = {
-        partyId: partyId,
-        partyName: partyName,
-        partyPhone: partyPhone,
-        invoiceId: invoiceData.invoiceId || null,
-        invoiceNumber: invoiceData.invoiceNumber || invoiceNumber,
-        partyTotal: partyTotal,
-        partyBalance: partyBalance,
-        transactionType: "SALE",
-        referenceId: invoiceData.invoiceId || null,
-        referenceType: "SALES_INVOICE",
-        referenceNumber: invoiceNumber,
-        description: `Sale of ${itemInputs.length} items to ${partyName}`,
-        transactionDate: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        date: new Date().toISOString(),
-        createdBy: "SYSTEM",
-        updatedBy: "SYSTEM",
-        status: status,
-      };
-
-      const response = await fetch(`${BASE_URL}/${CREATE_PARTY_TRANSACTION}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const txt = await response.text();
-        console.error("Failed to create party transaction", txt);
-      }
-    } catch (err) {
-      console.error("Error creating party transaction:", err);
-    }
-  };
 
   const incrementEstimateNumber = (currentEstimateNumber) => {
     // Handle alphanumeric estimate numbers like "RS-00012"
@@ -618,6 +469,31 @@ Thank you for your business!`;
     }
 
     try {
+      const payload = {
+        partyId: partyId,
+        partyName: partyName,
+        partyPhone: partyPhone,
+        items: itemInputs,
+        totalAmount: calculateSubTotal(),
+        totalQuantity: itemInputs.reduce(
+          (sum, item) => sum + parseFloat(item.quantity || 0),
+          0
+        ),
+        discountAmount: itemInputs
+          .filter((item) => item.itemName.trim() !== "")
+          .reduce(
+            (sum, item) =>
+              sum +
+              (parseFloat(item.price || 0) *
+                parseFloat(item.quantity || 0) *
+                parseFloat(item.discount || 0)) /
+                100,
+            0
+          ),
+        totalTaxAmount: calculateTotalTaxAmount(),
+        taxableAmount: calculateTaxableAmount(),
+      };
+
       const response = await fetch(
         `${BASE_URL}/${CREATE_NEW_ESTIMATE_QUOTATION}`,
         {
@@ -626,26 +502,7 @@ Thank you for your business!`;
             "Content-Type": "application/json",
           },
 
-          body: JSON.stringify({
-            partyId: partyId,
-            partyName: partyName,
-            partyPhone: partyPhone,
-            items: itemInputs,
-            totalAmount: calculateSubTotal(),
-            discountAmount: itemInputs
-              .filter((item) => item.itemName.trim() !== "")
-              .reduce(
-                (sum, item) =>
-                  sum +
-                  (parseFloat(item.price || 0) *
-                    parseFloat(item.quantity || 0) *
-                    parseFloat(item.discount || 0)) /
-                    100,
-                0
-              ),
-            totalTaxAmount: calculateTotalTaxAmount(),
-            taxableAmount: calculateTaxableAmount(),
-          }),
+          body: JSON.stringify(payload),
         }
       );
       if (response.ok) {
@@ -655,20 +512,8 @@ Thank you for your business!`;
         setToastType("success");
         setShowToast(true);
 
-        // Create product transactions for all items sold
-        // await createProductTransactions(data);
-
-        // Update item quantities in inventory
-        // await updateItemQuantities();
-
-        // Create item transactions for all items sold
-        // await createItemTransactions(data);
-
         // Also create sales transaction
-        // await createEstimatesQuotationTransaction(data);
-
-        // Also create party transaction
-        // await createPartyTransaction(data);
+        await createEstimateQuotationTransaction(data);
 
         // Clear all form fields after successful estimate creation
         setPartyName("");
@@ -903,11 +748,11 @@ Thank you for your business!`;
         setEstimateNumber(data.estimateNumber);
       } else {
         console.error("Failed to fetch estimate number");
-        setEstimateNumber("RS-00001");
+        setEstimateNumber("EQ-00001");
       }
     } catch (error) {
       console.error("Error fetching estimate number:", error);
-      setEstimateNumber("RS-00001");
+      setEstimateNumber("EQ-00001");
     }
   };
 
