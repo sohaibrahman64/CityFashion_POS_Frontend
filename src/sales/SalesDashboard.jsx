@@ -1,7 +1,7 @@
 import "./SalesDashboard.css";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
-import { BASE_URL, GET_SALES_TOTALS, GET_SALES_REPORTS } from "../Constants";
+import { BASE_URL, GET_SALES_TOTALS, GET_ALL_SALES_TRANSACTIONS } from "../Constants";
 
 const SalesDashboard = () => {
   const navigate = useNavigate();
@@ -135,7 +135,7 @@ const SalesDashboard = () => {
     setError(null);
 
     try {
-      let url = `${BASE_URL}/${GET_SALES_REPORTS}`;
+      let url = `${BASE_URL}/${GET_ALL_SALES_TRANSACTIONS}`;
 
       // Add date range params if filter is applied
       if (filterType !== "All Sale Invoices" && fromDate && toDate) {

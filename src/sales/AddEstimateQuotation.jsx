@@ -492,6 +492,7 @@ Thank you for your business!`;
           ),
         totalTaxAmount: calculateTotalTaxAmount(),
         taxableAmount: calculateTaxableAmount(),
+        status: "OPEN",
       };
 
       const response = await fetch(

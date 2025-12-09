@@ -214,7 +214,7 @@ const DynamicRoutes = ({ menuData }) => {
       <Route path="/items/categories/add" element={<AddItemCategory />} />
       <Route path="/purchase/paymentout/add" element={<AddPaymentOut />} />
       <Route path="/sales/estimate/add" element={<AddEstimateQuotation />} />
-      <Route path="/sales/proforma/add" element={<AddProformaInvoice />} />
+      <Route path="/sales/proforma-invoice/add" element={<AddProformaInvoice />} />
       <Route path="/sales/return/add" element={<AddSalesReturn />} />
       <Route path="/sales/order/add" element={<AddSalesOrder />} />
       <Route path="/parties/add" element={<AddParty />} />
