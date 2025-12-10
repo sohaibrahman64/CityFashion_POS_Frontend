@@ -308,8 +308,8 @@ const ProformaInvoiceDashboard = () => {
   };
 
   useEffect(() => {
-    //fetchTotalEstimateQuotationAmount();
-    //fetchAllEstimateQuotationTransaction();
+    fetchTotalProformaInvoiceAmount();
+    fetchAllProformaInvoiceTransaction();
   }, [filterType, fromDate, toDate]);
 
   // Handle clicks outside transaction actions menu to close it

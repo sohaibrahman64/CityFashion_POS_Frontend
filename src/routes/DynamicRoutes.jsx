@@ -73,6 +73,7 @@ import AddSalesReturn from "../sales/AddSalesReturn";
 import AddSalesOrder from "../sales/AddSalesOrder";
 import PartiesDashboard from "../parties/PartiesDashboard";
 import NewEstimateQuotationPreview from "../sales/NewEstimateQuotationPreview";
+import NewProformaInvoicePreview from "../sales/NewProformaInvoicePreview";
 
 const routeComponentMap = {
   "/dashboard": <Dashboard />,
@@ -220,8 +221,9 @@ const DynamicRoutes = ({ menuData }) => {
       <Route path="/parties/add" element={<AddParty />} />
       <Route path="/sales/estimate-quotation/add" element={<AddEstimateQuotation />} />
       <Route path="/sales/estimate-quotation/preview" element={<NewEstimateQuotationPreview/>} />
+      <Route path="/sales/proforma-invoice/preview" element={<NewProformaInvoicePreview/>} />
 
-      <Route path="*" element={<h3>404 - Page Not Found</h3>} />
+      <Route path="*" element={<h3>This Page Is Coming Soon!</h3>} />
     </Routes>
   );
 };
