@@ -4,7 +4,7 @@ import {
   BASE_URL,
   CREATE_INVOICE,
   GENERATE_INVOICE_NUMBER,
-  GET_ALL_PAYMENT_MODES,
+  GET_ALL_PAYMENT_TYPES,
   GET_INVENTORY_BY_BARCODE,
   GET_PRODUCT_BY_BARCODE,
   SAVE_INVENTORY,
@@ -367,7 +367,7 @@ const NewSales = () => {
 
   useEffect(() => {
     axios
-      .get(`${BASE_URL}/${GET_ALL_PAYMENT_MODES}`)
+      .get(`${BASE_URL}/${GET_ALL_PAYMENT_TYPES}`)
       .then((res) => setPaymentModes(res.data))
       .catch((err) => console.error("Failed to load payment modes:", err));
   }, []);

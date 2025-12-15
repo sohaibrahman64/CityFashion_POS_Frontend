@@ -20,6 +20,7 @@ const PartiesDropdown = ({ onPartySelect, selectedParty, showAddParty = true }) 
       const res = await fetch(`${BASE_URL}/${GET_ALL_PARTIES}`);
       const data = await res.json();
       const list = Array.isArray(data) ? data : [];
+      console.log(list);
       setParties(list);
       setFilteredParties(list);
     } catch (e) {

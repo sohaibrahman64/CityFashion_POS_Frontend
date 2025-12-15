@@ -3,7 +3,7 @@ import axios from "axios";
 import "./AddPurchase.css"; // optional CSS
 import ProductSelect from "../product/ProductSelect";
 import SupplierSelect from "../suppliers/SupplierSelect";
-import { BASE_URL, GET_ALL_PAYMENT_MODES, GET_ALL_SUPPLIERS, GET_ALL_PRODUCTS, ADD_PURCHASE } from "../Constants";
+import { BASE_URL, GET_ALL_PAYMENT_TYPES, GET_ALL_SUPPLIERS, GET_ALL_PRODUCTS, ADD_PURCHASE } from "../Constants";
 
 const AddPurchase = () => {
   const [suppliers, setSuppliers] = useState([]);
@@ -22,7 +22,7 @@ const AddPurchase = () => {
     fetchSuppliers();
     fetchProducts();
     // Fetch payment modes
-    axios.get(`${BASE_URL}/${GET_ALL_PAYMENT_MODES}`)
+    axios.get(`${BASE_URL}/${GET_ALL_PAYMENT_TYPES}`)
       .then(res => setPaymentModes(res.data))
       .catch(err => console.error("Failed to load payment modes", err));
   }, []);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./PurchaseHistory.css";
-import { BASE_URL, GET_PURCHASE_HISTORY, GET_ALL_PAYMENT_MODES } from "../Constants";
+import { BASE_URL, GET_PURCHASE_HISTORY, GET_ALL_PAYMENT_TYPES } from "../Constants";
 
 const PurchaseHistory = () => {
   const [purchases, setPurchases] = useState([]);
@@ -28,7 +28,7 @@ const PurchaseHistory = () => {
 
   const fetchPaymentModes = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/${GET_ALL_PAYMENT_MODES}`);
+      const res = await axios.get(`${BASE_URL}/${GET_ALL_PAYMENT_TYPES}`);
       setPaymentModes(res.data);
     } catch (err) {
       console.error("Failed to fetch payment modes", err);

@@ -6,7 +6,7 @@ import {
   GET_PAST_INVOICES,
   GET_INVOICE_PRINT_RESPONSE,
   GET_ALL_CUSTOMERS,
-  GET_ALL_PAYMENT_MODES,
+  GET_ALL_PAYMENT_TYPES,
 } from "../Constants";
 import InvoicePrint from "./InvoicePrint";
 
@@ -44,7 +44,7 @@ const PastSales = () => {
 
     const fetchPaymentModes = async () => {
       try {
-        const res = await axios.get(`${BASE_URL}/${GET_ALL_PAYMENT_MODES}`);
+        const res = await axios.get(`${BASE_URL}/${GET_ALL_PAYMENT_TYPES}`);
         setPaymentModes(res.data);
       } catch (error) {
         console.error("Failed to load payment modes", error);

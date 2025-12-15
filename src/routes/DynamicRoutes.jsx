@@ -123,7 +123,6 @@ const routeComponentMapNew = {
   "/reports": <ReportsDashboard />,
   "/mybusiness": <MyBusiness />,
   "/logout": <Logout />,
-  "/sales/new": <NewSalesNew />,
   "/sales/history": <PastSales />,
   "/parties/add": <AddParty />,
   "/items/add": <AddItem />,
@@ -137,8 +136,7 @@ const routeComponentMapNew = {
   "/purchase/paymentout/add": <AddPaymentOut />,
   "/sales/estimate": <EstimateQuotationDashboard />,
   "/sales/proforma": <ProformaInvoiceDashboard />,
-  "/sales/paymentin": <PaymentInDashboard />,
-  "/sales/paymentin/add": <AddPaymentIn />,
+  "/sales/payment-in": <PaymentInDashboard />,
   "/sales/order": <SalesOrderDashboard />,
   "/sales/deliverychallan": <DeliveryChallanDashboard />,
   "/sales/return": <SalesReturnDashboard />,
@@ -222,7 +220,7 @@ const DynamicRoutes = ({ menuData }) => {
       <Route path="/sales/estimate-quotation/add" element={<AddEstimateQuotation />} />
       <Route path="/sales/estimate-quotation/preview" element={<NewEstimateQuotationPreview/>} />
       <Route path="/sales/proforma-invoice/preview" element={<NewProformaInvoicePreview/>} />
-
+      <Route path="/sales/payment-in/add" element={<AddPaymentIn />} />
       <Route path="*" element={<h3>This Page Is Coming Soon!</h3>} />
     </Routes>
   );

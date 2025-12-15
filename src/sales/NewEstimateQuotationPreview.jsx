@@ -217,7 +217,7 @@ const NewEstimateQuotationPreview = () => {
           </button>
           <button
             className="new-estimate-quotation-preview-header-right-button"
-            onClick={() => navigate("/estimate-quotation")}
+            onClick={() => navigate("/sales/estimate")}
           >
             <span className="new-estimate-quotation-preview-header-right-button-label">
               Save And Close
