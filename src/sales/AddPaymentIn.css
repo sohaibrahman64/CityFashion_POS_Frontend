@@ -91,6 +91,16 @@
   gap: 4px;
 }
 
+.add-payment-in-form-select {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s;
+  background-color: white;
+}
+
 .add-payment-in-form-input-textarea {
   height: 114px;
   width: 265px;

@@ -1,8 +1,16 @@
-import { BASE_URL, GET_ALL_PAYMENT_TYPES } from "../Constants";
+import {
+  BASE_URL,
+  GET_ALL_PAYMENT_TYPES,
+  GET_PAYMENT_IN_RECEIPT_NUMBER,
+  CREATE_PAYMENT_IN,
+} from "../Constants";
 import PartiesDropdown from "../parties/PartiesDropdown";
 import "./AddPaymentIn.css";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Toast from "../components/Toast";
+
+
 const AddPaymentIn = ({ onClose }) => {
   const navigate = useNavigate();
   const [partyName, setPartyName] = useState("");
@@ -13,27 +21,51 @@ const AddPaymentIn = ({ onClose }) => {
   const [shippingAddress, setShippingAddress] = useState("");
   const [partyId, setPartyId] = useState(null);
   const [selectedParty, setSelectedParty] = useState(null);
-  const [payments, setPayments] = useState([]);
+  const [paymentTypes, setPaymentTypes] = useState([]);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
   const [formData, setFormData] = useState({
     partyName: "",
-    paymentType: "",
-    paymentRecieptNumber: "0000",
-    paymentDate: "",
-    paymentReceivedAmount: 0.0,
-    paymentDescription: "",
+    partyId: "",
+    partyOpeningBalance: 0,
+    partyUpdatedBalance: 0,
+    paymentTypeId: 1,
+    receiptNumber: "0000",
+    receivedDate: "",
+    receivedAmount: 0.0,
+    description: "",
   });
+
+  const [receiptNumber, setReceiptNumber] = useState([]);
+
+  const fetchReceiptNumber = () => {
+    fetch(`${BASE_URL}/${GET_PAYMENT_IN_RECEIPT_NUMBER}`)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        setReceiptNumber(data.receiptNumber || "00001");
+        setFormData((prev) => ({
+          ...prev,
+          receiptNumber: data.receiptNumber,
+        }));
+      })
+      .catch((error) =>
+        console.error("Error fetching Payment Receipt Number:", error)
+      );
+  };
 
   const getAllPaymentTypes = () => {
     fetch(`${BASE_URL}/${GET_ALL_PAYMENT_TYPES}`)
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        setPayments(data);
         // Set default Payment Type if data exists
         if (data && data.length > 0) {
+          setPaymentTypes(data);
           setFormData((prev) => ({
             ...prev,
-            paymentType: data[0].paymentMode,
+            paymentType: data[0].paymentType,
             paymentTypeId: data[0].id,
           }));
         }
@@ -42,17 +74,23 @@ const AddPaymentIn = ({ onClose }) => {
   };
 
   useEffect(() => {
+    fetchReceiptNumber();
+  }, []);
+
+  useEffect(() => {
     getAllPaymentTypes();
   }, []);
 
   const handlePaymentTypeChange = (e) => {
     const value = e.target.value;
-    const selected = payments.find((payment) => payment.paymentMode === value);
+    const selected = paymentTypes.find(
+      (payment) => payment.paymentType === value
+    );
     setFormData((prev) => ({
-        ...prev,
-        paymentType: value,
-        paymentTypeId: selected ? selected.id : "",
-    }))
+      ...prev,
+      paymentType: value,
+      paymentTypeId: selected ? selected.id : "",
+    }));
   };
 
   const handlePartySelect = (party) => {
@@ -63,6 +101,128 @@ const AddPaymentIn = ({ onClose }) => {
     setBillingAddress(party?.billingAddress || "");
     setShippingAddress(party?.shippingAddress || "");
     setPartyId(party?.id || null);
+    setSelectedParty(party);
+    setFormData((prev) => ({
+      ...prev,
+      partyId: party?.id,
+      partyName: party?.partyName,
+      partyOpeningBalance: party?.openingBalance,
+      partyUpdatedBalance: party?.updatedBalance,
+    }));
+  };
+
+  const getCurrentDate = () => {
+    const today = new Date();
+    const currentDate = today.toLocaleDateString("en-CA");
+    return currentDate;
+  };
+
+  const incrementReceiptNumber = (currentReceiptNumber) => {
+    // Handle alphanumeric estimate numbers like "RS-00012"
+    const match = currentReceiptNumber.match(/^([A-Z]+)-(\d+)$/);
+
+    if (match) {
+      const prefix = match[1]; // "PI"
+      const numberPart = parseInt(match[2], 10); // 12
+      const nextNumber = numberPart + 1;
+
+      // Format the number part with leading zeros (minimum 5 digits)
+      const formattedNumber = nextNumber.toString().padStart(5, "0");
+      return `${prefix}-${formattedNumber}`;
+    }
+
+    // Fallback: if format doesn't match, just increment as number
+    if (!isNaN(currentReceiptNumber)) {
+      return parseInt(currentReceiptNumber, 10) + 1;
+    }
+
+    // Default fallback
+    return "00001";
+  };
+
+  const handleReceivedAmountChange = (e) => {
+    const value = e.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      receivedAmount: value,
+    }));
+  };
+
+  const handleDescriptionChange = (e) => {
+    const value = e.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      description: value,
+    }));
+  };
+
+  const handleDateChange = (e) => {
+    const value = e.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      receivedDate: value,
+    }));
+  };
+
+  const handleSave = async () => {
+    try {
+      const payload = {
+        partyId: formData.partyId,
+        partyName: formData.partyName,
+        partyOpeningBalance: formData.partyOpeningBalance,
+        partyUpdatedBalance: formData.partyUpdatedBalance,
+        receiptNumber: formData.receiptNumber,
+        receivedAmount: formData.receivedAmount,
+        paymentTypeId: formData.paymentTypeId,
+        receivedDate: formData.receivedDate,
+        description: formData.description,
+      };
+
+      const response = await fetch(`${BASE_URL}/${CREATE_PAYMENT_IN}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Payment recorded successfully");
+        setToastMessage("Proforma Invoice created successfully!");
+        setToastType("success");
+        setShowToast(true);
+        setFormData({
+          partyName: "",
+          partyId: "",
+          partyOpeningBalance: 0.0,
+          partyUpdatedBalance: 0.0,
+          paymentTypeId: 1,
+          receiptNumber: "0000",
+          receivedDate: "",
+          receivedAmount: 0.0,
+          description: "",
+        });
+        setReceiptNumber((prevNumber) => incrementReceiptNumber(prevNumber));
+        setTimeout(() => {
+          navigate("/sales/payment-in/preview", {
+            state: { paymentInData: data },
+          });
+        }, 2500);
+      } else {
+        console.error("Failed to create estimate");
+        setToastMessage("Failed to create estimate. Please try again.");
+        setToastType("error");
+        setShowToast(true);
+      }
+    } catch (error) {
+      console.error("Error creating estimate:", error);
+      setToastMessage(
+        "Error creating estimate. Please check your connection and try again."
+      );
+      setToastType("error");
+      setShowToast(true);
+    }
   };
 
   return (
@@ -107,34 +267,48 @@ const AddPaymentIn = ({ onClose }) => {
                 selectedParty={selectedParty}
               />
               <label className="add-payment-in-balance-amount">
-                Balance: {partyOpeningBalance ? partyOpeningBalance : 0.00}
+                Balance: {formData.partyUpdatedBalance ? formData.partyUpdatedBalance : 0.0}
               </label>
             </div>
             <div className="add-payment-in-form-fields add-payment-in-right-column">
               <label className="add-payment-in-form-label-right">Receipt</label>
-              <label className="add-payment-in-receipt">00001</label>
+              <label className="add-payment-in-receipt">{receiptNumber}</label>
             </div>
             <div className="add-payment-in-form-fields">
               <label className="add-payment-in-form-label-left">
                 Payment Type
               </label>
-              <select id="paymentType" name="paymentType" value={formData.paymentType} onChange={handlePaymentTypeChange}>
-                {payments.map((payment) => (
-                  <option key={payment.id} value={payments.paymentType}>
-                    {payment.paymentMode}
+              <select
+                className="add-payment-in-form-select"
+                id="paymentType"
+                name="paymentType"
+                value={formData.paymentType}
+                onChange={handlePaymentTypeChange}
+              >
+                {paymentTypes.map((payment) => (
+                  <option key={payment.id} value={paymentTypes.paymentType}>
+                    {payment.paymentType}
                   </option>
                 ))}
               </select>
             </div>
             <div className="add-payment-in-form-fields add-payment-in-right-column">
               <label className="add-payment-in-form-label-right">Date</label>
-              <input className="add-payment-in-form-date-input" type="date" />
+              <input
+                value={getCurrentDate()}
+                className="add-payment-in-form-date-input"
+                type="date"
+                onChange={handleDateChange}
+              />
             </div>
             <div className="add-payment-in-form-fields">
-              <label className="add-payment-in-form-label-left">Received</label>
+              <label className="add-payment-in-form-label-left">
+                Received Amount
+              </label>
               <input
                 className="add-payment-in-form-input"
-                type="text"
+                type="number"
+                onChange={handleReceivedAmountChange}
                 placeholder="Enter Received Amount"
               />
             </div>
@@ -146,21 +320,37 @@ const AddPaymentIn = ({ onClose }) => {
                 rows="4"
                 cols="8"
                 className="add-payment-in-form-input-textarea"
+                onChange={handleDescriptionChange}
               />
             </div>
           </div>
         </div>
         <div className="add-payment-in-actions">
-          <button className="add-payment-in-link-payment-button">
-            Link To Payments
+          <button className="add-payment-in-link-payment-button" type="button">
+            Link Payments To Invoice
           </button>
-          <button className="add-payment-in-payment-history-button">
+          <button
+            className="add-payment-in-payment-history-button"
+            type="button"
+          >
             Payment History
           </button>
-          <button className="save-button">Save</button>
+          <button className="save-button" type="button" onClick={handleSave}>
+            Save
+          </button>
         </div>
       </div>
+      {/* Toast Notification */}
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          duration={2000}
+          onClose={() => setShowToast(false)}
+        />
+      )}
     </div>
   );
 };
+
 export default AddPaymentIn;

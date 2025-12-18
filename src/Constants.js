@@ -90,3 +90,5 @@ export const CREATE_NEW_PROFORMA_INVOICE = "api/proforma-invoice/create";
 export const GENERATE_PROFORMA_INVOICE_NUMBER = "api/proforma-invoice/proforma-invoice-number";
 export const GET_TOTAL_PAYMENT_IN_AMOUNT = "api/payment-in-transactions/totals";
 export const GET_ALL_PAYMENT_IN_TRANSACTIONS = "api/payment-in-transactions/getAll";
+export const GET_PAYMENT_IN_RECEIPT_NUMBER = "api/payment-in/receipt-number";
+export const CREATE_PAYMENT_IN = "api/payment-in/create";
