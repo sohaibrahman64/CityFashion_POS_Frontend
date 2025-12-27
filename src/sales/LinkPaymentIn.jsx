@@ -1,7 +1,7 @@
 import "./LinkPaymentIn.css";
 import { useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
-import { BASE_URL, GET_PARTIAL_OR_UNPAID_PARTIES } from "../Constants";
+import { BASE_URL, GET_PARTIAL_OR_UNPAID_PARTIES, LINK_PAYMENT_TO_TRANSACTIONS } from "../Constants";
 
 const LinkPaymentIn = ({ onClose, party, receivedAmount }) => {
   const navigate = useNavigate();
@@ -20,13 +20,14 @@ const LinkPaymentIn = ({ onClose, party, receivedAmount }) => {
     // Initialize linked amounts and selection when transactions change
     const initialLinked = {};
     const initialSelected = {};
-    partyTransactions.forEach((t) => {
+    partyTransactions.forEach((t, idx) => {
+      const key = t.transactionId ?? t.id ?? t.txnId ?? String(idx);
       const amt =
         t.linkedAmount !== undefined && t.linkedAmount !== null
           ? String(t.linkedAmount)
           : "0.00";
-      initialLinked[t.transactionId] = amt;
-      initialSelected[t.transactionId] = parseFloat(amt) > 0;
+      initialLinked[key] = amt;
+      initialSelected[key] = parseFloat(amt) > 0;
     });
     setLinkedAmounts(initialLinked);
     setSelectedTransactions(initialSelected);
@@ -75,6 +76,57 @@ const LinkPaymentIn = ({ onClose, party, receivedAmount }) => {
     0,
     (parseFloat(receivedAmountState) || 0) - totalLinked
   ).toFixed(2);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleDone = async () => {
+    const items = partyTransactions
+      .map((txn, idx) => {
+        const key = txn.transactionId ?? txn.id ?? txn.txnId ?? String(idx);
+        if (!selectedTransactions[key]) return null;
+        return {
+          transactionId: txn.transactionId ?? txn.id ?? key,
+          linkedAmount: parseFloat(linkedAmounts[key]) || 0,
+        };
+      })
+      .filter(Boolean);
+
+    const payload = {
+      party: selectedParty,
+      receivedAmount: parseFloat(receivedAmountState) || 0,
+      items,
+      unusedAmount: parseFloat(unusedAmount) || 0,
+    };
+
+    try {
+      setIsSubmitting(true);
+      const response = await fetch(`${BASE_URL}/${LINK_PAYMENT_TO_TRANSACTIONS}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.error("Link payment failed:", text);
+        alert("Failed to link payment. See console for details.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // success - close modal or navigate back
+      if (typeof onClose === "function") {
+        onClose(true);
+      } else {
+        navigate(-1);
+      }
+    } catch (error) {
+      console.error("Error linking payment:", error);
+      alert("Error linking payment. See console for details.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     if (isEditingAmount && inputRef.current) {
@@ -262,56 +314,59 @@ const LinkPaymentIn = ({ onClose, party, receivedAmount }) => {
                       </td>
                     </tr>
                   ) : (
-                    partyTransactions.map((txn) => (
-                      <tr
-                        key={txn.transactionId}
-                        className={selectedTransactions[txn.transactionId] ? "link-payment-in-selected" : ""}
-                        onClick={(e) => {
-                          const tag = (e.target && e.target.tagName || "").toLowerCase();
-                          // Ignore clicks that originate from interactive elements inside the row
-                          if (tag === "input" || tag === "button" || tag === "svg" || tag === "path" || tag === "select" || tag === "a") return;
-                          handleToggleSelect(txn.transactionId, !selectedTransactions[txn.transactionId]);
-                        }}
-                      >
-                        <td>
-                          <input
-                            type="checkbox"
-                            checked={!!selectedTransactions[txn.transactionId]}
-                            onChange={(e) =>
-                              handleToggleSelect(txn.transactionId, e.target.checked)
-                            }
-                          />
-                        </td>
-                        <td>{formatDate(txn.date)}</td>
-                        <td>{txn.transactionType}</td>
-                        <td>{txn.referenceNumber}</td>
-                        <td className="link-payment-in-align-right">
-                          {txn.partyTotal}
-                        </td>
-                        <td className="link-payment-in-align-right">
-                          {txn.partyBalance}
-                        </td>
-                        <td className="link-payment-in-align-right">
-                          {selectedTransactions[txn.transactionId] ? (
+                    partyTransactions.map((txn, idx) => {
+                      const key = txn.transactionId ?? txn.id ?? txn.txnId ?? String(idx);
+                      return (
+                        <tr
+                          key={key}
+                          className={selectedTransactions[key] ? "link-payment-in-selected" : ""}
+                          onClick={(e) => {
+                            const tag = (e.target && e.target.tagName || "").toLowerCase();
+                            // Ignore clicks that originate from interactive elements inside the row
+                            if (tag === "input" || tag === "button" || tag === "svg" || tag === "path" || tag === "select" || tag === "a") return;
+                            handleToggleSelect(key, !selectedTransactions[key]);
+                          }}
+                        >
+                          <td>
                             <input
-                              ref={(el) => (linkedInputRefs.current[txn.transactionId] = el)}
-                              type="text"
-                              className="link-payment-in-linked-amount"
-                              value={linkedAmounts[txn.transactionId] ?? ""}
+                              type="checkbox"
+                              checked={!!selectedTransactions[key]}
                               onChange={(e) =>
-                                handleLinkedAmountChange(
-                                  txn.transactionId,
-                                  e.target.value
-                                )
+                                handleToggleSelect(key, e.target.checked)
                               }
-                              onFocus={(e) => e.target.select()}
                             />
-                          ) : (
-                            <span className="link-payment-in-linked-placeholder">{"0.00"}</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))
+                          </td>
+                          <td>{formatDate(txn.date)}</td>
+                          <td>{txn.transactionType}</td>
+                          <td>{txn.referenceNumber}</td>
+                          <td className="link-payment-in-align-right">
+                            {txn.partyTotal}
+                          </td>
+                          <td className="link-payment-in-align-right">
+                            {txn.partyBalance}
+                          </td>
+                          <td className="link-payment-in-align-right">
+                            {selectedTransactions[key] ? (
+                              <input
+                                ref={(el) => (linkedInputRefs.current[key] = el)}
+                                type="text"
+                                className="link-payment-in-linked-amount"
+                                value={linkedAmounts[key] ?? ""}
+                                onChange={(e) =>
+                                  handleLinkedAmountChange(
+                                    key,
+                                    e.target.value
+                                  )
+                                }
+                                onFocus={(e) => e.target.select()}
+                              />
+                            ) : (
+                              <span className="link-payment-in-linked-placeholder">{"0.00"}</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>
@@ -325,8 +380,12 @@ const LinkPaymentIn = ({ onClose, party, receivedAmount }) => {
                 <button className="link-payment-in-btn link-payment-in-cancel">
                   CANCEL
                 </button>
-                <button className="link-payment-in-btn link-payment-in-done">
-                  DONE
+                <button
+                  className="link-payment-in-btn link-payment-in-done"
+                  onClick={handleDone}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Processing..." : "DONE"}
                 </button>
               </div>
             </div>

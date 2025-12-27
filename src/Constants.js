@@ -94,3 +94,4 @@ export const GET_PAYMENT_IN_RECEIPT_NUMBER = "api/payment-in/receipt-number";
 export const CREATE_PAYMENT_IN = "api/payment-in/create";
 export const CREATE_PAYMENT_IN_TRANSACTIONS = "api/payment-in-transactions/create";
 export const GET_PARTIAL_OR_UNPAID_PARTIES = "api/party-transactions/partial-or-unpaid";
+export const LINK_PAYMENT_TO_TRANSACTIONS = "api/payment-in-transactions/linkPayments";

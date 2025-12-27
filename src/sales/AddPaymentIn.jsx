@@ -193,7 +193,7 @@ const AddPaymentIn = ({ onClose }) => {
       if (response.ok) {
         const data = await response.json();
         console.log("Payment recorded successfully");
-        setToastMessage("Proforma Invoice created successfully!");
+        setToastMessage("Payment recorded successfully!");
         setToastType("success");
         setShowToast(true);
 
@@ -217,15 +217,15 @@ const AddPaymentIn = ({ onClose }) => {
           });
         }, 2500);
       } else {
-        console.error("Failed to create estimate");
-        setToastMessage("Failed to create estimate. Please try again.");
+        console.error("Failed to record payment");
+        setToastMessage("Failed to record payment. Please try again.");
         setToastType("error");
         setShowToast(true);
       }
     } catch (error) {
-      console.error("Error creating estimate:", error);
+      console.error("Error recording payment:", error);
       setToastMessage(
-        "Error creating estimate. Please check your connection and try again."
+        "Error recording payment."
       );
       setToastType("error");
       setShowToast(true);
