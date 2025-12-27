@@ -296,8 +296,9 @@ const PaymentInDashboard = () => {
   };
 
   useEffect(() => {
-    // fetchTotalPaymentInAmount();
-    // fetchAllPaymentInTransaction();
+    fetchTotalPaymentInAmount();
+    fetchAllPaymentInTransaction();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterType, fromDate, toDate]);
 
   // Handle clicks outside transaction actions menu to close it
@@ -519,7 +520,7 @@ const PaymentInDashboard = () => {
                   </th>
                   <th>
                     <div className="payment-in-dashboard-transactions-table-header">
-                      <span>Amount</span>
+                      <span>Total Amount</span>
                       <span className="payment-in-dashboard-transactions-filter-icon">
                         🔽
                       </span>
@@ -527,7 +528,7 @@ const PaymentInDashboard = () => {
                   </th>
                   <th>
                     <div className="payment-in-dashboard-transactions-table-header">
-                      <span>Balance</span>
+                      <span>Received Amount</span>
                       <span className="payment-in-dashboard-transactions-filter-icon">
                         🔽
                       </span>
@@ -570,19 +571,19 @@ const PaymentInDashboard = () => {
                 ) : (
                   paymentInTransactionsData.map((transaction, index) => (
                     <tr
-                      key={transaction.id | index}
+                      key={transaction.id || index}
                       className="payment-in-dashboard-transaction-row"
                     >
                       <td>
-                        {transaction.transactionDate
+                        {transaction.paymentReceivedDate
                           ? new Date(
-                              transaction.transactionDate
+                              transaction.paymentReceivedDate
                             ).toLocaleDateString("en-IN")
                           : "-"}
                       </td>
                       <td>
-                        {transaction.paymentInNumber ||
-                          transaction.paymentInNo ||
+                        {transaction.referenceNumber ||
+                          transaction.paymentInReferenceNumber ||
                           "-"}
                       </td>
                       <td>
@@ -599,14 +600,14 @@ const PaymentInDashboard = () => {
                       </td>
                       <td>
                         ₹{" "}
-                        {transaction.balanceAmount
-                          ? transaction.balanceAmount.toLocaleString("en-IN", {
+                        {transaction.receivedAmount
+                          ? transaction.receivedAmount.toLocaleString("en-IN", {
                               minimumFractionDigits: 2,
                               maximumFractionDigits: 2,
                             })
                           : "0.00"}
                       </td>
-                      <td>{transaction.status || "NA"}</td>
+                      <td>{transaction.paymentStatus || "NA"}</td>
                       <td>
                         <div className="payment-in-dashboard-transactions-convert-actions">
                           <div
@@ -614,7 +615,7 @@ const PaymentInDashboard = () => {
                             onClick={(e) => {
                               e.stopPropagation();
                               handleTransactionActionsClick(
-                                transaction.paymentInId,
+                                transaction.id,
                                 e
                               );
                             }}
@@ -624,7 +625,7 @@ const PaymentInDashboard = () => {
                           {/* Transaction Actions Menu - positioned relative to this transaction */}
                           {showTransactionActionsMenu &&
                             activeActionMenuRowId ===
-                              transaction.paymentInId && (
+                              transaction.id && (
                               <div
                                 className="payment-in-dashboard-transaction-actions-menu"
                                 ref={transactionActionsRef}
@@ -634,7 +635,7 @@ const PaymentInDashboard = () => {
                                   onClick={() =>
                                     handleTransactionAction(
                                       "view_edit",
-                                      transaction.paymentInId || transaction.id
+                                      transaction.id
                                     )
                                   }
                                 >
@@ -645,7 +646,7 @@ const PaymentInDashboard = () => {
                                   onClick={() =>
                                     handleTransactionAction(
                                       "delete",
-                                      transaction.paymentInId
+                                      transaction.id
                                     )
                                   }
                                 >
@@ -656,7 +657,7 @@ const PaymentInDashboard = () => {
                                   onClick={() =>
                                     handleTransactionAction(
                                       "duplicate",
-                                      transaction.paymentInId
+                                      transaction.id
                                     )
                                   }
                                 >
@@ -667,7 +668,7 @@ const PaymentInDashboard = () => {
                                   onClick={() =>
                                     handleTransactionAction(
                                       "open_pdf",
-                                      transaction.paymentInId
+                                      transaction.id
                                     )
                                   }
                                 >
@@ -678,7 +679,7 @@ const PaymentInDashboard = () => {
                                   onClick={() =>
                                     handleTransactionAction(
                                       "preview",
-                                      transaction.paymentInId
+                                      transaction.id
                                     )
                                   }
                                 >
@@ -689,7 +690,7 @@ const PaymentInDashboard = () => {
                                   onClick={() =>
                                     handleTransactionAction(
                                       "print",
-                                      transaction.paymentInId
+                                      transaction.id
                                     )
                                   }
                                 >
@@ -700,7 +701,7 @@ const PaymentInDashboard = () => {
                                   onClick={() =>
                                     handleTransactionAction(
                                       "view_history",
-                                      transaction.paymentInId
+                                      transaction.id
                                     )
                                   }
                                 >

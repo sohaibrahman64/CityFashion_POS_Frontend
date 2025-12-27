@@ -1,0 +1,300 @@
+.link-payment-in-overlay {
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.link-payment-in-modal {
+  background: white;
+  border-radius: 12px;
+  width: 90%; /* narrower than parent */
+  max-width: 800px; /* smaller max width */
+  max-height: 90vh; /* shorter height */
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  overflow: hidden; /* let inner body scroll, keep header/footer visible */
+}
+
+.link-payment-in-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.link-payment-in-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.link-payment-in-close-icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.link-payment-in-close-icon-button:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+/* Body layout */
+.link-payment-in-body {
+  padding: 18px 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1 1 auto; /* fill remaining modal height */
+  overflow: auto; /* enable scrolling when content overflows */
+}
+
+/* Ensure the internal form group grows so footer can stick */
+.link-payment-in-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-height: 0; /* allow children to overflow correctly */
+} 
+
+.link-payment-in-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.link-payment-in-top {
+  display: flex;
+  align-items: baseline;
+  gap: 24px;
+  justify-content: space-between;
+}
+
+.link-payment-in-party-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.link-payment-in-label-small,
+.link-payment-in-received-label {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.link-payment-in-party-name {
+  font-weight: 600;
+  color: #111827;
+}
+
+.link-payment-in-received-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  /* margin-bottom: 6px;
+  display: block; */
+}
+
+.link-payment-in-received-value {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  padding: 2px 2px;
+  border-radius: 6px;
+}
+
+.link-payment-in-received-value input {
+  border: none;
+  width: 90px;
+  font-weight: 600;
+  color: #0f172a;
+  background: transparent;
+  outline: none;
+  /* padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s;
+  background-color: white; */
+}
+
+.link-payment-in-edit-amount {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  color: #3b82f6;
+}
+
+.link-payment-in-reset-block {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.link-payment-in-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 6px 8px;
+}
+
+/* Controls row */
+.link-payment-in-controls {
+  display: flex;
+  justify-content: space-between;
+}
+
+.link-payment-in-separator {
+    border: 1px solid #e5e7eb;
+    margin: 8px 0;
+}
+
+.link-payment-in-txn-filter {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+.link-payment-in-search-box input {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  min-width: 200px;
+}
+
+/* Table */
+.link-payment-in-table {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  overflow: auto;
+}
+
+.link-payment-in-table table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+}
+
+.link-payment-in-table th,
+.link-payment-in-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f3f4f6;
+  text-align: left;
+  font-size: 13px;
+  color: #374151;
+}
+
+.link-payment-in-table thead th {
+  font-weight: 600;
+  background: #fff;
+}
+
+.link-payment-in-table tbody tr.link-payment-in-selected {
+  background: #e6f0f8;
+}
+
+/* Make rows appear clickable and show hover state */
+.link-payment-in-table tbody tr {
+  cursor: pointer;
+}
+.link-payment-in-table tbody tr:hover:not(.link-payment-in-selected) {
+  background: #f8fafc;
+}
+/* Keep inputs and buttons with normal cursor */
+.link-payment-in-table td input,
+.link-payment-in-table td button {
+  cursor: auto;
+}
+
+.link-payment-in-align-right {
+  text-align: right;
+}
+
+/* Footer */
+.link-payment-in-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0 8px;
+  border-top: 1px solid #e5e7eb;
+  background: #fff; /* ensures footer covers scrolled content */
+  position: sticky; /* keep footer visible */
+  bottom: 0;
+  z-index: 3;
+  flex-shrink: 0;
+}
+
+.link-payment-in-footer-left {
+  color: #374151;
+}
+
+.link-payment-in-footer-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.link-payment-in-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.link-payment-in-btn.link-payment-in-cancel {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.link-payment-in-btn.link-payment-in-done {
+  background: #0ea5e9; /* bright blue */
+  color: #fff;
+}
+
+/* Linked amount input & placeholder */
+.link-payment-in-linked-amount {
+  width: 100px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  text-align: right;
+  font-weight: 600;
+  background: transparent;
+  outline: none;
+}
+
+.link-payment-in-linked-placeholder {
+  color: #9ca3af;
+  display: inline-block;
+  width: 100%;
+  text-align: right;
+}

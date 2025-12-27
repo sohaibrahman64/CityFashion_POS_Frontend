@@ -6,8 +6,10 @@ import {
   GET_ACTIVE_GST_TYPES,
   CREATE_PARTY,
   UPDATE_PARTY,
+  CREATE_PARTY_TRANSACTION,
 } from "../Constants";
 import Toast from "../components/Toast";
+import { TbNumber1Small } from "react-icons/tb";
 
 const AddParty = ({ onClose, initialParty, onSuccess }) => {
   const [activeTab, setActiveTab] = useState("gst");
@@ -32,19 +34,19 @@ const AddParty = ({ onClose, initialParty, onSuccess }) => {
   };
 
   const [formData, setFormData] = useState({
-    partyName: "Monish",
+    partyName: "",
     gstin: "",
-    phoneNumber: "9923536215",
+    phoneNumber: "",
     gstType: "",
     gstTypeId: "",
     state: "",
     stateId: "",
-    emailId: "sohaib.rahman64@gmail.com",
-    billingAddress: "XYZ ABC",
+    emailId: "",
+    billingAddress: "",
     shippingAddress: "",
     enableShipping: false,
     // Credit & Balance fields
-    openingBalance: "25000",
+    openingBalance: "",
     asOfDate: formatDateToDDMMYYYY(new Date()),
     paymentType: "toPay",
     creditLimitType: "noLimit",
@@ -67,7 +69,9 @@ const AddParty = ({ onClose, initialParty, onSuccess }) => {
       billingAddress: initialParty.billingAddress || "",
       shippingAddress: initialParty.shippingAddress || "",
       enableShipping: Boolean(initialParty.shippingAddress),
-      openingBalance: String(initialParty.openingBalance ?? prev.openingBalance),
+      openingBalance: String(
+        initialParty.openingBalance ?? prev.openingBalance
+      ),
       asOfDate: (() => {
         // backend might send yyyy-MM-dd or dd-mm-yyyy; normalize to dd-mm-yyyy
         const val = initialParty.asOfDate;
@@ -197,21 +201,24 @@ const AddParty = ({ onClose, initialParty, onSuccess }) => {
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      const partyData = await response.json();
 
       if (response.ok) {
-        const successMsg = isEdit ? "Party updated successfully!" : "Party created successfully!";
-        console.log(successMsg, data);
+        const successMsg = isEdit
+          ? "Party updated successfully!"
+          : "Party created successfully!";
+        console.log(successMsg, partyData);
         setToast({ message: successMsg, type: "success" });
         // Call onSuccess callback to refresh the parties list in parent component
         if (onSuccess) {
           onSuccess();
+          await createPartyTransaction(partyData, onSuccess);
         }
         setTimeout(() => {
           onClose(); // Close the modal after showing success message
         }, 1500);
       } else {
-        console.error("Error saving party:", data);
+        console.error("Error saving party:", partyData);
         setToast({
           message: "Failed to save party. Please try again.",
           type: "error",
@@ -249,15 +256,16 @@ const AddParty = ({ onClose, initialParty, onSuccess }) => {
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      const partyData = await response.json();
 
       if (response.ok) {
-        console.log("Party created successfully:", data);
+        console.log("Party created successfully:", partyData);
         setToast({ message: "Party created successfully!", type: "success" });
-        
+
         // Call onSuccess callback to refresh the parties list in parent component
         if (onSuccess) {
           onSuccess();
+          await createPartyTransaction(partyData, onSuccess);
         }
 
         // Reset form and keep modal open
@@ -280,7 +288,7 @@ const AddParty = ({ onClose, initialParty, onSuccess }) => {
           customLimit: "",
         });
       } else {
-        console.error("Error creating party:", data);
+        console.error("Error creating party:", partyData);
         setToast({
           message: "Failed to create party. Please try again.",
           type: "error",
@@ -295,6 +303,46 @@ const AddParty = ({ onClose, initialParty, onSuccess }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const createPartyTransaction = async (partyData, onSuccess) => {
+    try {
+          const payload = {
+            partyId: partyData.id,
+            partyName: partyData.partyName,
+            partyPhone: partyData.phoneNumber,
+            invoiceId: null,
+            invoiceNumber: null,
+            partyTotal: partyData.openingBalance ? partyData.openingBalance : partyData.openingBalance === 0 ? 0 : null,
+            partyBalance: partyData.updatedBalance ? partyData.updatedBalance : partyData.updatedBalance === 0 ? 0 : null,
+            transactionType: partyData.paymentType ? partyData.paymentType === "toReceive" ? "RECEIVABLE_OPENING_BALANCE" : partyData.paymentType === "toPay" ? "PAYABLE_OPENING_BALANCE" : "OTHER" : "NA",
+            referenceId: null,
+            referenceType: partyData.paymentType ? partyData.paymentType === "toReceive" ? "RECEIVABLE_OPENING_BALANCE" : partyData.paymentType === "toPay" ? "PAYABLE_OPENING_BALANCE" : "OTHER" : "NA",
+            referenceNumber: null,
+            description: partyData.paymentType ? partyData.paymentType === "toReceive" ? "Receivable Opening Balance" : partyData.paymentType === "toPay" ? "Payable Opening Balance" : "Other" : "NA",
+            transactionDate: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            date: new Date().toISOString(),
+            createdBy: "SYSTEM",
+            updatedBy: "SYSTEM",
+            status: onSuccess ? partyData.paymentType === "toReceive" ? "RECEIVABLE_OPENING_BALANCE" : partyData.paymentType === "toPay" ? "PAYABLE_OPENING_BALANCE" : "OTHER" : "NA",
+          };
+    
+          const response = await fetch(`${BASE_URL}/${CREATE_PARTY_TRANSACTION}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+    
+          if (!response.ok) {
+            const txt = await response.text();
+            console.error("Failed to create party transaction", txt);
+          }
+        } catch (err) {
+          console.error("Error creating party transaction:", err);
+        }
+
   };
 
   return (

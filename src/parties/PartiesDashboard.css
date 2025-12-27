@@ -172,8 +172,19 @@
   flex: 1;
   text-align: right;
   font-size: 14px;
-  color: #29c080;
+  color: #6b7280; /* neutral default */
   font-weight: 500;
+}
+
+/* Amount colors based on paymentType */
+/* Green for amounts that are to be received */
+.parties-dashboard-amount-to-receive {
+  color: #29c080;
+}
+
+/* Red for amounts that are to be paid */
+.parties-dashboard-amount-to-pay {
+  color: #e02424;
 }
 
 .party-actions {

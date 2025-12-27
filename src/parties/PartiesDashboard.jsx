@@ -265,8 +265,8 @@ const PartiesDashboard = () => {
                 <div className="party-name">
                   {party.partyName || party.name}
                 </div>
-                <div className="party-amount">
-                  ₹ {(party.openingBalance ?? 0).toFixed(2)}
+                <div className={`party-amount ${party.paymentType === "toPay" ? "parties-dashboard-amount-to-pay" : party.paymentType === "toReceive" ? "parties-dashboard-amount-to-receive" : ""}`}>
+                  ₹ {(party.updatedBalance ?? 0).toFixed(2)}
                 </div>
                 <div className="party-actions">
                   <div

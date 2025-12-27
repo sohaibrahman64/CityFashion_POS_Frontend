@@ -312,6 +312,7 @@ const EstimateQuotationDashboard = () => {
   useEffect(() => {
     fetchTotalEstimateQuotationAmount();
     fetchAllEstimateQuotationTransaction();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterType, fromDate, toDate]);
 
   // Handle clicks outside transaction actions menu to close it

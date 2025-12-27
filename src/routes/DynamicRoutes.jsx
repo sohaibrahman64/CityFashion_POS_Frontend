@@ -75,6 +75,7 @@ import PartiesDashboard from "../parties/PartiesDashboard";
 import NewEstimateQuotationPreview from "../sales/NewEstimateQuotationPreview";
 import NewProformaInvoicePreview from "../sales/NewProformaInvoicePreview";
 import NewPaymentInPreview from "../sales/NewPaymentInPreview";
+import LinkPaymentIn from "../sales/LinkPaymentIn";
 
 const routeComponentMap = {
   "/dashboard": <Dashboard />,
@@ -223,6 +224,7 @@ const DynamicRoutes = ({ menuData }) => {
       <Route path="/sales/proforma-invoice/preview" element={<NewProformaInvoicePreview/>} />
       <Route path="/sales/payment-in/add" element={<AddPaymentIn />} />
       <Route path="/sales/payment-in/preview" element={<NewPaymentInPreview />}/>
+      <Route path="/sales/payment-in/link-to-txn" element={<LinkPaymentIn />} />
       <Route path="*" element={<h3>This Page Is Coming Soon!</h3>} />
     </Routes>
   );

@@ -3,12 +3,14 @@ import {
   GET_ALL_PAYMENT_TYPES,
   GET_PAYMENT_IN_RECEIPT_NUMBER,
   CREATE_PAYMENT_IN,
+  CREATE_PAYMENT_IN_TRANSACTIONS,
 } from "../Constants";
 import PartiesDropdown from "../parties/PartiesDropdown";
 import "./AddPaymentIn.css";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Toast from "../components/Toast";
+import LinkPaymentIn from "./LinkPaymentIn";
 
 
 const AddPaymentIn = ({ onClose }) => {
@@ -25,6 +27,14 @@ const AddPaymentIn = ({ onClose }) => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("success");
+  const [showLinkPaymentInModal, setShowLinkPaymentInModal] = useState(false);  
+
+  const getCurrentDate = () => {
+    const today = new Date();
+    const currentDate = today.toLocaleDateString("en-CA");
+    return currentDate;
+  };
+
   const [formData, setFormData] = useState({
     partyName: "",
     partyId: "",
@@ -32,7 +42,7 @@ const AddPaymentIn = ({ onClose }) => {
     partyUpdatedBalance: 0,
     paymentTypeId: 1,
     receiptNumber: "0000",
-    receivedDate: "",
+    receivedDate: getCurrentDate(),
     receivedAmount: 0.0,
     description: "",
   });
@@ -111,12 +121,6 @@ const AddPaymentIn = ({ onClose }) => {
     }));
   };
 
-  const getCurrentDate = () => {
-    const today = new Date();
-    const currentDate = today.toLocaleDateString("en-CA");
-    return currentDate;
-  };
-
   const incrementReceiptNumber = (currentReceiptNumber) => {
     // Handle alphanumeric estimate numbers like "RS-00012"
     const match = currentReceiptNumber.match(/^([A-Z]+)-(\d+)$/);
@@ -192,6 +196,9 @@ const AddPaymentIn = ({ onClose }) => {
         setToastMessage("Proforma Invoice created successfully!");
         setToastType("success");
         setShowToast(true);
+
+        await createPaymentInTransaction(data);
+
         setFormData({
           partyName: "",
           partyId: "",
@@ -224,6 +231,38 @@ const AddPaymentIn = ({ onClose }) => {
       setShowToast(true);
     }
   };
+
+  const createPaymentInTransaction = async (paymentInData) => {
+    try {
+      const transactionPayload = {
+        partyId: paymentInData.partyInfo.partyId,
+        partyName: paymentInData.partyInfo.partyName,
+        paymentType: paymentInData.paymentTypeInfo.paymentType,
+        receivedAmount: paymentInData.receivedAmount,
+        transactionType: "Payment In",
+        referenceNumber: paymentInData.receiptNumber,
+        paymentReceivedDate: getCurrentDate(),
+        totalAmount: paymentInData.receivedAmount,
+        paymentStatus: "UNUSED",
+        description: paymentInData.description,
+      };
+
+      const res = await fetch(`${BASE_URL}/${CREATE_PAYMENT_IN_TRANSACTIONS}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(transactionPayload),
+      });
+
+      if (!res.ok) {
+        const txt = await res.text();
+        console.error("Failed to create payment transaction", txt);
+      }
+    } catch (error) {
+      console.error("Error creating payment transaction:", error);
+    }
+  }
 
   return (
     <div className="add-payment-in-overlay">
@@ -326,7 +365,10 @@ const AddPaymentIn = ({ onClose }) => {
           </div>
         </div>
         <div className="add-payment-in-actions">
-          <button className="add-payment-in-link-payment-button" type="button">
+          <button className="add-payment-in-link-payment-button" type="button"
+          onClick={() => 
+            setShowLinkPaymentInModal(true)
+          }>
             Link Payments To Invoice
           </button>
           <button
@@ -347,6 +389,14 @@ const AddPaymentIn = ({ onClose }) => {
           type={toastType}
           duration={2000}
           onClose={() => setShowToast(false)}
+        />
+      )}
+
+      {showLinkPaymentInModal && (
+        <LinkPaymentIn
+          onClose={() => setShowLinkPaymentInModal(false)}
+          party={selectedParty}
+          receivedAmount={formData.receivedAmount}
         />
       )}
     </div>
