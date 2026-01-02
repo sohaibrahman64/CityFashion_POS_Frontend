@@ -12,7 +12,6 @@ import { useNavigate } from "react-router-dom";
 import Toast from "../components/Toast";
 import LinkPaymentIn from "./LinkPaymentIn";
 
-
 const AddPaymentIn = ({ onClose }) => {
   const navigate = useNavigate();
   const [partyName, setPartyName] = useState("");
@@ -27,7 +26,9 @@ const AddPaymentIn = ({ onClose }) => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("success");
-  const [showLinkPaymentInModal, setShowLinkPaymentInModal] = useState(false);  
+  const [showLinkPaymentInModal, setShowLinkPaymentInModal] = useState(false);
+  // Unused amount returned from LinkPaymentIn (string formatted to 2 decimals)
+  const [linkedUnusedAmount, setLinkedUnusedAmount] = useState(null);
 
   const getCurrentDate = () => {
     const today = new Date();
@@ -45,6 +46,9 @@ const AddPaymentIn = ({ onClose }) => {
     receivedDate: getCurrentDate(),
     receivedAmount: 0.0,
     description: "",
+    // keep unused amount in formData so it is sent with the payload
+    unusedAmount: 0.0,
+    linkPaymentInTxnId: null,
   });
 
   const [receiptNumber, setReceiptNumber] = useState([]);
@@ -180,6 +184,9 @@ const AddPaymentIn = ({ onClose }) => {
         paymentTypeId: formData.paymentTypeId,
         receivedDate: formData.receivedDate,
         description: formData.description,
+        // include unused amount (kept in formData and synced from LinkPaymentIn)
+        unusedAmount: formData.unusedAmount || 0,
+        linkPaymentInTxnId: formData.linkPaymentInTxnId || null,
       };
 
       const response = await fetch(`${BASE_URL}/${CREATE_PAYMENT_IN}`, {
@@ -209,6 +216,7 @@ const AddPaymentIn = ({ onClose }) => {
           receivedDate: "",
           receivedAmount: 0.0,
           description: "",
+          unusedAmount: 0.0,
         });
         setReceiptNumber((prevNumber) => incrementReceiptNumber(prevNumber));
         setTimeout(() => {
@@ -224,9 +232,7 @@ const AddPaymentIn = ({ onClose }) => {
       }
     } catch (error) {
       console.error("Error recording payment:", error);
-      setToastMessage(
-        "Error recording payment."
-      );
+      setToastMessage("Error recording payment.");
       setToastType("error");
       setShowToast(true);
     }
@@ -243,7 +249,7 @@ const AddPaymentIn = ({ onClose }) => {
         referenceNumber: paymentInData.receiptNumber,
         paymentReceivedDate: getCurrentDate(),
         totalAmount: paymentInData.receivedAmount,
-        paymentStatus: "UNUSED",
+        paymentStatus: paymentInData.unusedAmount > 0 ? "UNUSED" : "USED",
         description: paymentInData.description,
       };
 
@@ -262,7 +268,7 @@ const AddPaymentIn = ({ onClose }) => {
     } catch (error) {
       console.error("Error creating payment transaction:", error);
     }
-  }
+  };
 
   return (
     <div className="add-payment-in-overlay">
@@ -306,7 +312,10 @@ const AddPaymentIn = ({ onClose }) => {
                 selectedParty={selectedParty}
               />
               <label className="add-payment-in-balance-amount">
-                Balance: {formData.partyUpdatedBalance ? formData.partyUpdatedBalance : 0.0}
+                Balance:{" "}
+                {formData.partyUpdatedBalance
+                  ? formData.partyUpdatedBalance
+                  : 0.0}
               </label>
             </div>
             <div className="add-payment-in-form-fields add-payment-in-right-column">
@@ -325,7 +334,7 @@ const AddPaymentIn = ({ onClose }) => {
                 onChange={handlePaymentTypeChange}
               >
                 {paymentTypes.map((payment) => (
-                  <option key={payment.id} value={paymentTypes.paymentType}>
+                  <option key={payment.id} value={payment.paymentType}>
                     {payment.paymentType}
                   </option>
                 ))}
@@ -350,6 +359,17 @@ const AddPaymentIn = ({ onClose }) => {
                 onChange={handleReceivedAmountChange}
                 placeholder="Enter Received Amount"
               />
+              {/* <label className="add-payment-in-form-label-left">
+                Unused Amount
+              </label> */}
+              {linkedUnusedAmount !== null &&
+              linkedUnusedAmount !== undefined ? (
+                <label className="add-payment-in-unused-amount">
+                  Unused Amount: {linkedUnusedAmount}
+                </label>
+              ) : (
+                ""
+              )}
             </div>
             <div className="add-payment-in-form-fields add-payment-in-right-column">
               <label className="add-payment-in-form-label-right">
@@ -365,10 +385,11 @@ const AddPaymentIn = ({ onClose }) => {
           </div>
         </div>
         <div className="add-payment-in-actions">
-          <button className="add-payment-in-link-payment-button" type="button"
-          onClick={() => 
-            setShowLinkPaymentInModal(true)
-          }>
+          <button
+            className="add-payment-in-link-payment-button"
+            type="button"
+            onClick={() => setShowLinkPaymentInModal(true)}
+          >
             Link Payments To Invoice
           </button>
           <button
@@ -383,18 +404,33 @@ const AddPaymentIn = ({ onClose }) => {
         </div>
       </div>
       {/* Toast Notification */}
-      {showToast && (
-        <Toast
-          message={toastMessage}
-          type={toastType}
-          duration={2000}
-          onClose={() => setShowToast(false)}
-        />
-      )}
+      {showToast &&
+        // Defensive render: if Toast import is undefined we avoid throwing and show a simple fallback
+        (typeof Toast !== "undefined" ? (
+          <Toast
+            message={toastMessage}
+            type={toastType}
+            duration={2000}
+            onClose={() => setShowToast(false)}
+          />
+        ) : (
+          <div className={`toast toast-${toastType}`}>
+            <div className="toast-content">
+              <div className="toast-message">{toastMessage}</div>
+            </div>
+          </div>
+        ))}
 
       {showLinkPaymentInModal && (
         <LinkPaymentIn
-          onClose={() => setShowLinkPaymentInModal(false)}
+          onClose={(payload) => {
+            setShowLinkPaymentInModal(false);
+            if (payload && payload.unusedAmount !== undefined) {
+              // ensure formatted string with 2 decimals
+              const formatted = Number(payload.unusedAmount || 0).toFixed(2);
+              setLinkedUnusedAmount(formatted);              // sync into formData so Save uses it
+              setFormData((prev) => ({ ...prev, unusedAmount: parseFloat(formatted) || 0, linkPaymentInTxnId: payload.linkPaymentInTxnId || null }));            }
+          }}
           party={selectedParty}
           receivedAmount={formData.receivedAmount}
         />

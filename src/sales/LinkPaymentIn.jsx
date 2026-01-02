@@ -1,7 +1,12 @@
 import "./LinkPaymentIn.css";
 import { useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
-import { BASE_URL, GET_PARTIAL_OR_UNPAID_PARTIES, LINK_PAYMENT_TO_TRANSACTIONS } from "../Constants";
+import {
+  BASE_URL,
+  GET_PARTIAL_OR_UNPAID_PARTIES,
+  LINK_PAYMENT_TO_TRANSACTIONS,
+} from "../Constants";
+import Toast from "../components/Toast";
 
 const LinkPaymentIn = ({ onClose, party, receivedAmount }) => {
   const navigate = useNavigate();
@@ -15,6 +20,11 @@ const LinkPaymentIn = ({ onClose, party, receivedAmount }) => {
   const [linkedAmounts, setLinkedAmounts] = useState({});
   const [selectedTransactions, setSelectedTransactions] = useState({});
   const linkedInputRefs = useRef({});
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
+  // Ref to store timeout for closing modal after showing toast
+  const toastCloseTimeoutRef = useRef(null);
 
   useEffect(() => {
     // Initialize linked amounts and selection when transactions change
@@ -56,7 +66,10 @@ const LinkPaymentIn = ({ onClose, party, receivedAmount }) => {
       // reset linked amount when row is deselected
       setLinkedAmounts((prev) => ({ ...prev, [transactionId]: "0.00" }));
     } else {
-      setLinkedAmounts((prev) => ({ ...prev, [transactionId]: prev[transactionId] ?? "0.00" }));
+      setLinkedAmounts((prev) => ({
+        ...prev,
+        [transactionId]: prev[transactionId] ?? "0.00",
+      }));
       // focus and select the linked amount input after it becomes visible
       setTimeout(() => {
         const el = linkedInputRefs.current[transactionId];
@@ -79,14 +92,18 @@ const LinkPaymentIn = ({ onClose, party, receivedAmount }) => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [unusedAmountState, setUnusedAmountState] = useState("0.00");
+
   const handleDone = async () => {
+    console.log("Selected Party:", selectedParty);
     const items = partyTransactions
       .map((txn, idx) => {
         const key = txn.transactionId ?? txn.id ?? txn.txnId ?? String(idx);
         if (!selectedTransactions[key]) return null;
         return {
-          transactionId: txn.transactionId ?? txn.id ?? key,
+          partyTransactionId: txn.transactionId ?? txn.id ?? key,
           linkedAmount: parseFloat(linkedAmounts[key]) || 0,
+          referenceNumber: txn.referenceNumber || "",
         };
       })
       .filter(Boolean);
@@ -94,35 +111,64 @@ const LinkPaymentIn = ({ onClose, party, receivedAmount }) => {
     const payload = {
       party: selectedParty,
       receivedAmount: parseFloat(receivedAmountState) || 0,
-      items,
+      linkedAmountItems: items,
       unusedAmount: parseFloat(unusedAmount) || 0,
+      paymentInId: null,
     };
 
     try {
       setIsSubmitting(true);
-      const response = await fetch(`${BASE_URL}/${LINK_PAYMENT_TO_TRANSACTIONS}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        `${BASE_URL}/${LINK_PAYMENT_TO_TRANSACTIONS}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (!response.ok) {
         const text = await response.text();
         console.error("Link payment failed:", text);
-        alert("Failed to link payment. See console for details.");
+        setToastMessage("Error linking payment");
+        setToastType("error");
+        setShowToast(true);
         setIsSubmitting(false);
         return;
-      }
-
-      // success - close modal or navigate back
-      if (typeof onClose === "function") {
-        onClose(true);
       } else {
-        navigate(-1);
-      }
+        const data = await response.json();
+        console.log("Link payment response:", data);
+        setUnusedAmountState(data.unusedAmount || "0.00");
+        setToastMessage(data.message);
+        setToastType("success");
+        setShowToast(true);
+
+        // Prepare payload to return to parent so it can display the unused amount
+        const resultPayload = {
+          success: true,
+          unusedAmount: data.unusedAmount ?? "0.00",
+          linkPaymentInTxnId: data.linkPaymentInTxnId ?? null,
+        };
+
+        // success - close modal/navigate after a short delay to allow toast to appear
+        // clear any existing timeout
+        if (toastCloseTimeoutRef.current)
+          clearTimeout(toastCloseTimeoutRef.current);
+
+        toastCloseTimeoutRef.current = setTimeout(() => {
+          if (typeof onClose === "function") {
+            onClose(resultPayload);
+          } else {
+            navigate(-1);
+          }
+        }, 2000);
+      } // delay to allow toast to become visible
     } catch (error) {
       console.error("Error linking payment:", error);
       alert("Error linking payment. See console for details.");
+      setToastMessage("Error linking payment");
+      setToastType("error");
+      setShowToast(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -153,6 +199,15 @@ const LinkPaymentIn = ({ onClose, party, receivedAmount }) => {
       fetchPartiesTransactions(selectedParty.id);
     }
   }, [selectedParty]);
+
+  // Clean up any pending toast-close timeout when component unmounts
+  useEffect(() => {
+    return () => {
+      if (toastCloseTimeoutRef.current) {
+        clearTimeout(toastCloseTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const formatDate = (dateString) => {
     try {
@@ -315,16 +370,36 @@ const LinkPaymentIn = ({ onClose, party, receivedAmount }) => {
                     </tr>
                   ) : (
                     partyTransactions.map((txn, idx) => {
-                      const key = txn.transactionId ?? txn.id ?? txn.txnId ?? String(idx);
+                      const key =
+                        txn.transactionId ?? txn.id ?? txn.txnId ?? String(idx);
                       return (
                         <tr
                           key={key}
-                          className={selectedTransactions[key] ? "link-payment-in-selected" : ""}
+                          className={
+                            selectedTransactions[key]
+                              ? "link-payment-in-selected"
+                              : ""
+                          }
                           onClick={(e) => {
-                            const tag = (e.target && e.target.tagName || "").toLowerCase();
-                            // Ignore clicks that originate from interactive elements inside the row
-                            if (tag === "input" || tag === "button" || tag === "svg" || tag === "path" || tag === "select" || tag === "a") return;
-                            handleToggleSelect(key, !selectedTransactions[key]);
+                            const tag = (
+                              (e.target && e.target.tagName) ||
+                              ""
+                            ).toLowerCase();
+                            // Allow toggle on row click, but skip if clicking on interactive elements
+                            const isInteractive = [
+                              "input",
+                              "button",
+                              "svg",
+                              "path",
+                              "select",
+                              "a",
+                            ].includes(tag);
+                            if (!isInteractive) {
+                              handleToggleSelect(
+                                key,
+                                !selectedTransactions[key]
+                              );
+                            }
                           }}
                         >
                           <td>
@@ -348,20 +423,21 @@ const LinkPaymentIn = ({ onClose, party, receivedAmount }) => {
                           <td className="link-payment-in-align-right">
                             {selectedTransactions[key] ? (
                               <input
-                                ref={(el) => (linkedInputRefs.current[key] = el)}
+                                ref={(el) =>
+                                  (linkedInputRefs.current[key] = el)
+                                }
                                 type="text"
                                 className="link-payment-in-linked-amount"
                                 value={linkedAmounts[key] ?? ""}
                                 onChange={(e) =>
-                                  handleLinkedAmountChange(
-                                    key,
-                                    e.target.value
-                                  )
+                                  handleLinkedAmountChange(key, e.target.value)
                                 }
                                 onFocus={(e) => e.target.select()}
                               />
                             ) : (
-                              <span className="link-payment-in-linked-placeholder">{"0.00"}</span>
+                              <span className="link-payment-in-linked-placeholder">
+                                {"0.00"}
+                              </span>
                             )}
                           </td>
                         </tr>
@@ -377,7 +453,16 @@ const LinkPaymentIn = ({ onClose, party, receivedAmount }) => {
                 Unused Amount : <strong>{unusedAmount}</strong>
               </div>
               <div className="link-payment-in-footer-actions">
-                <button className="link-payment-in-btn link-payment-in-cancel">
+                <button
+                  className="link-payment-in-btn link-payment-in-cancel"
+                  onClick={() => {
+                    if (typeof onClose === "function") {
+                      onClose();
+                    } else {
+                      navigate(-1);
+                    }
+                  }}
+                >
                   CANCEL
                 </button>
                 <button
@@ -392,6 +477,15 @@ const LinkPaymentIn = ({ onClose, party, receivedAmount }) => {
           </div>
         </div>
       </div>
+      {/* Toast Notification */}
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          duration={2000}
+          onClose={() => setShowToast(false)}
+        />
+      )}
     </div>
   );
 };
