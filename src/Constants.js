@@ -95,3 +95,5 @@ export const CREATE_PAYMENT_IN = "api/payment-in/create";
 export const CREATE_PAYMENT_IN_TRANSACTIONS = "api/payment-in-transactions/create";
 export const GET_PARTIAL_OR_UNPAID_PARTIES = "api/party-transactions/partial-or-unpaid";
 export const LINK_PAYMENT_TO_TRANSACTIONS = "api/link-payment-in-txn/create";
+export const CREATE_PAYMENT_IN_HISTORY = "api/payment-in-history/create";
+

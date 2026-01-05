@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Toast from "../components/Toast";
 import LinkPaymentIn from "./LinkPaymentIn";
+import PaymentInHistory from "./PaymentInHistory";
 
 const AddPaymentIn = ({ onClose }) => {
   const navigate = useNavigate();
@@ -29,6 +30,9 @@ const AddPaymentIn = ({ onClose }) => {
   const [showLinkPaymentInModal, setShowLinkPaymentInModal] = useState(false);
   // Unused amount returned from LinkPaymentIn (string formatted to 2 decimals)
   const [linkedUnusedAmount, setLinkedUnusedAmount] = useState(null);
+  const [showPaymentHistory, setShowPaymentHistory] = useState(false);
+  const [linkedAmountItemsLength, setLinkedAmountItemsLength] = useState(0);
+  const [paymentInHistoryResponse, setPaymentInHistoryResponse] = useState(null);
 
   const getCurrentDate = () => {
     const today = new Date();
@@ -392,12 +396,17 @@ const AddPaymentIn = ({ onClose }) => {
           >
             Link Payments To Invoice
           </button>
-          <button
-            className="add-payment-in-payment-history-button"
-            type="button"
-          >
-            Payment History
-          </button>
+          {linkedAmountItemsLength > 0 ? (
+            <button
+              className="add-payment-in-payment-history-button"
+              type="button"
+              onClick={() => setShowPaymentHistory(true)}
+            >
+              Payment History
+            </button>
+          ) : (
+            ""
+          )}
           <button className="save-button" type="button" onClick={handleSave}>
             Save
           </button>
@@ -427,12 +436,50 @@ const AddPaymentIn = ({ onClose }) => {
             setShowLinkPaymentInModal(false);
             if (payload && payload.unusedAmount !== undefined) {
               // ensure formatted string with 2 decimals
-              const formatted = Number(payload.unusedAmount || 0).toFixed(2);
-              setLinkedUnusedAmount(formatted);              // sync into formData so Save uses it
-              setFormData((prev) => ({ ...prev, unusedAmount: parseFloat(formatted) || 0, linkPaymentInTxnId: payload.linkPaymentInTxnId || null }));            }
+              if (
+                payload.unusedAmount !== null ||
+                payload.unusedAmount !== undefined
+              ) {
+                const formatted = Number(payload.unusedAmount || 0).toFixed(2);
+                setLinkedUnusedAmount(formatted);
+                setFormData((prev) => ({
+                  ...prev,
+                  unusedAmount: parseFloat(formatted) || 0,
+                }));
+              }
+              if (
+                payload.linkPaymentInTxnId != null ||
+                payload.linkPaymentInTxnId != undefined
+              ) {
+                // sync into formData so Save uses it
+                setFormData((prev) => ({
+                  ...prev,
+                  linkPaymentInTxnId: payload.linkPaymentInTxnId || 0,
+                }));
+              }
+
+              if (payload.linkedAmountItemsLength !== undefined) {
+                // sync count of linked items if needed
+                setLinkedAmountItemsLength(
+                  payload.linkedAmountItemsLength || 0
+                );
+              }
+
+              if (payload.paymentInHistoryResponse && payload.paymentInHistoryResponse.success) {
+                setPaymentInHistoryResponse(payload.paymentInHistoryResponse || null);
+              }
+            }
           }}
           party={selectedParty}
           receivedAmount={formData.receivedAmount}
+        />
+      )}
+
+      {showPaymentHistory && (
+        <PaymentInHistory
+          onClose={() => setShowPaymentHistory(false)}
+          partyId={partyId}
+          paymentInHistoryResponse={paymentInHistoryResponse}
         />
       )}
     </div>

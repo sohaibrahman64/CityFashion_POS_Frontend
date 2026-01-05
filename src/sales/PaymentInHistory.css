@@ -1,0 +1,152 @@
+/* Payment History Modal Overlay */
+.payment-in-history-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+/* Modal Container */
+.payment-in-history-modal {
+  background: #ffffff;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 700px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Header */
+.payment-in-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.payment-in-history-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.payment-in-history-close-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  transition: color 0.2s;
+}
+
+.payment-in-history-close-icon:hover {
+  color: #374151;
+}
+
+/* Body */
+.payment-in-history-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Table Wrapper */
+.payment-in-history-table-wrapper {
+  margin-bottom: 20px;
+}
+
+/* Table */
+.payment-in-history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.payment-in-history-table thead {
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.payment-in-history-table thead th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.payment-in-history-table tbody tr {
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.payment-in-history-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.payment-in-history-table tbody td {
+  padding: 16px;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.payment-in-history-amount {
+  text-align: right;
+  font-weight: 500;
+}
+
+.payment-in-history-loading,
+.payment-in-history-no-data {
+  text-align: center;
+  color: #9ca3af;
+  padding: 32px !important;
+}
+
+/* Total */
+.payment-in-history-total {
+  padding: 16px;
+  text-align: right;
+  font-size: 15px;
+  font-weight: 600;
+  color: #374151;
+  border-top: 2px solid #e5e7eb;
+  margin-top: 8px;
+}
+
+/* Footer */
+.payment-in-history-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.payment-in-history-close-btn {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.payment-in-history-close-btn:hover {
+  background-color: #2563eb;
+}
+
+.payment-in-history-close-btn:active {
+  background-color: #1d4ed8;
+}

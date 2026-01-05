@@ -5,6 +5,7 @@ import {
   BASE_URL,
   GET_PARTIAL_OR_UNPAID_PARTIES,
   LINK_PAYMENT_TO_TRANSACTIONS,
+  CREATE_PAYMENT_IN_HISTORY,
 } from "../Constants";
 import Toast from "../components/Toast";
 
@@ -25,6 +26,8 @@ const LinkPaymentIn = ({ onClose, party, receivedAmount }) => {
   const [toastType, setToastType] = useState("success");
   // Ref to store timeout for closing modal after showing toast
   const toastCloseTimeoutRef = useRef(null);
+  const [linkedAmountItemsLengthState, setLinkedAmountItemsLengthState] =
+    useState(0);
 
   useEffect(() => {
     // Initialize linked amounts and selection when transactions change
@@ -94,6 +97,35 @@ const LinkPaymentIn = ({ onClose, party, receivedAmount }) => {
 
   const [unusedAmountState, setUnusedAmountState] = useState("0.00");
 
+  const createPaymentInHistoryRecord = async (paymentInHistoryItems) => {
+    let paymentInHistoryResponse = {};
+    try {
+      const response = await fetch(`${BASE_URL}/${CREATE_PAYMENT_IN_HISTORY}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(paymentInHistoryItems),
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        console.error("Create payment in history failed:", text);
+        paymentInHistoryResponse.success = false;
+        paymentInHistoryResponse.error = text;
+        return paymentInHistoryResponse;
+      } else {
+        const data = await response.json();
+        console.log("Payment in history created:", data);
+        paymentInHistoryResponse = {
+          message: data.message,
+          paymentInHistoryItems: data.paymentInHistoryItems,
+          success: data.success,
+        };
+        return paymentInHistoryResponse;
+      }
+    } catch (error) {
+      console.error("Error creating payment in history record:", error);
+    }
+  };
+
   const handleDone = async () => {
     console.log("Selected Party:", selectedParty);
     const items = partyTransactions
@@ -104,6 +136,8 @@ const LinkPaymentIn = ({ onClose, party, receivedAmount }) => {
           partyTransactionId: txn.transactionId ?? txn.id ?? key,
           linkedAmount: parseFloat(linkedAmounts[key]) || 0,
           referenceNumber: txn.referenceNumber || "",
+          transactionType: txn.transactionType || "",
+          transactionDate: txn.date,
         };
       })
       .filter(Boolean);
@@ -138,6 +172,7 @@ const LinkPaymentIn = ({ onClose, party, receivedAmount }) => {
       } else {
         const data = await response.json();
         console.log("Link payment response:", data);
+        setLinkedAmountItemsLengthState(data.linkedAmountItems.length || 0);
         setUnusedAmountState(data.unusedAmount || "0.00");
         setToastMessage(data.message);
         setToastType("success");
@@ -148,7 +183,25 @@ const LinkPaymentIn = ({ onClose, party, receivedAmount }) => {
           success: true,
           unusedAmount: data.unusedAmount ?? "0.00",
           linkPaymentInTxnId: data.linkPaymentInTxnId ?? null,
+          linkedAmountItemsLength: data.linkedAmountItems.length || 0,
         };
+
+        const paymentInHistoryItems = {
+          linkPaymentInTxnId: data.linkPaymentInTxnId ?? null,
+          receivedAmount: parseFloat(receivedAmountState) || 0,
+          paymentInHistoryRequestItems: data.linkedAmountItems.map((item) => {
+            return {
+              referenceNumber: item.referenceNumber,
+              linkedAmount: item.linkedAmount,
+              transactionType: item.transactionType,
+              transactionDate: item.transactionDate,
+            };
+          }),
+        };
+
+        const paymentInHistoryResponse = await createPaymentInHistoryRecord(paymentInHistoryItems);
+
+        resultPayload.paymentInHistoryResponse = paymentInHistoryResponse;
 
         // success - close modal/navigate after a short delay to allow toast to appear
         // clear any existing timeout
