@@ -1102,6 +1102,7 @@ Thank you for your business!`;
             className="add-estimate-quotation-btn-back"
             onClick={() => {
               // Back Button Logic Here
+              navigate(-1);
             }}
           >
             ← Back

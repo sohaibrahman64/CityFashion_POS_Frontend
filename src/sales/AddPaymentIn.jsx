@@ -33,6 +33,8 @@ const AddPaymentIn = ({ onClose }) => {
   const [showPaymentHistory, setShowPaymentHistory] = useState(false);
   const [linkedAmountItemsLength, setLinkedAmountItemsLength] = useState(0);
   const [paymentInHistoryResponse, setPaymentInHistoryResponse] = useState(null);
+  const [linkedAmountItems, setLinkedAmountItems] = useState([]);
+  const [linkAmountSuccess, setLinkAmountSuccess] = useState(false);
 
   const getCurrentDate = () => {
     const today = new Date();
@@ -191,6 +193,7 @@ const AddPaymentIn = ({ onClose }) => {
         // include unused amount (kept in formData and synced from LinkPaymentIn)
         unusedAmount: formData.unusedAmount || 0,
         linkPaymentInTxnId: formData.linkPaymentInTxnId || null,
+        linkedAmountItems: formData.linkedAmountItems || [],
       };
 
       const response = await fetch(`${BASE_URL}/${CREATE_PAYMENT_IN}`, {
@@ -367,7 +370,7 @@ const AddPaymentIn = ({ onClose }) => {
                 Unused Amount
               </label> */}
               {linkedUnusedAmount !== null &&
-              linkedUnusedAmount !== undefined ? (
+                linkedUnusedAmount !== undefined ? (
                 <label className="add-payment-in-unused-amount">
                   Unused Amount: {linkedUnusedAmount}
                 </label>
@@ -389,13 +392,15 @@ const AddPaymentIn = ({ onClose }) => {
           </div>
         </div>
         <div className="add-payment-in-actions">
-          <button
-            className="add-payment-in-link-payment-button"
-            type="button"
-            onClick={() => setShowLinkPaymentInModal(true)}
-          >
-            Link Payments To Invoice
-          </button>
+          {selectedParty && selectedParty.paymentType === "toReceive" && (
+            <button
+              className="add-payment-in-link-payment-button"
+              type="button"
+              onClick={() => setShowLinkPaymentInModal(true)}
+            >
+              Link Payments To Txn
+            </button>
+          )}
           {linkedAmountItemsLength > 0 ? (
             <button
               className="add-payment-in-payment-history-button"
@@ -468,8 +473,19 @@ const AddPaymentIn = ({ onClose }) => {
               if (payload.paymentInHistoryResponse && payload.paymentInHistoryResponse.success) {
                 setPaymentInHistoryResponse(payload.paymentInHistoryResponse || null);
               }
+
+              if (payload.linkedAmountItems !== undefined) {
+                //setLinkedAmountItems(payload.linkedAmountItems || []);  
+                setFormData((prev) => {
+                  return {
+                    ...prev,
+                    linkedAmountItems: payload.linkedAmountItems || [],
+                  }
+                });
+              }
             }
-          }}
+          }
+          }
           party={selectedParty}
           receivedAmount={formData.receivedAmount}
         />

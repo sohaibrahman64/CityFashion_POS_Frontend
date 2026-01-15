@@ -1,0 +1,290 @@
+.new-sales-order-preview-container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 10px;
+  box-sizing: border-box;
+  color: #3f4155;
+}
+
+.new-sales-order-preview-header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.new-sales-order-preview-header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.new-sales-order-preview-header-left-label {
+  font-size: 18px;
+  font-weight: 600;
+  color: #3f4155;
+}
+
+.new-sales-order-preview-header-right {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+}
+
+.new-sales-order-preview-download-button {
+  padding: 8px 16px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+.new-sales-order-preview-download-button:hover {
+  background-color: #218838;
+}
+
+.new-sales-order-preview-download-button:active {
+  transform: scale(0.98);
+}
+
+.new-sales-order-preview-download-button-label {
+  display: inline-block;
+}
+
+.new-sales-order-preview-header-right-button {
+  padding: 8px 16px;
+  background-color: #0a69b9;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+.new-sales-order-preview-header-right-button:hover {
+  background-color: #0856a0;
+}
+
+.new-sales-order-preview-header-right-button:active {
+  transform: scale(0.98);
+}
+
+.new-sales-order-preview-header-right-button-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.new-sales-order-preview-content-section {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  min-height: 400px;
+  color: #3f4155;
+}
+
+.new-sales-order-tax-order-title {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #3f4155;
+}
+
+.new-sales-order-paper {
+  margin-top: 16px;
+  background: #fff;
+  border: 1px solid #838491;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.new-sales-order-header-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid #838491;
+}
+
+.new-sales-order-company-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.new-sales-order-company-logo {
+  width: 96px;
+  height: 96px;
+  background: #9e9ea7;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border-radius: 2px;
+}
+
+.new-sales-order-company-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.new-sales-order-company-name { font-size: 22px; font-weight: 700; color: #2f3142; }
+.new-sales-order-company-phone { font-size: 12px; color: #3f4155; margin-top: 6px; }
+
+.new-sales-order-bill-order-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  border-radius: 4px;
+  padding: 10px;
+}
+
+/* Surround the two inner sections with borders */
+.new-sales-order-bill-order-grid .new-sales-order-bill-to,
+.new-sales-order-bill-order-grid .new-sales-order-details {
+  border: 1px solid #838491;
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.new-sales-order-section-title { font-size: 12px; font-weight: 700; color: #3f4155; margin-bottom: 6px; }
+.new-sales-order-bill-name { font-weight: 700; }
+.new-sales-order-bill-address, .new-sales-order-bill-state { font-size: 12px; color: #3f4155; }
+
+.new-sales-order-details .new-sales-order-detail-row { display: flex; justify-content: space-between; font-size: 12px; color: #3f4155; }
+.new-sales-order-details .new-sales-order-detail-row span:first-child { color: #3f4155; }
+
+.new-sales-order-items-table-wrapper { padding: 0px 0px 0px; }
+.new-sales-order-items-table { width: 100%; border-collapse: collapse; }
+.new-sales-order-items-table th, .new-sales-order-items-table td { border: 1px solid #838491; padding: 8px 10px; font-size: 12px; }
+.new-sales-order-items-table thead th { background: #f4f6f8; color: #3f4155; text-align: left; }
+.new-sales-order-col-serial { width: 40px; text-align: center; }
+.new-sales-order-col-name { width: 320px; }
+.new-sales-order-col-qty { width: 90px; text-align: center; }
+.new-sales-order-col-unit { width: 70px; text-align: center; }
+.new-sales-order-col-price, .new-sales-order-col-discount, .new-sales-order-col-gst, .new-sales-order-col-amount { width: 140px; text-align: right; }
+.new-sales-order-ta-right { text-align: right; }
+.new-sales-order-total-row td { font-weight: 700; background: #fafafa; }
+
+/* Tax summary below items table */
+.no-padding-cell { padding: 0; border-left: none; border-right: none; }
+.new-sales-order-tax-summary-wrapper { border-top: 1px solid #838491; }
+.new-sales-order-tax-summary-title { font-weight: 700; padding: 8px 10px; border-bottom: 1px solid #838491; background: #f4f6f8; }
+.new-sales-order-tax-summary-table { width: 100%; border-collapse: collapse; }
+.new-sales-order-tax-summary-table th, .new-sales-order-tax-summary-table td { border: 1px solid #838491; padding: 8px 10px; font-size: 12px; }
+.new-sales-order-tax-summary-table thead th { background: #f4f6f8; color: #3f4155; text-align: left; }
+.new-sales-order-ta-center { text-align: center; }
+.new-sales-order-ts-col-hsn { width: 120px; }
+.new-sales-order-ts-col-taxable { width: 160px; }
+.new-sales-order-ts-col-rate { width: 90px; text-align: center; }
+.new-sales-order-ts-col-amt { width: 110px; text-align: right; }
+.new-sales-order-ts-col-total { width: 140px; text-align: right; }
+.new-sales-order-ts-col-igst { width: 60px; }
+.new-sales-order-ts-col-cgst { width: 60px; }
+.new-sales-order-ts-col-sgst { width: 60px; }
+
+/* Editable company info styles */
+.new-sales-order-company-logo {
+  cursor: pointer;
+  position: relative;
+  transition: opacity 0.2s;
+}
+
+.new-sales-order-company-logo:hover {
+  opacity: 0.8;
+}
+
+.new-sales-order-company-name:hover,
+.new-sales-order-company-phone:hover {
+  background-color: #f0f7ff;
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin: -2px -4px;
+}
+
+.new-sales-order-company-name-input,
+.new-sales-order-company-phone-input {
+  outline: none;
+  border-radius: 4px;
+}
+
+.new-sales-order-company-name-input:focus,
+.new-sales-order-company-phone-input:focus {
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+.new-sales-order-logo-image {
+  border-radius: 4px;
+}
+
+/* Footer sections */
+.new-sales-order-footer-sections { margin-top: 12px; }
+.new-sales-order-terms-section { border: 1px solid #838491; border-radius: 4px; overflow: hidden; }
+.new-sales-order-terms-title { font-weight: 700; padding: 8px 10px; border-bottom: 1px solid #838491; background: #f4f6f8; }
+.new-sales-order-terms-body { padding: 8px 10px; }
+
+.sign-section { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.new-sales-order-company-box, .new-sales-order-sign-box { border: 1px solid #838491; min-height: 140px; }
+.new-sales-order-company-box-title { font-weight: 700; padding: 8px 10px; border-bottom: 1px solid #838491; background: #f4f6f8; }
+.new-sales-order-signatory-text { display: flex; justify-content: center; align-items: center; height: 100%; font-weight: 600; }
+
+/* 2-Column Footer Layout */
+.new-sales-order-estimate-bottom-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.new-sales-order-estimate-left-column-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.new-sales-order-estimate-right-column-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid #838491;
+  border-radius: 4px;
+  background: #fafafa;
+  padding: 0;
+  overflow: hidden;
+}
+
+.new-sales-order-summary-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  font-size: 12px;
+}
+
+.new-sales-order-summary-item:last-child {
+  border-bottom: none;
+}
+
+.new-sales-order-summary-item strong {
+  font-weight: 700;
+  color: #2f3142;
+}
+
+.new-sales-order-summary-item span {
+  text-align: right;
+  font-weight: 600;
+  color: #3f4155;
+}

@@ -63,15 +63,17 @@ const LinkPaymentIn = ({ onClose, party, receivedAmount }) => {
     }
   };
 
-  const handleToggleSelect = (transactionId, checked) => {
+  const handleToggleSelect = (transactionId, checked, balanceAmount) => {
     setSelectedTransactions((prev) => ({ ...prev, [transactionId]: checked }));
     if (!checked) {
       // reset linked amount when row is deselected
       setLinkedAmounts((prev) => ({ ...prev, [transactionId]: "0.00" }));
     } else {
+      // If balance amount is provided, use it; otherwise default to "0.00"
+      const amountToSet = balanceAmount !== undefined ? String(balanceAmount) : "0.00";
       setLinkedAmounts((prev) => ({
         ...prev,
-        [transactionId]: prev[transactionId] ?? "0.00",
+        [transactionId]: amountToSet,
       }));
       // focus and select the linked amount input after it becomes visible
       setTimeout(() => {
@@ -184,6 +186,7 @@ const LinkPaymentIn = ({ onClose, party, receivedAmount }) => {
           unusedAmount: data.unusedAmount ?? "0.00",
           linkPaymentInTxnId: data.linkPaymentInTxnId ?? null,
           linkedAmountItemsLength: data.linkedAmountItems.length || 0,
+          linkedAmountItems: data.linkedAmountItems || [],
         };
 
         const paymentInHistoryItems = {
@@ -448,9 +451,11 @@ const LinkPaymentIn = ({ onClose, party, receivedAmount }) => {
                               "a",
                             ].includes(tag);
                             if (!isInteractive) {
+                              const newCheckedState = !selectedTransactions[key];
                               handleToggleSelect(
                                 key,
-                                !selectedTransactions[key]
+                                newCheckedState,
+                                newCheckedState ? txn.partyBalance : null
                               );
                             }
                           }}

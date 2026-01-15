@@ -160,8 +160,33 @@ const PartiesDropdown = ({ onPartySelect, selectedParty, showAddParty = true }) 
                           {party.phoneNumber || "No phone"}
                         </div>
                       </div>
-                      <div className="party-balance">
-                        {formatBalance(party.openingBalance)}
+                      <div className="party-balance-container">
+                        <div
+                          className={`party-balance ${
+                            party.paymentType === "toPay"
+                              ? "balance-to-pay"
+                              : party.paymentType === "toReceive"
+                              ? "balance-to-receive"
+                              : ""
+                          }`}
+                        >
+                          {formatBalance(party.updatedBalance)}
+                        </div>
+                        <div
+                          className={`payment-type-badge ${
+                            party.paymentType === "toPay"
+                              ? "payment-type-to-pay"
+                              : party.paymentType === "toReceive"
+                              ? "payment-type-to-receive"
+                              : ""
+                          }`}
+                        >
+                          {party.paymentType === "toPay"
+                            ? "To Pay"
+                            : party.paymentType === "toReceive"
+                            ? "To Receive"
+                            : ""}
+                        </div>
                       </div>
                     </div>
                   ))

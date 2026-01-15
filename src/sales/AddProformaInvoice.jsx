@@ -70,9 +70,9 @@ const AddProformaInvoice = () => {
   const [receivedAmount, setReceivedAmount] = useState("");
   const [isFullyReceived, setIsFullyReceived] = useState(false);
   const searchTimeoutRef = useRef(null);
-  const estimatePreviewRef = useRef(null);
+  const proformaInvoicePreviewRef = useRef(null);
   const fileInputRef = useRef(null);
-  const [proformaInvoiceNumber, setProformaInvoiceNumber] = useState("RS-00001");
+  const [proformaInvoiceNumber, setProformaInvoiceNumber] = useState("PI-00001");
 
   const handleHeaderTaxTypeChange = (newTaxType) => {
     setHeaderTaxType(newTaxType);
@@ -173,13 +173,13 @@ Thank you for your business!`;
 
   const generateAndDownloadPDF = async () => {
     try {
-      if (!estimatePreviewRef.current) {
+      if (!proformaInvoicePreviewRef.current) {
         console.error("Proforma Invoice preview element not found");
         return;
       }
 
       // Clone the estimate preview element to avoid modifying the original
-      const element = estimatePreviewRef.current.cloneNode(true);
+      const element = proformaInvoicePreviewRef.current.cloneNode(true);
 
       // Remove action buttons from PDF
       const actionButtons = element.querySelector(".action-buttons");
@@ -219,13 +219,13 @@ Thank you for your business!`;
   };
 
   const printInvoice = () => {
-    if (!estimatePreviewRef.current) {
+    if (!proformaInvoicePreviewRef.current) {
       console.error("Proforma Invoice preview element not found");
       return;
     }
 
     // Clone the estimate preview element to avoid modifying the original
-    const element = estimatePreviewRef.current.cloneNode(true);
+    const element = proformaInvoicePreviewRef.current.cloneNode(true);
 
     // Remove action buttons from print
     const actionButtons = element.querySelector(".action-buttons");
@@ -1097,6 +1097,7 @@ Thank you for your business!`;
             className="add-proforma-invoice-btn-back"
             onClick={() => {
               // Back Button Logic Here
+              navigate(-1);
             }}
           >
             ← Back
@@ -1345,7 +1346,7 @@ Thank you for your business!`;
         <div className="add-proforma-invoice-right-column">
           <div
             className="add-proforma-invoice-estimate-preview"
-            ref={estimatePreviewRef}
+            ref={proformaInvoicePreviewRef}
           >
             <h2 className="add-proforma-invoice-estimate-title">
               Proforma Invoice
