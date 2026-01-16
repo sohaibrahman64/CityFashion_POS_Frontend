@@ -80,7 +80,7 @@ const SalesOrderDashboard = () => {
     const [toDate, setToDate] = useState(initialDateRange.to);
     const [salesOrderData, setSalesOrderData] = useState({
         totalSalesOrderAmount: 0,
-        totalFulfilledAmount: 0,
+        totalAdvanceAmount: 0,
         totalOverdueAmount: 0,
         percentageChange: 0,
     });
@@ -114,7 +114,7 @@ const SalesOrderDashboard = () => {
 
             setSalesOrderData({
                 totalSalesOrderAmount: data.data.totalSalesOrderAmount || 0,
-                totalFulfilledAmount: data.data.totalFulfilledAmount || 0,
+                totalAdvanceAmount: data.data.totalAdvanceAmount || 0,
                 totalOverdueAmount: data.data.totalOverdueAmount || 0,
                 percentageChange: data.data.percentageChange || 0,
             });
@@ -456,11 +456,11 @@ const SalesOrderDashboard = () => {
                     </div>
                     <div className="sales-order-dashboard-conversion-summary">
                         <span className="sales-order-dashboard-converted-label">
-                            Fulfilled:{" "}
+                            Advance:{" "}
                         </span>
                         <span className="sales-order-dashboard-converted-amount">
                             ₹{" "}
-                            {salesOrderData.totalFulfilledAmount.toLocaleString(
+                            {salesOrderData.totalAdvanceAmount.toLocaleString(
                                 "en-IN",
                                 {
                                     minimumFractionDigits: 2,
