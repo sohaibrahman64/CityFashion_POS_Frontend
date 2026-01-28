@@ -1,0 +1,449 @@
+.new-delivery-challan-preview-container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 10px;
+  box-sizing: border-box;
+  color: #3f4155;
+}
+
+.new-delivery-challan-preview-header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.new-delivery-challan-preview-header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.new-delivery-challan-preview-header-left-label {
+  font-size: 18px;
+  font-weight: 600;
+  color: #3f4155;
+}
+
+.new-delivery-challan-preview-header-right {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.new-delivery-challan-preview-download-button {
+  padding: 8px 16px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+.new-delivery-challan-preview-download-button:hover {
+  background-color: #218838;
+}
+
+.new-delivery-challan-preview-download-button:active {
+  transform: scale(0.98);
+}
+
+.new-delivery-challan-preview-download-button-label {
+  display: inline-block;
+}
+
+.new-delivery-challan-preview-header-right-button {
+  padding: 8px 16px;
+  background-color: #0a69b9;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+.new-delivery-challan-preview-header-right-button:hover {
+  background-color: #0a69b9;
+}
+
+.new-delivery-challan-preview-header-right-button:active {
+  transform: scale(0.98);
+}
+
+.new-delivery-challan-preview-header-right-button-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.new-delivery-challan-preview-content-section {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  min-height: 400px;
+  color: #3f4155;
+}
+
+.new-delivery-challan-tax-title {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #3f4155;
+}
+
+.new-delivery-challan-paper {
+  margin-top: 16px;
+  background: #fff;
+  border: 1px solid #838491;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.new-delivery-challan-header-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid #838491;
+}
+
+.new-delivery-challan-company-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.new-delivery-challan-company-logo {
+  width: 96px;
+  height: 96px;
+  background: #9e9ea7;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border-radius: 2px;
+}
+
+.new-delivery-challan-logo-image {
+  border-radius: 4px;
+}
+
+.new-delivery-challan-company-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.new-delivery-challan-company-name-input
+  .new-delivery-challan-company-phone-input {
+  outline: none;
+  border-radius: 4px;
+}
+
+.new-delivery-challan-company-name-input:focus
+  .new-delivery-challan-company-phone-input:focus {
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+.new-delivery-challan-company-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: #2f3142;
+}
+
+.new-delivery-challan-company-phone {
+  font-size: 12px;
+  color: #3f4155;
+  margin-top: 6px;
+}
+
+.new-bill-delivery-challan-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.new-bill-delivery-challan-grid .new-delivery-challan-bill-to,
+.new-bill-delivery-challan-grid .new-delivery-challan-details {
+  border: 1px solid #838491;
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.new-delivery-challan-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #3f4155;
+  margin-bottom: 6px;
+}
+
+.new-delivery-challan-bill-name {
+  font-weight: 700;
+}
+
+.new-delivery-challan-bill-address,
+.new-delivery-challan-bill-state {
+  font-size: 12px;
+  color: #3f4155;
+}
+
+.new-delivery-challan-details .new-delivery-challan-detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #3f4155;
+}
+
+.new-delivery-challan-details
+  .new-delivery-challan-detail-row
+  span:first-child {
+  color: #3f4155;
+}
+
+.new-delivery-challan-section-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: #3f4155;
+  margin-bottom: 6px;
+}
+
+.new-delivery-challan-items-table-wrapper {
+  padding: 0px 0px 0px;
+}
+
+.new-delivery-challan-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+/* .new-delivery-challan-items-table {
+  margin: 5px 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+} */
+
+.new-delivery-challan-items-table th, 
+.new-delivery-challan-items-table td {
+  border: 1px solid #838491;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.new-delivery-challan-col-serial {
+  width: 40px;
+  text-align: center;
+}
+
+.new-delivery-challan-col-name {
+  width: 320px;
+}
+
+.new-delivery-challan-col-qty {
+  width: 90px;
+  text-align: center;
+}
+
+.new-delivery-challan-col-unit {
+  width: 70px;
+  text-align: center;
+}
+
+.new-delivery-challan-col-price,
+.new-delivery-challan-col-discount,
+.new-delivery-challan-col-gst,
+.new-delivery-challan-col-amount {
+  width: 140px;
+  text-align: right;
+}
+
+.new-delivery-challan-total-row td {
+  font-weight: 700;
+  background: #fafafa;
+}
+
+.new-delivery-challan-ta-right {
+  text-align: right;
+}
+
+.new-delivery-challan-no-padding-cell {
+  padding: 0;
+  border-left: none;
+  border-right: none;
+}
+
+.new-delivery-challan-tax-summary-wrapper {
+  border-top: 1px solid #838491;
+}
+
+.new-delivery-challan-tax-summary-title {
+  font-weight: 700;
+  padding: 8px 10px;
+  border-bottom: 1px solid #838491;
+  background: #f4f6f8;
+}
+
+.new-delivery-challan-tax-summary-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.new-delivery-challan-tax-summary-table th,
+.new-delivery-challan-tax-summary-table td {
+  border: 1px solid #838491;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.new-delivery-challan-tax-summary-table thead th {
+  background: #f4f6f8;
+  color: #3f4155;
+  text-align: left;
+}
+
+.new-delivery-challan-ts-col-hsn {
+  width: 120px;
+}
+
+.new-delivery-challan-ts-col-taxable {
+  width: 160px;
+}
+
+.new-delivery-challan-ts-col-igst {
+  width: 60px;
+}
+
+.new-delivery-challan-ts-col-cgst {
+  width: 60px;
+}
+
+.new-delivery-challan-ts-col-sgst {
+  width: 60px;
+}
+
+.new-delivery-challan-ts-col-total {
+  width: 140px;
+  text-align: right;
+}
+
+.new-delivery-challan-ts-col-rate {
+  width: 90px;
+  text-align: center;
+}
+
+.new-delivery-challan-ts-col-amt {
+  width: 110px;
+  text-align: right;
+}
+
+.new-delivery-challan-ta-center {
+  text-align: center;
+}
+
+.new-delivery-challan-footer-sections {
+  margin-top: 12px;
+}
+
+.new-delivery-challan-terms-section {
+  border: 1px solid #838491;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.new-delivery-challan-receipt-table {
+  border: 1px solid #838491;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+.new-delivery-challan-receipt-delivery-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.new-delivery-challan-receipt-delivery-table td {
+  padding: 6px 5px;
+  font-size: 10px;
+  color: #3f4155;
+  border: 1px solid #838491;
+  text-align: left;
+  line-height: 1.2;
+}
+
+.new-delivery-challan-receipt-header {
+  font-weight: 700;
+  background-color: #f4f6f8;
+  color: #3f4155;
+}
+
+.new-delivery-challan-receipt-label {
+  font-weight: 600;
+  color: #3f4155;
+}
+
+.new-delivery-challan-receipt-divider {
+  width: 2px;
+  border: none !important;
+  background-color: #838491;
+  padding: 0 !important;
+}
+
+.new-delivery-challan-terms-title {
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 10px;
+  border-bottom: 1px solid #838491;
+  background: #f4f6f8;
+}
+
+.new-delivery-challan-terms-body {
+  font-size: 12px;
+  padding: 8px 10px;
+}
+
+.new-delivery-challan-sign-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.new-delivery-challan-company-box,
+.new-delivery-challan-sign-box {
+  border: 1px solid #838491;
+  min-height: 140px;
+}
+
+.new-delivery-challan-company-box-title {
+  font-weight: 700;
+  padding: 8px 10px;
+  border-bottom: 1px solid #838491;
+  background: #f4f6f8;
+}
+
+.new-delivery-challan-signatory-text {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  font-weight: 600;
+}
+.new-delivery-challan-ts-col-amt {
+  width: 110px;
+  text-align: right;
+}

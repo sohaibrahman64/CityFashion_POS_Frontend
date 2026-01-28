@@ -95,7 +95,7 @@ const ProformaInvoiceDashboard = () => {
       let url = `${BASE_URL}/${GET_TOTAL_PROFORMA_INVOICE_AMOUNT}`;
 
       // Add date range params if filter is applied
-      if (filterType !== "All Estimates" && fromDate && toDate) {
+      if (filterType !== "All Proforma Invoices" && fromDate && toDate) {
         url += `?fromDate=${fromDate}&toDate=${toDate}`;
       }
 
@@ -103,7 +103,7 @@ const ProformaInvoiceDashboard = () => {
 
       if (!response.ok) {
         console.error(
-          "Failed to fetch total estimate quotation amount:",
+          "Failed to fetch total proforma invoice amount:",
           response.status
         );
         return;
@@ -133,7 +133,7 @@ const ProformaInvoiceDashboard = () => {
       let url = `${BASE_URL}/${GET_ALL_PROFORMA_INVOICE_TRANSACTIONS}`;
 
       // Add date range params if filter is applied
-      if (filterType !== "All Estimates" && fromDate && toDate) {
+      if (filterType !== "All Proforma Invoices" && fromDate && toDate) {
         url += `?fromDate=${fromDate}&toDate=${toDate}`;
       }
       const response = await fetch(url);
@@ -161,7 +161,7 @@ const ProformaInvoiceDashboard = () => {
 
   const handleFilterChange = (newFilterType) => {
     setFilterType(newFilterType);
-    if (newFilterType !== "All Estimates") {
+    if (newFilterType !== "All Proforma Invoices") {
       const dateRange = getDateRange(newFilterType);
       setFromDate(dateRange.from);
       setToDate(dateRange.to);
@@ -367,10 +367,10 @@ const ProformaInvoiceDashboard = () => {
               <option value="Last Month">Last Month</option>
               <option value="This Year">This Year</option>
               <option value="This Quarter">This Quarter</option>
-              <option value="All Estimates">All Estimates</option>
+              <option value="All Proforma Invoices">All Proforma Invoices</option>
               <option value="Custom">Custom</option>
             </select>
-            {filterType !== "All Estimates" && (
+            {filterType !== "All Proforma Invoices" && (
               <div className="proforma-invoice-dashboard-date-range-inputs">
                 <div className="proforma-invoice-dashboard-date-input-group">
                   <label>From:</label>
@@ -400,7 +400,7 @@ const ProformaInvoiceDashboard = () => {
         <div className="proforma-invoice-dashboard-total-estimates-inner">
           <div className="proforma-invoice-dashboard-total-estimates-amount-group">
             <span className="proforma-invoice-dashboard-total-estimates-label">
-              Total Estimates:
+              Total Proforma Invoice Amount:
             </span>
             <span className="proforma-invoice-dashboard-total-estimates-amount">
               ₹{" "}

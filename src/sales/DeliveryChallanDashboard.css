@@ -1,0 +1,552 @@
+.delivery-challan-dashboard-container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.delivery-challan-dashboard-header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.delivery-challan-dashboard-label {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.delivery-challan-dashboard-header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.delivery-challan-dashboard-label {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.delivery-challan-dashboard-header-right {
+  display: flex;
+  align-items: center;
+}
+
+.add-delivery-challan-btn {
+  padding: 8px 16px;
+  background-color: #0a69b9;
+  color: #fff;
+  border: none;
+  border-radius: 9999px; /* fully rounded sides */
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.add-delivery-challan-btn:hover {
+  background-color: #085a98;
+}
+
+.delivery-challan-dashboard-filter-box {
+  margin-top: 1px;
+  height: 70px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.delivery-challan-dashboard-filter-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.delivery-challan-dashboard-filter-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+}
+
+.delivery-challan-dashboard-filter-options {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+}
+
+.delivery-challan-dashboard-filter-dropdown {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 9999px;
+  background-color: #fff;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  min-width: 180px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+  padding-right: 32px;
+  position: relative;
+}
+
+.delivery-challan-dashboard-filter-dropdown option {
+  padding: 8px 12px;
+  margin-top: 2px 0;
+  border: none;
+  background-color: #fff;
+  color: #333;
+  font-size: 14px;
+}
+
+.delivery-challan-dashboard-filter-dropdown option:first-child {
+  /* border-top: 1px solid #ddd; */
+  border: none;
+}
+
+.delivery-challan-dashboard-filter-dropdown option:last-child {
+  /* border-bottom: 1px solid #ddd; */
+  border: none;
+}
+
+.delivery-challan-dashboard-filter-dropdown:focus {
+  outline: none;
+  border-color: #0a69b9;
+  box-shadow: 0 0 0 2px rgba(10, 105, 185, 0.25);
+}
+
+.delivery-challan-dashboard-date-range-inputs {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.delivery-challan-dashboard-date-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.delivery-challan-dashboard-date-input-group label {
+  font-size: 14px;
+  color: #333;
+  white-space: nowrap;
+}
+
+.delivery-challan-dashboard-date-input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 9999px;
+  font-size: 14px;
+  background-color: #fff;
+}
+
+.delivery-challan-dashboard-date-input:focus {
+  outline: none;
+  border-color: #0a69b9;
+  box-shadow: 0 0 0 2px rgba(10, 105, 185, 0.25);
+}
+
+.delivery-challan-dashboard-total-estimates-box {
+  margin-top: 5px;
+  margin-bottom: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  height: 100px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.delivery-challan-dashboard-total-estimates-inner {
+  width: 400px;
+  height: 90px;
+  background-color: #f5f5f5;
+  border: 1px solid #ece2f2;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 0 0;
+  position: relative;
+  padding: 5px;
+}
+
+.delivery-challan-dashboard-total-estimates-amount-group {
+  position: absolute;
+  top: 8px;
+  left: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.delivery-challan-dashboard-total-estimates-label {
+  color: #706a8c;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.delivery-challan-dashboard-total-estimates-amount {
+  color: #333;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.delivery-challan-dashboard-percentage-group {
+  position: absolute;
+  top: 8px;
+  right: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.delivery-challan-dashboard-percentage-box {
+  background-color: #def7ee;
+  border-radius: 9999px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+}
+
+.delivery-challan-dashboard-percentage-text {
+  color: #29c080;
+}
+
+.delivery-challan-dashboard-percentage-arrow-up {
+  color: #41bf97;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.delivery-challan-dashboard-percentage-arrow-down {
+  color: #e91111;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.delivery-challan-dashboard-vs-last-month {
+  color: #666;
+  font-size: 12px;
+  font-weight: 400;
+  margin: 0;
+}
+
+.delivery-challan-dashboard-conversion-summary {
+  position: absolute;
+  bottom: 5px;
+  left: 15px;
+  right: 15px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.delivery-challan-dashboard-converted-label {
+  color: #a19ab6;
+  font-weight: 500;
+}
+
+.delivery-challan-dashboard-converted-amount {
+  color: #574c61;
+  font-weight: 600;
+}
+
+.delivery-challan-dashboard-separator {
+  color: #a19ab6;
+  margin: 0 2px;
+}
+
+.delivery-challan-dashboard-open-label {
+  color: #a19ab6;
+  font-weight: 500;
+}
+
+.delivery-challan-dashboard-open-amount {
+  color: #574c61;
+  font-weight: 600;
+}
+
+.delivery-challan-dashboard-table-container {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  height: auto;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  box-sizing: border-box;
+}
+
+.delivery-challan-dashboard-table-header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.delivery-challan-dashboard-table-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.delivery-challan-dashboard-table-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.delivery-challan-dashboard-action-icon {
+  font-size: 18px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+/* Empty state centering and styling */
+.delivery-challan-dashboard-table-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 25px;
+  padding-bottom: 25px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.delivery-challan-dashboard-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.delivery-challan-dashboard-empty-message-primary {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.delivery-challan-dashboard-empty-message-secondary {
+  margin: 0;
+  font-size: 13px;
+  color: #b09cb8;
+}
+
+.delivery-challan-dashboard-empty-add-btn {
+  margin-top: 8px;
+}
+
+.delivery-challan-dashboard-transactions-table-wrapper {
+  height: calc(100% - 60px);
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+}
+
+.delivery-challan-dashboard-transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.delivery-challan-dashboard-transactions-table thead {
+  background-color: #f8f9fa;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.delivery-challan-dashboard-transactions-table th {
+  padding: 12px 8px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #e0e0e0;
+  border-right: 1px solid #e0e0e0;
+}
+
+.delivery-challan-dashboard-transactions-table th:last-child {
+  border-right: none;
+}
+
+.delivery-challan-dashboard-transactions-table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.delivery-challan-dashboard-transactions-filter-icon {
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.delivery-challan-dashboard-loading-row {
+}
+
+.delivery-challan-dashboard-loading-message {
+  text-align: center;
+  color: #0a69b9;
+  font-weight: 500;
+  font-size: 16px;
+  border: none !important;
+}
+
+.delivery-challan-dashboard-error-row {
+}
+
+.delivery-challan-dashboard-error-message {
+  text-align: center;
+  color: #d32f2f;
+  font-weight: 500;
+  font-size: 16px;
+  border: none !important;
+}
+
+.delivery-challan-dashboard-transaction-row {
+  transition: background-color 0.2s;
+}
+
+.delivery-challan-dashboard-transaction-row:hover {
+  background-color: #f8f9fa;
+}
+
+.delivery-challan-dashboard-transaction-row.highlighted {
+  background-color: #e3f2fd;
+}
+
+.delivery-challan-dashboard-transaction-row td {
+  padding: 12px 15px;
+  font-size: 14px;
+  color: #333;
+  border-bottom: 1px solid #f0f0f0;
+}
+.delivery-challan-dashboard-transaction-row:hover {
+  background-color: #f8f9fa;
+}
+
+.delivery-challan-dashboard-transactions-convert-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.delivery-challan-dashboard-transactions-convert-select {
+  width: 100%;
+  padding: 2px;
+  border: 1px solid #ddd;
+  border-radius: 2px;
+  font-size: 9px;
+  height: 20px;
+  background-color: white;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.delivery-challan-dashboard-transaction-three-dots {
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 18px;
+  color: #666;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.delivery-challan-dashboard-transaction-three-dots:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.delivery-challan-dashboard-transaction-actions-menu {
+  position: fixed;
+  top: 60%;
+  right: 120px;
+  transform: translateY(-50%);
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 180px;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.delivery-challan-dashboard-transaction-action-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+}
+
+.delivery-challan-transaction-dashboard-action-item:last-child {
+  border-bottom: none;
+}
+
+.delivery-challan-transaction-dashboard-action-item:hover {
+  background-color: #f8f9fa;
+  color: #007bff;
+}
+
+.delivery-challan-transaction-dashboard-action-item:active {
+  background-color: #e9ecef;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.delivery-challan-dashboard-transactions-convert-button {
+  padding: 8px 16px;
+  background-color: #0a69b9;
+  color: #fff;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 600;
+}
