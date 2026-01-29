@@ -2,6 +2,7 @@ import "./NewEstimateQuotationPreview.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useRef } from "react";
 import html2pdf from "html2pdf.js";
+import { FiEdit } from "react-icons/fi";
 
 const NewEstimateQuotationPreview = () => {
   const navigate = useNavigate();
@@ -23,6 +24,32 @@ const NewEstimateQuotationPreview = () => {
   const formatNumberWithCommas = (num) => {
     if (num === null || num === undefined || isNaN(num)) return "0.00";
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
+  // Function to convert number to words
+  const numberToWords = (num) => {
+    if (!num || num === 0) return "Zero Rupees Only";
+    const single = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+    const double = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+    const tens = ["", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+    const formatTens = (n) => n < 10 ? single[n] : n >= 10 && n < 20 ? double[n - 10] : tens[Math.floor(n / 10)] + " " + single[n % 10];
+    const formatHundreds = (n) => {
+      if (n > 99) return single[Math.floor(n / 100)] + " Hundred " + formatTens(n % 100);
+      return formatTens(n);
+    };
+    let str = "";
+    const crore = Math.floor(num / 10000000);
+    num %= 10000000;
+    const lakh = Math.floor(num / 100000);
+    num %= 100000;
+    const thousand = Math.floor(num / 1000);
+    num %= 1000;
+    const hundred = num;
+    if (crore > 0) str += formatHundreds(crore) + " Crore ";
+    if (lakh > 0) str += formatHundreds(lakh) + " Lakh ";
+    if (thousand > 0) str += formatHundreds(thousand) + " Thousand ";
+    if (hundred > 0) str += formatHundreds(hundred);
+    return str.trim() + " Rupees Only";
   };
 
   const items = estimateQuotationData.items || [];
@@ -99,6 +126,10 @@ const NewEstimateQuotationPreview = () => {
 
       // Clone the estimate quotation preview element to avoid modifying the original
       const element = estimateQuotationPreviewRef.current.cloneNode(true);
+
+      // Remove edit icons from the cloned element
+      const editIcons = element.querySelectorAll('.new-estimate-quotation-edit-icon, .new-estimate-quotation-edit-icon-logo');
+      editIcons.forEach(icon => icon.remove());
 
       // Remove any elements that shouldn't be in the PDF (like edit indicators)
       const editableElements = element.querySelectorAll(
@@ -253,6 +284,7 @@ const NewEstimateQuotationPreview = () => {
                 ) : (
                   <span style={{ cursor: "pointer" }}>LOGO</span>
                 )}
+                <FiEdit className="new-estimate-quotation-edit-icon-logo" />
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -284,9 +316,10 @@ const NewEstimateQuotationPreview = () => {
                   <div
                     className="new-estimate-quotation-company-name"
                     onClick={handleCompanyNameClick}
-                    style={{ cursor: "pointer" }}
+                    style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
                   >
                     {companyName}
+                    <FiEdit className="new-estimate-quotation-edit-icon" />
                   </div>
                 )}
                 {isEditingCompanyPhone ? (
@@ -310,9 +343,10 @@ const NewEstimateQuotationPreview = () => {
                   <div
                     className="new-estimate-quotation-company-phone"
                     onClick={handleCompanyPhoneClick}
-                    style={{ cursor: "pointer" }}
+                    style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
                   >
                     Phone: {companyPhone}
+                    <FiEdit className="new-estimate-quotation-edit-icon" />
                   </div>
                 )}
               </div>
@@ -477,8 +511,8 @@ const NewEstimateQuotationPreview = () => {
               <tfoot>
                 <tr>
                   <td
-                    colSpan="8"
-                    className="new-estimate-quotation-no-padding-cell"
+                    colSpan="5"
+                    className="new-estimate-quotation-no-padding-cell new-estimate-quotation-tax-summary-cell"
                   >
                     <div className="new-estimate-quotation-tax-summary-wrapper">
                       <div className="new-estimate-quotation-tax-summary-title">
@@ -751,6 +785,102 @@ const NewEstimateQuotationPreview = () => {
                       </table>
                     </div>
                   </td>
+                  <td
+                    colSpan="3"
+                    className="new-estimate-quotation-no-padding-cell new-estimate-quotation-totals-summary-cell"
+                  >
+                    <div className="new-estimate-quotation-totals-summary-wrapper">
+                      <table className="new-estimate-quotation-totals-summary-table">
+                        <tbody>
+                          <tr>
+                            <td className="new-estimate-quotation-totals-label">Sub Total</td>
+                            <td className="new-estimate-quotation-totals-separator">:</td>
+                            <td className="new-estimate-quotation-totals-value">
+                              ₹{" "}
+                              {formatNumberWithCommas(
+                                validItems
+                                  .reduce(
+                                    (sum, item) => sum + parseFloat(item.total || 0),
+                                    0
+                                  )
+                                  .toFixed(2)
+                              )}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="new-estimate-quotation-totals-label">Round Off</td>
+                            <td className="new-estimate-quotation-totals-separator">:</td>
+                            <td className="new-estimate-quotation-totals-value">
+                              - ₹{" "}
+                              {(() => {
+                                const subtotal = validItems.reduce(
+                                  (sum, item) => sum + parseFloat(item.total || 0),
+                                  0
+                                );
+                                const rounded = Math.round(subtotal);
+                                const roundOff = subtotal - rounded;
+                                return formatNumberWithCommas(Math.abs(roundOff).toFixed(2));
+                              })()}
+                            </td>
+                          </tr>
+                          <tr className="new-estimate-quotation-totals-final-row">
+                            <td className="new-estimate-quotation-totals-label">Total</td>
+                            <td className="new-estimate-quotation-totals-separator">:</td>
+                            <td className="new-estimate-quotation-totals-value">
+                              ₹{" "}
+                              {formatNumberWithCommas(
+                                Math.round(
+                                  validItems.reduce(
+                                    (sum, item) => sum + parseFloat(item.total || 0),
+                                    0
+                                  )
+                                ).toFixed(2)
+                              )}
+                            </td>
+                          </tr>
+                          <tr className="new-estimate-quotation-totals-words-row">
+                            <td colSpan="3" className="new-estimate-quotation-totals-words">
+                              <strong>Estimate Amount In Words:</strong>
+                              <br />
+                              {numberToWords(
+                                Math.round(
+                                  validItems.reduce(
+                                    (sum, item) => sum + parseFloat(item.total || 0),
+                                    0
+                                  )
+                                )
+                              )}
+                            </td>
+                          </tr>
+                          <tr className="new-estimate-quotation-totals-extra-row">
+                            <td colSpan="3" className="new-estimate-quotation-totals-extra-cell">
+                              <div className="new-estimate-quotation-totals-extra-container">
+                                <div className="new-estimate-quotation-totals-extra-item">
+                                  <span className="new-estimate-quotation-totals-extra-label">You Saved</span>
+                                  <span className="new-estimate-quotation-totals-extra-separator">:</span>
+                                  <span className="new-estimate-quotation-totals-extra-value">
+                                    ₹ {formatNumberWithCommas(
+                                      validItems
+                                        .reduce(
+                                          (sum, item) =>
+                                            sum +
+                                            (parseFloat(item.price || 0) *
+                                              parseFloat(item.quantity || 0) *
+                                              parseFloat(item.discount || 0)) /
+                                            100,
+                                          0
+                                        )
+                                        .toFixed(2)
+                                    )}
+                                  </span>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </td>
                 </tr>
               </tfoot>
             </table>
@@ -765,12 +895,10 @@ const NewEstimateQuotationPreview = () => {
               </div>
             </div>
             <div className="new-estimate-quotation-sign-section">
-              <div className="new-estimate-quotation-company-box">
+              <div className="new-estimate-quotation-sign-box">
                 <div className="new-estimate-quotation-company-box-title">
                   For {companyName}:
                 </div>
-              </div>
-              <div className="new-estimate-quotation-sign-box">
                 <div className="new-estimate-quotation-signatory-text">
                   Authorized Signatory
                 </div>

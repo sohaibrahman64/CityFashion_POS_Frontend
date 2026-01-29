@@ -742,7 +742,7 @@ Thank you for your business!`;
       console.log(response.body);
       if (response.ok) {
         const data = await response.json();
-        setProformaInvoiceNumber(data.proformaInvoice);
+        setProformaInvoiceNumber(data.proformaInvoiceNumber);
       } else {
         console.error("Failed to fetch proforma invoice number");
         setProformaInvoiceNumber("PI-00001");

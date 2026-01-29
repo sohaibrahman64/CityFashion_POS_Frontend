@@ -2,6 +2,7 @@ import "./NewDeliveryChallanPreview.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useRef } from "react";
 import html2pdf from "html2pdf.js";
+import { FiEdit } from "react-icons/fi";
 
 const NewDeliveryChallanPreview = () => {
     const navigate = useNavigate();
@@ -97,8 +98,14 @@ const NewDeliveryChallanPreview = () => {
                 return;
             }
 
-            // Clone the estimate quotation preview element to avoid modifying the original
+            // Clone the delivery challan preview element to avoid modifying the original
             const element = deliveryChallanPreviewRef.current.cloneNode(true);
+
+            // Remove edit icons from the cloned element
+            const editIcons = element.querySelectorAll(
+                ".new-delivery-challan-edit-icon, .new-delivery-challan-edit-icon-logo"
+            );
+            editIcons.forEach((icon) => icon.remove());
 
             // Remove any elements that shouldn't be in the PDF (like edit indicators)
             const editableElements = element.querySelectorAll(
@@ -251,6 +258,7 @@ const NewDeliveryChallanPreview = () => {
                                 ) : (
                                     <span style={{ cursor: "pointer" }}>LOGO</span>
                                 )}
+                                <FiEdit className="new-delivery-challan-edit-icon-logo" />
                                 <input
                                     ref={fileInputRef}
                                     type="file"
@@ -282,9 +290,10 @@ const NewDeliveryChallanPreview = () => {
                                     <div
                                         className="new-delivery-challan-company-name"
                                         onClick={handleCompanyNameClick}
-                                        style={{ cursor: "pointer" }}
+                                        style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
                                     >
                                         {companyName}
+                                        <FiEdit className="new-delivery-challan-edit-icon" />
                                     </div>
                                 )}
                                 {isEditingCompanyPhone ? (
@@ -308,9 +317,10 @@ const NewDeliveryChallanPreview = () => {
                                     <div
                                         className="new-delivery-challan-company-phone"
                                         onClick={handleCompanyPhoneClick}
-                                        style={{ cursor: "pointer" }}
+                                        style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
                                     >
                                         Phone: {companyPhone}
+                                        <FiEdit className="new-delivery-challan-edit-icon" />
                                     </div>
                                 )}
                             </div>
@@ -422,12 +432,10 @@ const NewDeliveryChallanPreview = () => {
                             </table>
                         </div>
                         <div className="new-delivery-challan-sign-section">
-                            <div className="new-delivery-challan-company-box">
+                            <div className="new-delivery-challan-sign-box">
                                 <div className="new-delivery-challan-company-box-title">
                                     For {companyName}:
                                 </div>
-                            </div>
-                            <div className="new-delivery-challan-sign-box">
                                 <div className="new-delivery-challan-signatory-text">
                                     Authorized Signatory
                                 </div>

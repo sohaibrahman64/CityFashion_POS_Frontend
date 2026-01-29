@@ -5,6 +5,7 @@
   padding: 10px;
   box-sizing: border-box;
   color: #3f4155;
+  font-family: 'Segoe UI', 'Tahoma', 'Geneva', ' Verdana', sans-serif, 'Roboto', Arial, sans-serif;
 }
 
 .new-estimate-quotation-preview-header-section {
@@ -25,8 +26,8 @@
 }
 
 .new-estimate-quotation-preview-header-left-label {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700;
   color: #3f4155;
 }
 
@@ -44,7 +45,7 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   transition: background-color 0.3s, transform 0.1s;
 }
@@ -68,12 +69,12 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
   transition: background-color 0.3s, transform 0.1s;
 }
 
 .new-estimate-quotation-preview-header-right-button:hover {
-  background-color: #0a69b9;
+  background-color: #0856a0;
 }
 
 .new-estimate-quotation-preview-header-right-button:active {
@@ -81,7 +82,7 @@
 }
 
 .new-estimate-quotation-preview-header-right-button-label {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -92,6 +93,7 @@
   padding: 20px;
   min-height: 400px;
   color: #3f4155;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, Roboto, Arial, sans-serif;
 }
 
 .new-estimate-quotation-tax-title {
@@ -108,6 +110,7 @@
   border: 1px solid #838491;
   border-radius: 6px;
   overflow: hidden;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, Roboto, Arial, sans-serif;
 }
 
 .new-estimate-quotation-header-grid {
@@ -140,6 +143,58 @@
   border-radius: 4px;
 }
 
+/* Editable company info styles */
+.new-estimate-quotation-company-logo {
+  cursor: pointer;
+  position: relative;
+  transition: opacity 0.2s;
+}
+
+.new-estimate-quotation-edit-icon-logo {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  background: white;
+  border-radius: 50%;
+  padding: 4px;
+  font-size: 16px;
+  color: #0a69b9;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.new-estimate-quotation-edit-icon {
+  font-size: 14px;
+  color: #0a69b9;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.new-estimate-quotation-edit-icon:hover {
+  opacity: 1;
+}
+
+.new-estimate-quotation-company-logo:hover {
+  opacity: 0.8;
+}
+
+.new-estimate-quotation-company-logo:hover .new-estimate-quotation-edit-icon-logo {
+  opacity: 1;
+}
+
+.new-estimate-quotation-company-name:hover,
+.new-estimate-quotation-company-phone:hover {
+  background-color: #f0f7ff;
+  border-radius: 4px;
+  padding: 4px 8px;
+  margin: -4px -8px;
+}
+
+.new-estimate-quotation-company-name:hover .new-estimate-quotation-edit-icon,
+.new-estimate-quotation-company-phone:hover .new-estimate-quotation-edit-icon {
+  opacity: 1;
+}
+
 .new-estimate-quotation-company-info {
   display: flex;
   flex-direction: column;
@@ -157,13 +212,13 @@
 }
 
 .new-estimate-quotation-company-name {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
-  color: #2f3142;
+  color: #3f4155;
 }
 
 .new-estimate-quotation-company-phone {
-  font-size: 12px;
+  font-size: 14px;
   color: #3f4155;
   margin-top: 6px;
 }
@@ -185,39 +240,44 @@
 
 .new-estimate-quotation-section-title {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   color: #3f4155;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .new-estimate-quotation-bill-name {
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 12px;
+  color: #3f4155;
+  margin-bottom: 4px;
 }
 
 .new-estimate-quotation-bill-address,
 .new-estimate-quotation-bill-state {
   font-size: 12px;
   color: #3f4155;
+  margin-bottom: 2px;
 }
 
 .new-estimate-quotation-details .new-estimate-quotation-detail-row {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
+  font-size: 10px;
   color: #3f4155;
+  margin-bottom: 2px;
 }
 
 .new-estimate-quotation-details
   .new-estimate-quotation-detail-row
   span:first-child {
   color: #3f4155;
+  font-weight: 500;
 }
 
-.new-estimate-quotation-section-title {
-  font-size: 10px;
-  font-weight: 700;
-  color: #3f4155;
-  margin-bottom: 6px;
+.new-estimate-quotation-details
+  .new-estimate-quotation-detail-row
+  span:last-child {
+  font-weight: 600;
 }
 
 .new-estimate-quotation-items-table-wrapper {
@@ -227,21 +287,20 @@
 .new-estimate-quotation-items-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
 }
-
-/* .new-estimate-quotation-items-table {
-  margin: 5px 5px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  overflow: hidden;
-} */
 
 .new-estimate-quotation-items-table th, 
 .new-estimate-quotation-items-table td {
   border: 1px solid #838491;
   padding: 8px 10px;
-  font-size: 12px;
+  font-size: 10px;
+}
+
+.new-estimate-quotation-items-table thead th {
+  background: #f4f6f8;
+  color: #3f4155;
+  text-align: left;
+  font-weight: 600;
 }
 
 .new-estimate-quotation-col-serial {
@@ -284,6 +343,15 @@
   padding: 0;
   border-left: none;
   border-right: none;
+  border-bottom: none;
+}
+
+.new-estimate-quotation-tax-summary-cell {
+  border-right: 1px solid #838491;
+}
+
+.new-estimate-quotation-totals-summary-cell {
+  border-left: none;
 }
 
 .new-estimate-quotation-tax-summary-wrapper {
@@ -291,10 +359,11 @@
 }
 
 .new-estimate-quotation-tax-summary-title {
-  font-weight: 700;
+  font-weight: 600;
   padding: 8px 10px;
   border-bottom: 1px solid #838491;
   background: #f4f6f8;
+  font-size: 10px;
 }
 
 .new-estimate-quotation-tax-summary-table {
@@ -306,13 +375,14 @@
 .new-estimate-quotation-tax-summary-table td {
   border: 1px solid #838491;
   padding: 8px 10px;
-  font-size: 12px;
+  font-size: 10px;
 }
 
 .new-estimate-quotation-tax-summary-table thead th {
   background: #f4f6f8;
   color: #3f4155;
   text-align: left;
+  font-weight: 600;
 }
 
 .new-estimate-quotation-ts-col-hsn {
@@ -354,53 +424,162 @@
   text-align: center;
 }
 
+/* Totals summary section */
+.new-estimate-quotation-totals-summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  height: 100%;
+}
+
+.new-estimate-quotation-totals-summary-table td {
+  padding: 10px 12px;
+  font-size: 10px;
+  border: none;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.new-estimate-quotation-totals-summary-table tr:last-child td {
+  border-bottom: none;
+}
+
+.new-estimate-quotation-totals-label {
+  text-align: left;
+  color: #3f4155;
+  width: 40%;
+}
+
+.new-estimate-quotation-totals-separator {
+  text-align: center;
+  color: #3f4155;
+  width: 10%;
+}
+
+.new-estimate-quotation-totals-value {
+  text-align: right;
+  color: #3f4155;
+  font-weight: 500;
+  width: 50%;
+}
+
+.new-estimate-quotation-totals-final-row {
+  font-weight: 600;
+  background: #fafafa;
+}
+
+.new-estimate-quotation-totals-final-row .new-estimate-quotation-totals-label,
+.new-estimate-quotation-totals-final-row .new-estimate-quotation-totals-separator,
+.new-estimate-quotation-totals-final-row .new-estimate-quotation-totals-value {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.new-estimate-quotation-totals-words-row {
+  border-top: 1px solid #e0e0e0;
+}
+
+.new-estimate-quotation-totals-words {
+  padding: 8px 12px;
+  font-size: 10px;
+  text-align: left;
+  color: #3f4155;
+  line-height: 1.4;
+}
+
+.new-estimate-quotation-totals-words strong {
+  font-weight: 600;
+  font-size: 10px;
+}
+
+.new-estimate-quotation-totals-extra-row {
+  border-top: 1px solid #e0e0e0;
+}
+
+.new-estimate-quotation-totals-extra-cell {
+  padding: 8px 12px;
+  border: none;
+  border-bottom: none;
+}
+
+.new-estimate-quotation-totals-extra-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.new-estimate-quotation-totals-extra-item {
+  display: grid;
+  grid-template-columns: 100px 10px 1fr;
+  gap: 8px;
+  align-items: center;
+  font-size: 10px;
+}
+
+.new-estimate-quotation-totals-extra-label {
+  color: #3f4155;
+  font-weight: 500;
+  text-align: left;
+}
+
+.new-estimate-quotation-totals-extra-separator {
+  color: #3f4155;
+  text-align: center;
+}
+
+.new-estimate-quotation-totals-extra-value {
+  color: #3f4155;
+  font-weight: 500;
+  text-align: right;
+}
+
 .new-estimate-quotation-footer-sections {
-  margin-top: 12px;
+  margin-top: 6px;
 }
 
 .new-estimate-quotation-terms-section {
   border: 1px solid #838491;
-  border-radius: 4px;
+  border-radius: 2px;
   overflow: hidden;
 }
 
 .new-estimate-quotation-terms-title {
-  font-size: 14px;
-  font-weight: 500;
-  padding: 8px 10px;
+  font-weight: 600;
+  padding: 4px 6px;
   border-bottom: 1px solid #838491;
   background: #f4f6f8;
+  font-size: 10px;
 }
 
 .new-estimate-quotation-terms-body {
-  font-size: 12px;
-  padding: 8px 10px;
+  padding: 4px 6px;
+  font-size: 10px;
+  line-height: 1.3;
 }
 
 .new-estimate-quotation-sign-section {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
 }
 
-.new-estimate-quotation-company-box,
 .new-estimate-quotation-sign-box {
   border: 1px solid #838491;
-  min-height: 140px;
+  min-height: 60px;
+  min-width: 300px;
 }
 
 .new-estimate-quotation-company-box-title {
-  font-weight: 700;
-  padding: 8px 10px;
+  font-weight: 600;
+  padding: 4px 6px;
   border-bottom: 1px solid #838491;
   background: #f4f6f8;
+  font-size: 10px;
 }
 
 .new-estimate-quotation-signatory-text {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%;
-  font-weight: 600;
+  padding: 20px 10px;
+  font-weight: 500;
+  font-size: 10px;
 }

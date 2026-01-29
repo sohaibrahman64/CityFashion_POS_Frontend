@@ -2,6 +2,7 @@ import "./NewProformaInvoicePreview.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useRef } from "react";
 import html2pdf from "html2pdf.js";
+import { FiEdit } from "react-icons/fi";
 
 const NewProformaInvoicePreview = () => {
   const navigate = useNavigate();
@@ -23,6 +24,32 @@ const NewProformaInvoicePreview = () => {
   const formatNumberWithCommas = (num) => {
     if (num === null || num === undefined || isNaN(num)) return "0.00";
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
+  // Function to convert number to words
+  const numberToWords = (num) => {
+    if (!num || num === 0) return "Zero Rupees Only";
+    const single = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+    const double = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+    const tens = ["", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+    const formatTens = (n) => n < 10 ? single[n] : n >= 10 && n < 20 ? double[n - 10] : tens[Math.floor(n / 10)] + " " + single[n % 10];
+    const formatHundreds = (n) => {
+      if (n > 99) return single[Math.floor(n / 100)] + " Hundred " + formatTens(n % 100);
+      return formatTens(n);
+    };
+    let str = "";
+    const crore = Math.floor(num / 10000000);
+    num %= 10000000;
+    const lakh = Math.floor(num / 100000);
+    num %= 100000;
+    const thousand = Math.floor(num / 1000);
+    num %= 1000;
+    const hundred = num;
+    if (crore > 0) str += formatHundreds(crore) + " Crore ";
+    if (lakh > 0) str += formatHundreds(lakh) + " Lakh ";
+    if (thousand > 0) str += formatHundreds(thousand) + " Thousand ";
+    if (hundred > 0) str += formatHundreds(hundred);
+    return str.trim() + " Rupees Only";
   };
 
   const items = proformaInvoiceData.items || [];
@@ -99,6 +126,12 @@ const NewProformaInvoicePreview = () => {
 
       // Clone the estimate quotation preview element to avoid modifying the original
       const element = proformaInvoicePreviewRef.current.cloneNode(true);
+
+      // Remove edit icons from the cloned element
+      const editIcons = element.querySelectorAll(
+        ".new-proforma-invoice-edit-icon, .new-proforma-invoice-edit-icon-logo"
+      );
+      editIcons.forEach((icon) => icon.remove());
 
       // Remove any elements that shouldn't be in the PDF (like edit indicators)
       const editableElements = element.querySelectorAll(
@@ -253,6 +286,7 @@ const NewProformaInvoicePreview = () => {
                 ) : (
                   <span style={{ cursor: "pointer" }}>LOGO</span>
                 )}
+                <FiEdit className="new-proforma-invoice-edit-icon-logo" />
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -284,9 +318,10 @@ const NewProformaInvoicePreview = () => {
                   <div
                     className="new-proforma-invoice-company-name"
                     onClick={handleCompanyNameClick}
-                    style={{ cursor: "pointer" }}
+                    style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
                   >
                     {companyName}
+                    <FiEdit className="new-proforma-invoice-edit-icon" />
                   </div>
                 )}
                 {isEditingCompanyPhone ? (
@@ -310,9 +345,10 @@ const NewProformaInvoicePreview = () => {
                   <div
                     className="new-proforma-invoice-company-phone"
                     onClick={handleCompanyPhoneClick}
-                    style={{ cursor: "pointer" }}
+                    style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
                   >
                     Phone: {companyPhone}
+                    <FiEdit className="new-proforma-invoice-edit-icon" />
                   </div>
                 )}
               </div>
@@ -477,8 +513,8 @@ const NewProformaInvoicePreview = () => {
               <tfoot>
                 <tr>
                   <td
-                    colSpan="8"
-                    className="new-proforma-invoice-no-padding-cell"
+                    colSpan="5"
+                    className="new-proforma-invoice-no-padding-cell new-proforma-invoice-tax-summary-cell"
                   >
                     <div className="new-proforma-invoice-tax-summary-wrapper">
                       <div className="new-proforma-invoice-tax-summary-title">
@@ -751,6 +787,102 @@ const NewProformaInvoicePreview = () => {
                       </table>
                     </div>
                   </td>
+                  <td
+                    colSpan="3"
+                    className="new-proforma-invoice-no-padding-cell new-proforma-invoice-totals-summary-cell"
+                  >
+                    <div className="new-proforma-invoice-totals-summary-wrapper">
+                      <table className="new-proforma-invoice-totals-summary-table">
+                        <tbody>
+                          <tr>
+                            <td className="new-proforma-invoice-totals-label">Sub Total</td>
+                            <td className="new-proforma-invoice-totals-separator">:</td>
+                            <td className="new-proforma-invoice-totals-value">
+                              ₹{" "}
+                              {formatNumberWithCommas(
+                                validItems
+                                  .reduce(
+                                    (sum, item) => sum + parseFloat(item.total || 0),
+                                    0
+                                  )
+                                  .toFixed(2)
+                              )}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="new-proforma-invoice-totals-label">Round Off</td>
+                            <td className="new-proforma-invoice-totals-separator">:</td>
+                            <td className="new-proforma-invoice-totals-value">
+                              - ₹{" "}
+                              {(() => {
+                                const subtotal = validItems.reduce(
+                                  (sum, item) => sum + parseFloat(item.total || 0),
+                                  0
+                                );
+                                const rounded = Math.round(subtotal);
+                                const roundOff = subtotal - rounded;
+                                return formatNumberWithCommas(Math.abs(roundOff).toFixed(2));
+                              })()}
+                            </td>
+                          </tr>
+                          <tr className="new-proforma-invoice-totals-final-row">
+                            <td className="new-proforma-invoice-totals-label">Total</td>
+                            <td className="new-proforma-invoice-totals-separator">:</td>
+                            <td className="new-proforma-invoice-totals-value">
+                              ₹{" "}
+                              {formatNumberWithCommas(
+                                Math.round(
+                                  validItems.reduce(
+                                    (sum, item) => sum + parseFloat(item.total || 0),
+                                    0
+                                  )
+                                ).toFixed(2)
+                              )}
+                            </td>
+                          </tr>
+                          <tr className="new-proforma-invoice-totals-words-row">
+                            <td colSpan="3" className="new-proforma-invoice-totals-words">
+                              <strong>Proforma Amount In Words:</strong>
+                              <br />
+                              {numberToWords(
+                                Math.round(
+                                  validItems.reduce(
+                                    (sum, item) => sum + parseFloat(item.total || 0),
+                                    0
+                                  )
+                                )
+                              )}
+                            </td>
+                          </tr>
+                          <tr className="new-proforma-invoice-totals-extra-row">
+                            <td colSpan="3" className="new-proforma-invoice-totals-extra-cell">
+                              <div className="new-proforma-invoice-totals-extra-container">
+                                <div className="new-proforma-invoice-totals-extra-item">
+                                  <span className="new-proforma-invoice-totals-extra-label">You Saved</span>
+                                  <span className="new-proforma-invoice-totals-extra-separator">:</span>
+                                  <span className="new-proforma-invoice-totals-extra-value">
+                                    ₹ {formatNumberWithCommas(
+                                      validItems
+                                        .reduce(
+                                          (sum, item) =>
+                                            sum +
+                                            (parseFloat(item.price || 0) *
+                                              parseFloat(item.quantity || 0) *
+                                              parseFloat(item.discount || 0)) /
+                                            100,
+                                          0
+                                        )
+                                        .toFixed(2)
+                                    )}
+                                  </span>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </td>
                 </tr>
               </tfoot>
             </table>
@@ -765,12 +897,10 @@ const NewProformaInvoicePreview = () => {
               </div>
             </div>
             <div className="new-proforma-invoice-sign-section">
-              <div className="new-proforma-invoice-company-box">
+              <div className="new-proforma-invoice-sign-box">
                 <div className="new-proforma-invoice-company-box-title">
                   For {companyName}:
                 </div>
-              </div>
-              <div className="new-proforma-invoice-sign-box">
                 <div className="new-proforma-invoice-signatory-text">
                   Authorized Signatory
                 </div>

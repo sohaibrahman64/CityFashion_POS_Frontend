@@ -2,6 +2,7 @@ import "./NewSalesOrderPreview.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useRef } from "react";
 import html2pdf from "html2pdf.js";
+import { FiEdit } from "react-icons/fi";
 
 const NewSalesOrderPreview = () => {
     const navigate = useNavigate();
@@ -201,35 +202,98 @@ const NewSalesOrderPreview = () => {
                 return;
             }
 
-            // Clone the invoice preview element to avoid modifying the original
-            const element = salesOrderPreviewRef.current.cloneNode(true);
+                        // Clone the sales order preview element to avoid modifying the original
+                        const element = salesOrderPreviewRef.current.cloneNode(true);
 
-            // Remove any elements that shouldn't be in the PDF (like edit indicators)
-            const editableElements = element.querySelectorAll('[style*="cursor: pointer"]');
-            editableElements.forEach(el => {
-                el.style.cursor = 'default';
-            });
+                        // Remove edit icons from the cloned element
+                        const editIcons = element.querySelectorAll(
+                                ".new-sales-order-edit-icon, .new-sales-order-edit-icon-logo"
+                        );
+                        editIcons.forEach((icon) => icon.remove());
 
-            // Configure PDF options
-            const opt = {
-                margin: [10, 10, 10, 10],
-                filename: `SalesOrder_${salesOrderData.partyName || "Customer"}_${salesOrderData.salesOrderNumber || new Date().toISOString().split("T")[0]
-                    }.pdf`,
-                image: { type: "jpeg", quality: 0.98 },
-                html2canvas: {
-                    scale: 2,
-                    useCORS: true,
-                    allowTaint: true,
-                },
-                jsPDF: {
-                    unit: "mm",
-                    format: "a4",
-                    orientation: "portrait",
-                },
-            };
+                        // Remove any elements that shouldn't be in the PDF (like edit indicators)
+                        const editableElements = element.querySelectorAll('[style*="cursor: pointer"]');
+                        editableElements.forEach(el => {
+                                el.style.cursor = 'default';
+                        });
 
-            // Generate and download PDF
-            await html2pdf().set(opt).from(element).save();
+                        // Configure PDF options with optimized settings for single page
+                        const opt = {
+                                margin: [5, 5, 5, 5],
+                                filename: `SalesOrder_${salesOrderData.partyName || "Customer"}_${salesOrderData.salesOrderNumber || new Date().toISOString().split("T")[0]
+                                        }.pdf`,
+                                image: { type: "jpeg", quality: 0.98 },
+                                html2canvas: {
+                                        scale: 1.5,
+                                        useCORS: true,
+                                        allowTaint: true,
+                                },
+                                jsPDF: {
+                                        unit: "mm",
+                                        format: "a4",
+                                        orientation: "portrait",
+                                },
+                        };
+
+                        // Apply print-friendly styles before PDF generation to compress layout
+                        const styleSheet = document.createElement("style");
+                        styleSheet.innerHTML = `
+                @media print {
+                    body { margin: 0; padding: 0; }
+                    .new-sales-order-preview-content-section {
+                        font-size: 10px !important;
+                        line-height: 1.1 !important;
+                    }
+                    .new-sales-order-paper {
+                        page-break-after: avoid !important;
+                        padding: 0 !important;
+                    }
+                    .new-sales-order-header-grid {
+                        margin-bottom: 4px !important;
+                    }
+                    .new-sales-order-company-info {
+                        line-height: 1.2 !important;
+                    }
+                    .new-sales-order-items-table,
+                    .new-sales-order-tax-summary-table {
+                        font-size: 8px !important;
+                        page-break-inside: avoid !important;
+                    }
+                    .new-sales-order-items-table th,
+                    .new-sales-order-items-table td {
+                        padding: 2px 3px !important;
+                        line-height: 1 !important;
+                    }
+                    .new-sales-order-tax-summary-table th,
+                    .new-sales-order-tax-summary-table td {
+                        padding: 1px 2px !important;
+                        line-height: 1 !important;
+                    }
+                    .new-sales-order-total-row {
+                        font-size: 8px !important;
+                    }
+                    .new-sales-order-items-table-wrapper {
+                        margin: 4px 0 !important;
+                    }
+                    .new-sales-order-footer-sections {
+                        page-break-inside: avoid !important;
+                        margin-top: 2px !important;
+                        font-size: 9px !important;
+                    }
+                    .new-sales-order-terms-section,
+                    .new-sales-order-sign-section {
+                        margin: 0 !important;
+                        padding: 0 !important;
+                    }
+                }
+            `;
+                        document.head.appendChild(styleSheet);
+
+                        // Generate and download PDF
+                        await html2pdf().set(opt).from(element).save();
+
+                        // Remove the style sheet after PDF generation
+                        document.head.removeChild(styleSheet);
 
             console.log("PDF generated and downloaded successfully");
         } catch (error) {
@@ -268,7 +332,7 @@ const NewSalesOrderPreview = () => {
                 className="new-sales-order-preview-content-section"
                 ref={salesOrderPreviewRef}
             >
-                <div className="new-sales-order-tax-order-title">Sales Order</div>
+                <div className="new-sales-order-tax-title">Sales Order</div>
                 <div className="new-sales-order-paper">
                     <div className="new-sales-order-header-grid">
                         <div className="new-sales-order-company-block">
@@ -277,7 +341,7 @@ const NewSalesOrderPreview = () => {
                                     <img
                                         src={logoPreview}
                                         alt="Company Logo"
-                                        className="logo-image"
+                                        className="new-sales-order-logo-image"
                                         style={{
                                             width: "100%",
                                             height: "100%",
@@ -287,6 +351,7 @@ const NewSalesOrderPreview = () => {
                                 ) : (
                                     <span style={{ cursor: "pointer" }}>LOGO</span>
                                 )}
+                                <FiEdit className="new-sales-order-edit-icon-logo" />
                                 <input
                                     ref={fileInputRef}
                                     type="file"
@@ -318,9 +383,10 @@ const NewSalesOrderPreview = () => {
                                     <div
                                         className="new-sales-order-company-name"
                                         onClick={handleCompanyNameClick}
-                                        style={{ cursor: "pointer" }}
+                                        style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
                                     >
                                         {companyName}
+                                        <FiEdit className="new-sales-order-edit-icon" />
                                     </div>
                                 )}
                                 {isEditingCompanyPhone ? (
@@ -344,9 +410,10 @@ const NewSalesOrderPreview = () => {
                                     <div
                                         className="new-sales-order-company-phone"
                                         onClick={handleCompanyPhoneClick}
-                                        style={{ cursor: "pointer" }}
+                                        style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
                                     >
                                         Phone: {companyPhone}
+                                        <FiEdit className="new-sales-order-edit-icon" />
                                     </div>
                                 )}
                             </div>
@@ -435,7 +502,15 @@ const NewSalesOrderPreview = () => {
                                     </tr>
                                 ))}
                                 <tr className="new-sales-order-total-row">
-                                    <td colSpan="4">Total</td>
+                                    <td colSpan="2">Total</td>
+                                    <td className="new-sales-order-ta-left">
+                                        {validItems.reduce(
+                                            (sum, item) => sum + parseFloat(item.quantity || 0),
+                                            0
+                                        )}
+                                    </td>
+                                    <td></td>
+                                    <td className="new-sales-order-ta-right"></td>
                                     <td className="new-sales-order-ta-right">
                                         ₹{" "}
                                         {formatNumberWithCommas(
@@ -463,7 +538,6 @@ const NewSalesOrderPreview = () => {
                                                 .toFixed(2)
                                         )}
                                     </td>
-                                    <td className="new-sales-order-ta-right" colSpan="1"></td>
                                     <td className="new-sales-order-ta-right">
                                         ₹{" "}
                                         {formatNumberWithCommas(
@@ -479,7 +553,10 @@ const NewSalesOrderPreview = () => {
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <td colSpan="8" className="no-padding-cell">
+                                    <td
+                                        colSpan="5"
+                                        className="new-sales-order-no-padding-cell new-sales-order-tax-summary-cell"
+                                    >
                                         <div className="new-sales-order-tax-summary-wrapper">
                                             <div className="new-sales-order-tax-summary-title">Tax Summary:</div>
                                             <table className="new-sales-order-tax-summary-table">
@@ -710,71 +787,87 @@ const NewSalesOrderPreview = () => {
                                             </table>
                                         </div>
                                     </td>
+                                    <td
+                                        colSpan="3"
+                                        className="new-sales-order-no-padding-cell new-sales-order-totals-summary-cell"
+                                    >
+                                        <div className="new-sales-order-totals-summary-wrapper">
+                                            <table className="new-sales-order-totals-summary-table">
+                                                <tbody>
+                                                    <tr className="new-sales-order-totals-final-row">
+                                                        <td className="new-sales-order-totals-label">Total</td>
+                                                        <td className="new-sales-order-totals-separator">:</td>
+                                                        <td className="new-sales-order-totals-value">
+                                                            ₹ {formatNumberWithCommas(calculateSubTotal().toFixed(2))}
+                                                        </td>
+                                                    </tr>
+                                                    <tr className="new-sales-order-totals-words-row">
+                                                        <td colSpan="3" className="new-sales-order-totals-words">
+                                                            <strong>Order Amount In Words:</strong>
+                                                            <br />
+                                                            {numberToWords(calculateSubTotal())}
+                                                        </td>
+                                                    </tr>
+                                                    <tr className="new-sales-order-totals-extra-row">
+                                                        <td colSpan="3" className="new-sales-order-totals-extra-cell">
+                                                            <div className="new-sales-order-totals-extra-container">
+                                                                <div className="new-sales-order-totals-extra-item">
+                                                                    <span className="new-sales-order-totals-extra-label">Advance</span>
+                                                                    <span className="new-sales-order-totals-extra-separator">:</span>
+                                                                    <span className="new-sales-order-totals-extra-value">
+                                                                        ₹ {formatNumberWithCommas(calculateAdvanceAmount().toFixed(2))}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="new-sales-order-totals-extra-item">
+                                                                    <span className="new-sales-order-totals-extra-label">Balance</span>
+                                                                    <span className="new-sales-order-totals-extra-separator">:</span>
+                                                                    <span className="new-sales-order-totals-extra-value">
+                                                                        ₹ {formatNumberWithCommas(
+                                                                            (calculateSubTotal() - calculateAdvanceAmount()).toFixed(2)
+                                                                        )}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="new-sales-order-totals-extra-item">
+                                                                    <span className="new-sales-order-totals-extra-label">You Saved</span>
+                                                                    <span className="new-sales-order-totals-extra-separator">:</span>
+                                                                    <span className="new-sales-order-totals-extra-value">
+                                                                        ₹ {formatNumberWithCommas(
+                                                                            validItems
+                                                                                .reduce(
+                                                                                    (sum, item) =>
+                                                                                        sum +
+                                                                                        (parseFloat(item.price || 0) *
+                                                                                            parseFloat(item.quantity || 0) *
+                                                                                            parseFloat(item.discount || 0)) /
+                                                                                        100,
+                                                                                    0
+                                                                                )
+                                                                                .toFixed(2)
+                                                                        )}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </td>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
-                    <div className="new-sales-order-estimate-bottom-section">
-                        <div className="new-sales-order-estimate-left-column-content">
-                            <div className="new-sales-order-terms-section">
-                                <div className="new-sales-order-terms-title">Terms & Conditions:</div>
-                                <div className="new-sales-order-terms-body">
-                                    Thanks for doing business with us!
-                                </div>
-                            </div>
-                            <div className="new-sales-order-sign-section">
-                                <div className="new-sales-order-company-box">
-                                    <div className="new-sales-order-company-box-title">For {companyName}:</div>
-                                </div>
-                                <div className="new-sales-order-sign-box">
-                                    <div className="new-sales-order-signatory-text">Authorized Signatory</div>
-                                </div>
+                    <div className="new-sales-order-footer-sections">
+                        <div className="new-sales-order-terms-section">
+                            <div className="new-sales-order-terms-title">Terms & Conditions:</div>
+                            <div className="new-sales-order-terms-body">
+                                Thanks for doing business with us!
                             </div>
                         </div>
-                        <div className="new-sales-order-estimate-right-column-content">
-                            <div className="new-sales-order-summary-item">
-                                <strong>Total</strong>
-                                <span>
-                                    ₹ {formatNumberWithCommas(calculateSubTotal().toFixed(2))}
-                                </span>
-                            </div>
-                            <div className="new-sales-order-summary-item">
-                                <span>Order Amount in Words</span>
-                                <span>
-                                    {numberToWords(calculateSubTotal())}
-                                </span>
-                            </div>
-                            <div className="new-sales-order-summary-item">
-                                <span>Advance</span>
-                                <span>
-                                    ₹ {formatNumberWithCommas(calculateAdvanceAmount().toFixed(2))}
-                                </span>
-                            </div>
-                            <div className="new-sales-order-summary-item">
-                                <span>Balance</span>
-                                <span>
-                                    ₹ {formatNumberWithCommas(
-                                        (calculateSubTotal() - calculateAdvanceAmount()).toFixed(2)
-                                    )}
-                                </span>
-                            </div>
-                            <div className="new-sales-order-summary-item">
-                                <span>You Saved</span>
-                                <span>
-                                    ₹ {formatNumberWithCommas(
-                                        validItems
-                                            .reduce(
-                                                (sum, item) =>
-                                                    sum +
-                                                    (parseFloat(item.price || 0) *
-                                                        parseFloat(item.quantity || 0) *
-                                                        parseFloat(item.discount || 0)) /
-                                                    100,
-                                                0
-                                            )
-                                            .toFixed(2)
-                                    )}
-                                </span>
+                        <div className="new-sales-order-sign-section">
+                            <div className="new-sales-order-sign-box">
+                                <div className="new-sales-order-company-box-title">For {companyName}:</div>
+                                <div className="new-sales-order-signatory-text">Authorized Signatory</div>
                             </div>
                         </div>
                     </div>

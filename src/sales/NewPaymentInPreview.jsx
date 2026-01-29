@@ -1,7 +1,8 @@
+import "./NewPaymentInPreview.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useRef } from "react";
 import html2pdf from "html2pdf.js";
-import "./NewPaymentInPreview.css";
+import { FiEdit } from "react-icons/fi";
 
 const NewPaymentInPreview = () => {
   const navigate = useNavigate();
@@ -196,8 +197,14 @@ const NewPaymentInPreview = () => {
         return;
       }
 
-      // Clone the estimate quotation preview element to avoid modifying the original
+      // Clone the payment in preview element to avoid modifying the original
       const element = paymentInPreviewRef.current.cloneNode(true);
+
+      // Remove edit icons from the cloned element
+      const editIcons = element.querySelectorAll(
+        ".new-payment-in-edit-icon, .new-payment-in-edit-icon-logo"
+      );
+      editIcons.forEach((icon) => icon.remove());
 
       // Remove any elements that shouldn't be in the PDF (like edit indicators)
       const editableElements = element.querySelectorAll(
@@ -348,6 +355,7 @@ const NewPaymentInPreview = () => {
                 ) : (
                   <span style={{ cursor: "pointer" }}>LOGO</span>
                 )}
+                <FiEdit className="new-payment-in-edit-icon-logo" />
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -379,9 +387,10 @@ const NewPaymentInPreview = () => {
                   <div
                     className="new-payment-in-company-name"
                     onClick={handleCompanyNameClick}
-                    style={{ cursor: "pointer" }}
+                    style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
                   >
                     {companyName}
+                    <FiEdit className="new-payment-in-edit-icon" />
                   </div>
                 )}
                 {isEditingCompanyPhone ? (
@@ -405,9 +414,10 @@ const NewPaymentInPreview = () => {
                   <div
                     className="new-payment-in-company-phone"
                     onClick={handleCompanyPhoneClick}
-                    style={{ cursor: "pointer" }}
+                    style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
                   >
                     Phone: {companyPhone}
+                    <FiEdit className="new-payment-in-edit-icon" />
                   </div>
                 )}
               </div>
@@ -468,14 +478,9 @@ const NewPaymentInPreview = () => {
           </div>
           <div className="new-payment-in-footer-sections">
             <div className="new-payment-in-sign-section">
-              <div className="new-payment-in-company-box">
+              <div className="new-payment-in-sign-box">
                 <div className="new-payment-in-company-box-title">
                   For {companyName}:
-                </div>
-              </div>
-              <div className="new-payment-in-sign-box">
-                <div className="new-payment-in-signatory-text">
-                  Authorized Signatory
                 </div>
               </div>
             </div>
