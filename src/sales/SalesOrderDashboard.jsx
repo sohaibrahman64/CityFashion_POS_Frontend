@@ -133,7 +133,7 @@ const SalesOrderDashboard = () => {
             let url = `${BASE_URL}/${GET_ALL_SALES_ORDER_TRANSACTIONS}`;
 
             // Add date range params if filter is applied
-            if (filterType !== "All Estimates" && fromDate && toDate) {
+            if (filterType !== "All Orders" && fromDate && toDate) {
                 url += `?fromDate=${fromDate}&toDate=${toDate}`;
             }
             const response = await fetch(url);
@@ -161,7 +161,7 @@ const SalesOrderDashboard = () => {
 
     const handleFilterChange = (newFilterType) => {
         setFilterType(newFilterType);
-        if (newFilterType !== "All Estimates") {
+        if (newFilterType !== "All Orders") {
             const dateRange = getDateRange(newFilterType);
             setFromDate(dateRange.from);
             setToDate(dateRange.to);

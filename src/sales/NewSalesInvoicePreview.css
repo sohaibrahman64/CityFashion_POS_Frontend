@@ -172,7 +172,10 @@
 .new-sales-invoice-preview-invoice-details .new-sales-invoice-preview-detail-row span:last-child { font-weight: 600; }
 
 .new-sales-invoice-preview-items-table-wrapper { padding: 0px 0px 0px; }
-.new-sales-invoice-preview-items-table { width: 100%;  }
+.new-sales-invoice-preview-items-table {
+  width: 100%;
+  border-collapse: collapse;
+}
 .new-sales-invoice-preview-items-table th, .new-sales-invoice-preview-items-table td { border: 1px solid #838491; padding: 8px 10px; font-size: 10px; }
 .new-sales-invoice-preview-items-table thead th { background: #f4f6f8; color: #3f4155; text-align: left; font-weight: 600; }
 .new-sales-invoice-preview-col-serial { width: 40px; text-align: center; }

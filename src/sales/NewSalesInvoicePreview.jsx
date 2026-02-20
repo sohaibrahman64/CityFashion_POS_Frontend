@@ -293,6 +293,9 @@ const NewSalesInvoicePreview = () => {
                   {invoiceData.partyName || "Customer Name"}
                 </div>
                 <div className="new-sales-invoice-preview-bill-address">
+                  {invoiceData.billingAddress || "Address"}
+                </div>
+                <div className="new-sales-invoice-preview-bill-address">
                   {invoiceData.partyPhone || "Contact No."}
                 </div>
                 <div className="new-sales-invoice-preview-bill-state">State: 27-Maharashtra</div>
@@ -311,6 +314,12 @@ const NewSalesInvoicePreview = () => {
                   <span>Place Of Supply:</span>
                   <span>27-Maharashtra</span>
                 </div>
+              </div>
+            </div>
+            <div className="new-sales-invoice-preview-terms-section">
+              <div className="new-sales-invoice-preview-terms-title">Ship To</div>
+              <div className="new-sales-invoice-preview-terms-body">
+                {invoiceData.shippingAddress || "Shipping Address"}
               </div>
             </div>
           </div>

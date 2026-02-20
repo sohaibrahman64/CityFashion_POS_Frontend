@@ -78,6 +78,7 @@ import NewPaymentInPreview from "../sales/NewPaymentInPreview";
 import LinkPaymentIn from "../sales/LinkPaymentIn";
 import NewSalesOrderPreview from "../sales/NewSalesOrderPreview";
 import NewDeliveryChallanPreview from "../sales/NewDeliveryChallanPreview";
+import NewSalesReturnPreview from "../sales/NewSalesReturnPreview";
 
 const routeComponentMap = {
   "/dashboard": <Dashboard />,
@@ -231,6 +232,8 @@ const DynamicRoutes = ({ menuData }) => {
       <Route path="*" element={<h3>This Page Is Coming Soon!</h3>} />
       <Route path="/sales/order/preview" element={<NewSalesOrderPreview />} />
       <Route path="/sales/deliverychallan/preview" element={<NewDeliveryChallanPreview />} />
+      <Route path="/sales/return/add" element={<AddSalesReturn />} />
+      <Route path="/sales/return/preview" element={<NewSalesReturnPreview />} />
     </Routes>
   );
 };

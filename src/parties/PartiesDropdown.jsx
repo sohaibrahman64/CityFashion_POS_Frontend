@@ -37,12 +37,39 @@ const PartiesDropdown = ({ onPartySelect, selectedParty, showAddParty = true }) 
   }, []);
 
   useEffect(() => {
-    if (selectedParty && parties.length > 0) {
-      const match = parties.find((party) => party.id === selectedParty);
+    if (!selectedParty) {
+      return;
+    }
+
+    if (typeof selectedParty === "object") {
+      const nextName =
+        selectedParty.partyName ||
+        selectedParty.name ||
+        selectedParty.invoicePartyName ||
+        "";
+      setSearchTerm(nextName);
+      if (onPartySelect) {
+        onPartySelect(selectedParty);
+      }
+      return;
+    }
+
+    const normalizedId = String(selectedParty);
+    if (parties.length > 0) {
+      const match = parties.find((party) => String(party.id) === normalizedId);
       if (match) {
         setSearchTerm(match.partyName || match.name || "");
+        if (onPartySelect) {
+          onPartySelect(match);
+        }
+        return;
       }
-    }}, [selectedParty, parties]);
+    }
+
+    if (typeof selectedParty === "string") {
+      setSearchTerm(selectedParty);
+    }
+  }, [selectedParty, parties, onPartySelect]);
 
   // Filter parties when search term changes
   useEffect(() => {

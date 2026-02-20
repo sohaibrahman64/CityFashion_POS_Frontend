@@ -1,0 +1,65 @@
+.invoice-numbers-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.invoice-numbers-dropdown-input-wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.invoice-numbers-dropdown-input {
+  width: 100%;
+  padding: 10px 32px 10px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.invoice-numbers-dropdown-input:focus {
+  outline: none;
+  border-color: #0a69b9;
+  box-shadow: 0 0 5px rgba(10, 105, 185, 0.3);
+}
+
+.invoice-numbers-dropdown-arrow {
+  position: absolute;
+  right: 10px;
+  font-size: 12px;
+  color: #666;
+  pointer-events: none;
+}
+
+.invoice-numbers-dropdown-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  z-index: 10;
+}
+
+.invoice-numbers-dropdown-item {
+  padding: 8px 10px;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+}
+
+.invoice-numbers-dropdown-item:hover {
+  background-color: #f5f5f5;
+}
+
+.invoice-numbers-dropdown-no-results {
+  padding: 10px;
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+}

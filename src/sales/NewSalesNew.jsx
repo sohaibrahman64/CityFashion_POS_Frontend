@@ -73,7 +73,7 @@ const NewSalesNew = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("success");
-  const [invoiceNumber, setInvoiceNumber] = useState("RS-00001");
+  const [invoiceNumber, setInvoiceNumber] = useState("INV-00001");
   const [companyName, setCompanyName] = useState("My Company");
   const [companyPhone, setCompanyPhone] = useState("My Phone Number");
   const [isEditingCompanyName, setIsEditingCompanyName] = useState(false);
@@ -504,6 +504,8 @@ Thank you for your business!`;
           partyId: partyId,
           partyName: partyName,
           partyPhone: partyPhone,
+          billingAddress: billingAddress,
+          shippingAddress: shippingAddress,
           items: itemInputs,
           receivedAmount: receivedAmount,
           subtotalAmount: calculateSubTotal(),
@@ -638,11 +640,11 @@ Thank you for your business!`;
   };
 
   const incrementInvoiceNumber = (currentInvoiceNumber) => {
-    // Handle alphanumeric invoice numbers like "RS-00012"
+    // Handle alphanumeric invoice numbers like "INV-00012"
     const match = currentInvoiceNumber.match(/^([A-Z]+)-(\d+)$/);
 
     if (match) {
-      const prefix = match[1]; // "RS"
+      const prefix = match[1]; // "INV"
       const numberPart = parseInt(match[2], 10); // 12
       const nextNumber = numberPart + 1;
 
@@ -657,7 +659,7 @@ Thank you for your business!`;
     }
 
     // Default fallback
-    return "RS-00001";
+    return "INV-00001";
   };
 
   const createProductTransactions = async (invoiceData) => {
@@ -903,14 +905,14 @@ Thank you for your business!`;
       console.log(response.body);
       if (response.ok) {
         const data = await response.json();
-        setInvoiceNumber(data.invoiceNumber || "RS-00001");
+        setInvoiceNumber(data.invoiceNumber || "INV-00001");
       } else {
         console.error("Failed to fetch invoice number");
-        setInvoiceNumber("RS-00001");
+        setInvoiceNumber("INV-00001");
       }
     } catch (error) {
       console.error("Error fetching invoice number:", error);
-      setInvoiceNumber("RS-00001");
+      setInvoiceNumber("INV-00001");
     }
   };
 
